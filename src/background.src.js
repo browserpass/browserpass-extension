@@ -29,6 +29,7 @@ browser.runtime.onMessage.addListener(receiveMessage);
  */
 function getLocalSettings() {
     var settings = Object.assign({}, defaultSettings);
+    settings.defaultStore = {};
     for (var key in settings) {
         var value = localStorage.getItem(key);
         if (value !== null) {
