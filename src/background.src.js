@@ -105,7 +105,7 @@ async function receiveMessage(message, sender, sendResponse) {
             for (var key in settings.stores) {
                 if (response.data.storeSettings.hasOwnProperty(key)) {
                     var fileSettings = JSON.parse(response.data.storeSettings[key]);
-                    if (typeof(settings.stores[key].settings) !== "object") {
+                    if (typeof settings.stores[key].settings !== "object") {
                         settings.stores[key].settings = {};
                     }
                     var storeSettings = settings.stores[key].settings;
