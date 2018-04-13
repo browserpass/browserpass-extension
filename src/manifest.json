@@ -5,7 +5,7 @@
   "description": "Chrome extension for zx2c4's pass (password manager) - Community Edition.",
   "version": "3.0.0",
   "author": [
-      "Maxim Baz <github@maximbaz.com>",
+      "Maxim Baz <browserpass@maximbaz.com>",
       "Steve Gilberd <steve@erayd.net>"
   ],
   "homepage_url": "https://github.com/browserpass/browserpass-extension",
