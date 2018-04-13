@@ -1,0 +1,20 @@
+{
+    "name": "browserpass-extension",
+    "version": "3.0.0",
+    "description": "Chrome extension for zx2c4's pass (password manager) - Community Edition.",
+    "homepage": "https://github.com/browserpass/browserpass-extension",
+    "license": "ISC",
+    "author": [
+        {
+            "name": "Maxim Baz",
+            "email": "github@maximbaz.com"
+        },
+        {
+            "name": "Steve Gilberd",
+            "email": "steve@erayd.net"
+        }
+    ],
+    "dependencies": {
+        "chrome-extension-async": "^3.0.0"
+    }
+}
