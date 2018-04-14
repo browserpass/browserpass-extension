@@ -86,7 +86,7 @@ function handleMessage(settings, message, sendResponse) {
  * @param function(mixed)  sendResponse Callback to send response
  * @return void
  */
-function receiveMessage(message, sender, sendResponse) {
+async function receiveMessage(message, sender, sendResponse) {
     // restrict messages to this extension only
     if (sender.id !== browser.runtime.id) {
         // silently exit without responding when the source is foreign
@@ -94,45 +94,38 @@ function receiveMessage(message, sender, sendResponse) {
     }
 
     var settings = getLocalSettings();
-    browser.runtime
-        .sendNativeMessage(appID, {
+    try {
+        var response = await browser.runtime.sendNativeMessage(appID, {
             settings: settings,
             action: "configure"
-        })
-        .then(
-            // native config request is successful
-            function(response) {
-                settings.version = response.version;
-                if (settings.stores.length) {
-                    // there are user-configured stores present
-                    for (var key in settings.stores) {
-                        if (
-                            response.response.storeSettings.hasOwnProperty(key)
-                        ) {
-                            var storeSettings = settings.stores[key].settings;
-                            if (storeSettings) {
-                                settings.stores[key].settings = JSON.parse(
-                                    response.response.storeSettings[key]
-                                );
-                            }
-                        }
+        });
+        console.log("ok", response);
+        settings.version = response.version;
+        if (settings.stores.length) {
+            // there are user-configured stores present
+            for (var key in settings.stores) {
+                if (response.response.storeSettings.hasOwnProperty(key)) {
+                    var storeSettings = settings.stores[key].settings;
+                    if (storeSettings) {
+                        settings.stores[key].settings = JSON.parse(
+                            response.response.storeSettings[key]
+                        );
                     }
-                } else {
-                    // no user-configured stores, so use the default store
-                    settings.defaultStore.name = "default";
-                    settings.defaultStore.path = response.response.defaultPath;
-                    settings.defaultStore.settings =
-                        response.response.defaultSettings;
-                    settings.stores.default = settings.defaultStore;
                 }
-                handleMessage(settings, message, sendResponse);
-            },
-            // native config request has failed
-            function(error) {
-                console.log(error);
-                sendResponse({ status: "error", message: error });
             }
-        );
+        } else {
+            // no user-configured stores, so use the default store
+            settings.defaultStore.name = "default";
+            settings.defaultStore.path = response.response.defaultPath;
+            settings.defaultStore.settings = response.response.defaultSettings;
+            settings.stores.default = settings.defaultStore;
+        }
+        handleMessage(settings, message, sendResponse);
+    } catch (e) {
+        // handle error
+        console.log(e);
+        sendResponse({ status: "error", message: e.toString() });
+    }
 
     // allow async responses after this function returns
     return true;
