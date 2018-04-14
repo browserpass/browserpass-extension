@@ -17,7 +17,7 @@ var defaultSettings = {
 };
 
 // handle incoming messages
-chrome.runtime.onMessage.addListener(receiveMessage);
+browser.runtime.onMessage.addListener(receiveMessage);
 
 //----------------------------------- Function definitions ----------------------------------//
 /**
