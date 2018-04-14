@@ -29,7 +29,6 @@ chrome.runtime.onMessage.addListener(receiveMessage);
  */
 function getLocalSettings() {
     var settings = Object.assign({}, defaultSettings);
-    settings.defaultStore = {};
     for (var key in settings) {
         var value = localStorage.getItem(key);
         if (value !== null) {
@@ -95,8 +94,9 @@ async function receiveMessage(message, sender, sendResponse) {
 
     var settings = getLocalSettings();
     try {
+        var configureSettings = Object.assign(settings, { defaultStore: {} });
         var response = await browser.runtime.sendNativeMessage(appID, {
-            settings: settings,
+            settings: configureSettings,
             action: "configure"
         });
         console.log("ok", response);
