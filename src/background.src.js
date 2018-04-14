@@ -99,7 +99,6 @@ async function receiveMessage(message, sender, sendResponse) {
             settings: configureSettings,
             action: "configure"
         });
-        console.log("ok", response);
         settings.version = response.version;
         if (settings.stores.length) {
             // there are user-configured stores present
