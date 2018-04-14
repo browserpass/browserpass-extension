@@ -8,7 +8,7 @@ if (typeof browser === "undefined") {
 }
 
 // native application id
-var appID = "com.github.browserpass";
+var appID = "com.github.browserpass.native";
 
 // default settings
 var defaultSettings = {
