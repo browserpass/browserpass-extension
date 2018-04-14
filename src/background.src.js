@@ -17,7 +17,12 @@ var defaultSettings = {
 };
 
 // handle incoming messages
-browser.runtime.onMessage.addListener(receiveMessage);
+browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+    receiveMessage(message, sender, sendResponse);
+
+    // allow async responses after this function returns
+    return true;
+});
 
 //----------------------------------- Function definitions ----------------------------------//
 /**
@@ -130,9 +135,6 @@ async function receiveMessage(message, sender, sendResponse) {
         console.log(e);
         sendResponse({ status: "error", message: e.toString() });
     }
-
-    // allow async responses after this function returns
-    return true;
 }
 
 /**
