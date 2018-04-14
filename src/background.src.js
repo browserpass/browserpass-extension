@@ -105,11 +105,15 @@ async function receiveMessage(message, sender, sendResponse) {
             // there are user-configured stores present
             for (var key in settings.stores) {
                 if (response.data.storeSettings.hasOwnProperty(key)) {
+                    var fileSettings = JSON.parse(response.data.storeSettings[key]);
+                    if (typeof(settings.stores[key].settings) !== "object") {
+                        settings.stores[key].settings = {};
+                    }
                     var storeSettings = settings.stores[key].settings;
-                    if (storeSettings) {
-                        settings.stores[key].settings = JSON.parse(
-                            response.data.storeSettings[key]
-                        );
+                    for (var settingKey in fileSettings) {
+                        if (!storeSettings.hasOwnProperty(settingKey)) {
+                            storeSettings[settingKey] = fileSettings[settingKey];
+                        }
                     }
                 }
             }
