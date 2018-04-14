@@ -5,7 +5,7 @@ all: deps prettier background.js popup.js
 deps:
 	yarn install
 
-prettier: background.src.js popup.src.js
+prettier: *.src.js
 	prettier --write *.src.js
 
 background.js: background.src.js
