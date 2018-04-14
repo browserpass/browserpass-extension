@@ -20,14 +20,7 @@
     "default_popup": "popup.html"
   },
   "permissions": [
-    "tabs",
     "activeTab",
-    "nativeMessaging",
-    "notifications",
-    "storage",
-    "webRequest",
-    "webRequestBlocking",
-    "http://*/*",
-    "https://*/*"
+    "nativeMessaging"
   ]
 }
