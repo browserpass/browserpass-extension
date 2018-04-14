@@ -21,7 +21,7 @@ browser.runtime.onMessage.addListener(receiveMessage);
 
 //----------------------------------- Function definitions ----------------------------------//
 /**
- * Get loaded settings
+ * Get Local settings from the extension
  *
  * @since 3.0.0
  *
