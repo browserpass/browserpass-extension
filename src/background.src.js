@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener(receiveMessage);
  *
  * @since 3.0.0
  *
- * @return object Loaded settings
+ * @return object Local settings from the extension
  */
 function getLocalSettings() {
     var settings = Object.assign({}, defaultSettings);
