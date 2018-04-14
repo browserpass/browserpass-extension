@@ -1,3 +1,6 @@
+BROWSERIFY := node_modules/.bin/browserify
+PRETTIER := node_modules/.bin/prettier
+
 .PHONY: all
 all: deps prettier background.js popup.js
 
@@ -5,11 +8,17 @@ all: deps prettier background.js popup.js
 deps:
 	yarn install
 
-prettier: *.src.js
-	prettier --write *.src.js
+prettier: $(PRETTIER) *.src.js
+	$(PRETTIER) --write *.src.js
 
-background.js: background.src.js
-	browserify -o background.js background.src.js
+background.js: $(BROWSERIFY) background.src.js
+	$(BROWSERIFY) -o background.js background.src.js
 
-popup.js: popup.src.js
-	browserify -o popup.js popup.src.js
+popup.js: $(BROWSERIFY) popup.src.js
+	$(BROWSERIFY) -o popup.js popup.src.js
+
+$(BROWSERIFY):
+	npm install browserify
+
+$(PRETTIER):
+	npm install prettier
