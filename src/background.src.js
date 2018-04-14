@@ -71,6 +71,11 @@ function handleMessage(settings, message, sendResponse) {
             saveSettings(message.settings);
             sendResponse({ status: "ok" });
             break;
+        case "listFiles":
+            hostAction(settings, "list", sendResponse).then(function(response) {
+                sendResponse(response.data.files);
+            });
+            break;
         default:
             sendResponse({
                 status: "error",
@@ -78,6 +83,28 @@ function handleMessage(settings, message, sendResponse) {
             });
             break;
     }
+}
+
+/**
+ * Send a request to the host app
+ *
+ * @since 3.0.0
+ *
+ * @param object settings Live settings object
+ * @param string action   Action to run
+ * @param params object   Additional params to pass to the host app
+ * @return Promise
+ */
+function hostAction(settings, action, params = {}) {
+    var request = {
+        settings: settings,
+        action: action
+    };
+    for (var key in params) {
+        request[key] = params[key];
+    }
+
+    return browser.runtime.sendNativeMessage(appID, request);
 }
 
 /**
