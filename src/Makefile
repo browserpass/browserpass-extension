@@ -16,3 +16,4 @@ background.js: $(BROWSERIFY) background.src.js
 
 popup.js: $(BROWSERIFY) popup.src.js
 	$(BROWSERIFY) -o popup.js popup.src.js
+
