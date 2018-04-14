@@ -104,11 +104,11 @@ async function receiveMessage(message, sender, sendResponse) {
         if (settings.stores.length) {
             // there are user-configured stores present
             for (var key in settings.stores) {
-                if (response.response.storeSettings.hasOwnProperty(key)) {
+                if (response.data.storeSettings.hasOwnProperty(key)) {
                     var storeSettings = settings.stores[key].settings;
                     if (storeSettings) {
                         settings.stores[key].settings = JSON.parse(
-                            response.response.storeSettings[key]
+                            response.data.storeSettings[key]
                         );
                     }
                 }
@@ -116,8 +116,8 @@ async function receiveMessage(message, sender, sendResponse) {
         } else {
             // no user-configured stores, so use the default store
             settings.defaultStore.name = "default";
-            settings.defaultStore.path = response.response.defaultPath;
-            settings.defaultStore.settings = response.response.defaultSettings;
+            settings.defaultStore.path = response.data.defaultPath;
+            settings.defaultStore.settings = response.data.defaultSettings;
             settings.stores.default = settings.defaultStore;
         }
         handleMessage(settings, message, sendResponse);
