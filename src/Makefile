@@ -1,7 +1,7 @@
-.PHONY: deps
-
+.PHONY: all
 all: deps prettier background.js popup.js
 
+.PHONY: deps
 deps:
 	yarn install
 
