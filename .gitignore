@@ -1,0 +1,4 @@
+src/node_modules
+src/*.js
+src/*.log
+!src/*.src.js
