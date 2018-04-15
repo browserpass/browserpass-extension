@@ -17,7 +17,12 @@ var defaultSettings = {
 };
 
 // handle incoming messages
-browser.runtime.onMessage.addListener(receiveMessage);
+browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+    receiveMessage(message, sender, sendResponse);
+
+    // allow async responses after this function returns
+    return true;
+});
 
 //----------------------------------- Function definitions ----------------------------------//
 /**
@@ -49,7 +54,7 @@ function getLocalSettings() {
  * @param function(mixed) sendResponse Callback to send response
  * @return void
  */
-function handleMessage(settings, message, sendResponse) {
+async function handleMessage(settings, message, sendResponse) {
     // check that action is present
     if (typeof message !== "object" || !message.hasOwnProperty("action")) {
         sendResponse({ status: "error", message: "Action is missing" });
@@ -66,6 +71,14 @@ function handleMessage(settings, message, sendResponse) {
             saveSettings(message.settings);
             sendResponse({ status: "ok" });
             break;
+        case "listFiles":
+            try {
+                var response = await hostAction(settings, "list");
+                sendResponse(response.data.files);
+            } catch (e) {
+                console.log(e);
+            }
+            break;
         default:
             sendResponse({
                 status: "error",
@@ -73,6 +86,28 @@ function handleMessage(settings, message, sendResponse) {
             });
             break;
     }
+}
+
+/**
+ * Send a request to the host app
+ *
+ * @since 3.0.0
+ *
+ * @param object settings Live settings object
+ * @param string action   Action to run
+ * @param params object   Additional params to pass to the host app
+ * @return Promise
+ */
+function hostAction(settings, action, params = {}) {
+    var request = {
+        settings: settings,
+        action: action
+    };
+    for (var key in params) {
+        request[key] = params[key];
+    }
+
+    return browser.runtime.sendNativeMessage(appID, request);
 }
 
 /**
@@ -105,7 +140,7 @@ async function receiveMessage(message, sender, sendResponse) {
             for (var key in settings.stores) {
                 if (response.data.storeSettings.hasOwnProperty(key)) {
                     var fileSettings = JSON.parse(response.data.storeSettings[key]);
-                    if (typeof(settings.stores[key].settings) !== "object") {
+                    if (typeof settings.stores[key].settings !== "object") {
                         settings.stores[key].settings = {};
                     }
                     var storeSettings = settings.stores[key].settings;
@@ -130,9 +165,6 @@ async function receiveMessage(message, sender, sendResponse) {
         console.log(e);
         sendResponse({ status: "error", message: e.toString() });
     }
-
-    // allow async responses after this function returns
-    return true;
 }
 
 /**
