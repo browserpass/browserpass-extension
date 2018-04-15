@@ -24,20 +24,18 @@ function checkpoint(activity) {
 
 // wrap with current tab & settings
 checkpoint("start");
-browser.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+browser.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
     checkpoint("after tab");
-    browser.runtime.sendMessage({ action: "getSettings" }).then(
-        function(response) {
-            checkpoint("after getSettings");
-            settings = response;
-            settings.tab = tabs[0];
-            settings.host = new URL(settings.tab.url).hostname;
-            run();
-        },
-        function(response) {
-            console.log(response); // TODO
-        }
-    );
+    try {
+        var response = browser.runtime.sendMessage({ action: "getSettings" });
+        checkpoint("after getSettings");
+        settings = response;
+        settings.tab = tabs[0];
+        settings.host = new URL(settings.tab.url).hostname;
+        run();
+    } catch (e) {
+        console.log(e.toString()); // TODO
+    }
 });
 
 //----------------------------------- Function definitions ----------------------------------//
@@ -161,31 +159,29 @@ function renderList() {
     return Mithril("div.logins", list);
 }
 
-function run() {
-    // get list of logins
-    browser.runtime.sendMessage({ action: "listFiles" }).then(
-        function(response) {
-            checkpoint("after listFiles");
-            for (var store in response) {
-                for (var key in response[store]) {
-                    var login = {
-                        store: store,
-                        login: response[store][key].replace(/\.gpg$/i, "")
-                    };
-                    login.domain = pathToDomain(login.store + "/" + login.login);
-                    logins.push(login);
-                }
+async function run() {
+    try {
+        // get list of logins
+        var response = await browser.runtime.sendMessage({ action: "listFiles" });
+        checkpoint("after listFiles");
+        for (var store in response) {
+            for (var key in response[store]) {
+                var login = {
+                    store: store,
+                    login: response[store][key].replace(/\.gpg$/i, "")
+                };
+                login.domain = pathToDomain(login.store + "/" + login.login);
+                logins.push(login);
             }
-            checkpoint("after listFiles post-processing");
-
-            domainLogins = getDomainLogins(settings.host);
-
-            render();
-        },
-        function(response) {
-            showError(response);
         }
-    );
+        checkpoint("after listFiles post-processing");
+
+        domainLogins = getDomainLogins(settings.host);
+
+        render();
+    } catch (e) {
+        showError(e.toString());
+    }
 }
 
 /**

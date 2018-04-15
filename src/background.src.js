@@ -54,7 +54,7 @@ function getLocalSettings() {
  * @param function(mixed) sendResponse Callback to send response
  * @return void
  */
-function handleMessage(settings, message, sendResponse) {
+async function handleMessage(settings, message, sendResponse) {
     // check that action is present
     if (typeof message !== "object" || !message.hasOwnProperty("action")) {
         sendResponse({ status: "error", message: "Action is missing" });
@@ -72,9 +72,8 @@ function handleMessage(settings, message, sendResponse) {
             sendResponse({ status: "ok" });
             break;
         case "listFiles":
-            hostAction(settings, "list", sendResponse).then(function(response) {
-                sendResponse(response.data.files);
-            });
+            var response = await hostAction(settings, "list");
+            sendResponse(response.data.files);
             break;
         default:
             sendResponse({
