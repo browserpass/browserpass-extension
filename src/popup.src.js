@@ -146,7 +146,7 @@ function renderList() {
     }
 
     var list = [];
-    getDomainLogins(settings.host).forEach(function(login) {
+    domainLogins.forEach(function(login) {
         list.push(
             Mithril("div.part.login", { title: login.domain }, login.store + ":" + login.login)
         );
