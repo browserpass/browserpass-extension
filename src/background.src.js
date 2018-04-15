@@ -72,8 +72,12 @@ async function handleMessage(settings, message, sendResponse) {
             sendResponse({ status: "ok" });
             break;
         case "listFiles":
-            var response = await hostAction(settings, "list");
-            sendResponse(response.data.files);
+            try {
+                var response = await hostAction(settings, "list");
+                sendResponse(response.data.files);
+            } catch (e) {
+                console.log(e);
+            }
             break;
         default:
             sendResponse({
