@@ -27,12 +27,16 @@ checkpoint("start");
 browser.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
     checkpoint("after tab");
     try {
-        var response = browser.runtime.sendMessage({ action: "getSettings" });
-        checkpoint("after getSettings");
-        settings = response;
-        settings.tab = tabs[0];
-        settings.host = new URL(settings.tab.url).hostname;
-        run();
+        var response = await browser.runtime.sendMessage({ action: "getSettings" });
+        if (response.status == "ok") {
+            checkpoint("after getSettings");
+            settings = response.settings;
+            settings.tab = tabs[0];
+            settings.host = new URL(settings.tab.url).hostname;
+            run();
+        } else {
+            throw new Exception(response.message);
+        }
     } catch (e) {
         console.log(e.toString()); // TODO
     }
