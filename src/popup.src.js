@@ -24,7 +24,7 @@ function checkpoint(activity) {
 
 // wrap with current tab & settings
 checkpoint("start");
-chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+browser.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     checkpoint("after tab");
     browser.runtime.sendMessage({ action: "getSettings" }).then(
         function(response) {
