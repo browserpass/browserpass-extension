@@ -1,6 +1,8 @@
 BROWSERIFY := node_modules/.bin/browserify
 PRETTIER := node_modules/.bin/prettier
 
+CLEAN_FILES := background.js popup.js
+
 .PHONY: all
 all: deps prettier background.js popup.js
 
@@ -16,3 +18,6 @@ background.js: $(BROWSERIFY) background.src.js
 
 popup.js: $(BROWSERIFY) popup.src.js
 	$(BROWSERIFY) -o popup.js popup.src.js
+
+clean:
+	rm -rf $(CLEAN_FILES)

@@ -1,3 +1,4 @@
+/chrome
 src/node_modules
 src/*.js
 src/*.log
