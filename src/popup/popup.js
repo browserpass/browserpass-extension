@@ -17,19 +17,11 @@ if (typeof browser === "undefined") {
     var browser = chrome;
 }
 
-// performance debugging function - TODO remove once extension is ready for release
-function checkpoint(activity) {
-    console.log("Elapsed: " + (Date.now() - startTime) + "ms (" + activity + ")");
-}
-
 // wrap with current tab & settings
-checkpoint("start");
 browser.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
-    checkpoint("after tab");
     try {
         var response = await browser.runtime.sendMessage({ action: "getSettings" });
         if (response.status == "ok") {
-            checkpoint("after getSettings");
             settings = response.settings;
             settings.tab = tabs[0];
             settings.host = new URL(settings.tab.url).hostname;
@@ -111,7 +103,6 @@ function render() {
             return [renderError(), renderNotice(), renderList()];
         }
     });
-    checkpoint("after render");
 }
 
 /**
@@ -159,7 +150,6 @@ function renderList() {
         showNotice("There are no logins matching " + settings.host + ".");
     }
 
-    checkpoint("after renderList");
     return Mithril("div.logins", list);
 }
 
@@ -167,7 +157,6 @@ async function run() {
     try {
         // get list of logins
         var response = await browser.runtime.sendMessage({ action: "listFiles" });
-        checkpoint("after listFiles");
         for (var store in response) {
             for (var key in response[store]) {
                 var login = {
@@ -178,7 +167,6 @@ async function run() {
                 logins.push(login);
             }
         }
-        checkpoint("after listFiles post-processing");
 
         domainLogins = getDomainLogins(settings.host);
 
