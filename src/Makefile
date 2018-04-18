@@ -4,7 +4,7 @@ PRETTIER := node_modules/.bin/prettier
 CLEAN_FILES := background.js popup.js
 
 .PHONY: all
-all: deps prettier background.js popup.js
+all: deps prettier js/background.dist.js js/popup.dist.js
 
 .PHONY: deps
 deps:
@@ -13,11 +13,13 @@ deps:
 prettier: $(PRETTIER) *.src.js popup/*.js
 	$(PRETTIER) --write *.src.js popup/*.js
 
-background.js: $(BROWSERIFY) background.src.js
-	$(BROWSERIFY) -o background.dist.js background.src.js
+js/background.dist.js: $(BROWSERIFY) background.src.js
+	[ -d js ] || mkdir -p js
+	$(BROWSERIFY) -o js/background.dist.js background.src.js
 
-popup.js: $(BROWSERIFY) popup/*.js
-	$(BROWSERIFY) -o popup.dist.js popup/popup.js
+js/popup.dist.js: $(BROWSERIFY) popup/*.js
+	[ -d js ] || mkdir -p js
+	$(BROWSERIFY) -o js/popup.dist.js popup/popup.js
 
 clean:
 	rm -rf $(CLEAN_FILES)

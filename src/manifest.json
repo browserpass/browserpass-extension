@@ -12,7 +12,7 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "background.dist.js"
+      "js/background.dist.js"
     ]
   },
   "browser_action": {
