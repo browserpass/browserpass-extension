@@ -1,9 +1,9 @@
 CHROME_FILES := manifest.json \
-	       *.html \
+	       *.dist.js \
 	       *.css \
 	       *.png \
-	       background.js \
-	       popup.js
+	       popup/*.html \
+	       popup/*.css
 CHROME_FILES := $(wildcard $(addprefix src/,$(CHROME_FILES)))
 CHROME_FILES := $(patsubst src/%,chrome/%,$(CHROME_FILES))
 

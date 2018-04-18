@@ -10,14 +10,14 @@ all: deps prettier background.js popup.js
 deps:
 	yarn install
 
-prettier: $(PRETTIER) *.src.js
-	$(PRETTIER) --write *.src.js
+prettier: $(PRETTIER) *.src.js popup/*.js
+	$(PRETTIER) --write *.src.js popup/*.js
 
 background.js: $(BROWSERIFY) background.src.js
-	$(BROWSERIFY) -o background.js background.src.js
+	$(BROWSERIFY) -o background.dist.js background.src.js
 
-popup.js: $(BROWSERIFY) popup.src.js
-	$(BROWSERIFY) -o popup.js popup.src.js
+popup.js: $(BROWSERIFY) popup/*.js
+	$(BROWSERIFY) -o popup.dist.js popup/popup.js
 
 clean:
 	rm -rf $(CLEAN_FILES)
