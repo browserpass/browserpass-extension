@@ -155,8 +155,8 @@ async function receiveMessage(message, sender, sendResponse) {
             // no user-configured stores, so use the default store
             settings.stores.default = {
                 name: "default",
-                path: response.data.defaultPath,
-                settings: response.data.defaultSettings
+                path: response.data.defaultStore.path,
+                settings: response.data.defaultStore.settings
             };
         }
         handleMessage(settings, message, sendResponse);
