@@ -10,12 +10,12 @@ all: deps prettier js/background.dist.js js/popup.dist.js
 deps:
 	yarn install
 
-prettier: $(PRETTIER) *.src.js popup/*.js
-	$(PRETTIER) --write *.src.js popup/*.js
+prettier: $(PRETTIER) *.js popup/*.js
+	$(PRETTIER) --write *.js popup/*.js
 
-js/background.dist.js: $(BROWSERIFY) background.src.js
+js/background.dist.js: $(BROWSERIFY) background.js
 	[ -d js ] || mkdir -p js
-	$(BROWSERIFY) -o js/background.dist.js background.src.js
+	$(BROWSERIFY) -o js/background.dist.js background.js
 
 js/popup.dist.js: $(BROWSERIFY) popup/*.js
 	[ -d js ] || mkdir -p js
