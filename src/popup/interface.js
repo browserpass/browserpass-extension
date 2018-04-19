@@ -23,7 +23,7 @@ function Interface(settings, logins) {
     this.settings = settings;
     this.logins = logins;
     this.results = [];
-    this.active = true;
+    this.active = !settings.tab.url.match(/^chrome:\/\//);
     this.searchPart = new SearchInterface(this);
 
     // initialise with empty search
@@ -69,6 +69,7 @@ function view(ctl, params) {
                             result.doAction("fill");
                         },
                         onkeydown: function(e) {
+                            e.preventDefault();
                             switch (e.code) {
                                 case "ArrowDown":
                                     if (e.target.nextSibling) {
@@ -87,6 +88,9 @@ function view(ctl, params) {
                                 case "Enter":
                                     result.doAction("fill");
                                     break;
+                                case "KeyG":
+                                    result.doAction("launch");
+                                    break;
                             }
                         }
                     },
@@ -104,7 +108,7 @@ function view(ctl, params) {
                             title: "Copy username",
                             onclick: function(e) {
                                 e.stopPropagation();
-                                result.doAction("copyUser");
+                                result.doAction("copyUsername");
                             }
                         }),
                         m("div.action.launch", {

@@ -5,7 +5,7 @@ CLEAN_FILES := js
 PRETTIER_FILES := $(wildcard *.js popup/*.js *.css popup/*.css)
 
 .PHONY: all
-all: deps prettier js/background.dist.js js/popup.dist.js
+all: deps prettier js/background.dist.js js/popup.dist.js js/inject.dist.js
 
 .PHONY: deps
 deps:
@@ -22,6 +22,10 @@ js/background.dist.js: $(BROWSERIFY) background.js
 js/popup.dist.js: $(BROWSERIFY) popup/*.js
 	[ -d js ] || mkdir -p js
 	$(BROWSERIFY) -o js/popup.dist.js popup/popup.js
+
+js/inject.dist.js: $(BROWSERIFY) inject.js
+	[ -d js ] || mkdir -p js
+	$(BROWSERIFY) -o js/inject.dist.js inject.js
 
 .PHONY: clean
 clean:
