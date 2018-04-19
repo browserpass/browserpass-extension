@@ -1,7 +1,7 @@
 BROWSERIFY := node_modules/.bin/browserify
 PRETTIER := node_modules/.bin/prettier
 
-CLEAN_FILES := background.js popup.js
+CLEAN_FILES := js
 
 .PHONY: all
 all: deps prettier js/background.dist.js js/popup.dist.js
