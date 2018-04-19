@@ -80,9 +80,17 @@ function view(ctl, params) {
                 onkeydown: function(e) {
                     switch (e.code) {
                         case "Backspace":
-                            if (self.popup.active && e.target.value.length == 0) {
-                                self.popup.active = false;
-                                self.popup.search("");
+                            if (self.popup.active) {
+                                if (e.target.value.length == 0) {
+                                    self.popup.active = false;
+                                    self.popup.search("");
+                                } else if (
+                                    e.target.selectionStart == 0 &&
+                                    e.target.selectionStart == e.target.selectionEnd
+                                ) {
+                                    self.popup.active = false;
+                                    self.popup.search(e.target.value);
+                                }
                             }
                             break;
                     }
