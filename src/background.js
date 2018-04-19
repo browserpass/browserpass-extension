@@ -13,6 +13,7 @@ var appID = "com.github.browserpass.native";
 // default settings
 var defaultSettings = {
     gpgPath: null,
+    maxSearchResults: 100,
     stores: {}
 };
 

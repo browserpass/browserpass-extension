@@ -2,16 +2,8 @@
 "use strict";
 
 require("chrome-extension-async");
-var Mithril = require("mithril");
 var TldJS = require("tldjs");
-var FuzzySort = require("fuzzysort");
-
-var startTime = Date.now();
-var settings = null;
-var error = null;
-var notice = null;
-var logins = [];
-var domainLogins = [];
+var Interface = require("./interface");
 
 if (typeof browser === "undefined") {
     var browser = chrome;
@@ -22,48 +14,34 @@ browser.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
     try {
         var response = await browser.runtime.sendMessage({ action: "getSettings" });
         if (response.status == "ok") {
-            settings = response.settings;
+            var settings = response.settings;
             settings.tab = tabs[0];
             settings.host = new URL(settings.tab.url).hostname;
-            run();
+            run(settings);
         } else {
-            throw new Exception(response.message);
+            throw new Error(response.message);
         }
     } catch (e) {
-        console.log(e.toString()); // TODO
+        handleError(e);
     }
 });
 
 //----------------------------------- Function definitions ----------------------------------//
 
 /**
- * Get the logins which match the provided domain
+ * Handle an error
  *
  * @since 3.0.0
  *
- * @param string domain Domain to filter against
- * @return array
+ * @param Error error Error object
  */
-function getDomainLogins(domain) {
-    var domainLogins = [];
-    var t = TldJS.parse(domain);
-
-    // ignore invalid domains
-    if (!t.isValid || t.domain === null) {
-        return [];
-    }
-
-    // filter against the domain
-    for (var key in logins) {
-        if (logins[key].domain === t.hostname) {
-            domainLogins.push(logins[key]);
-        }
-    }
-
-    // recurse and add matching domains to the list
-    domainLogins = domainLogins.concat(getDomainLogins(t.hostname.replace(/^.+?\./, "")));
-
-    return domainLogins;
+function handleError(error) {
+    console.log(error);
+    var errorNode = document.createElement("div");
+    errorNode.setAttribute("class", "part error");
+    errorNode.textContent = error.toString();
+    document.body.innerHTML = "";
+    document.body.appendChild(errorNode);
 }
 
 /**
@@ -90,112 +68,53 @@ function pathToDomain(path) {
 }
 
 /**
- * Render the popup contents
+ * Run the main popup logic
  *
  * @since 3.0.0
  *
+ * @param object settings Settings object
  * @return void
  */
-function render() {
-    var body = document.getElementsByTagName("body")[0];
-    Mithril.mount(body, {
-        view: function() {
-            return [renderError(), renderNotice(), renderList()];
-        }
-    });
-}
-
-/**
- * Render any error messages
- *
- * @since 3.0.0
- *
- * @return Vnode
- */
-function renderError() {
-    return error === null ? null : Mithril("div.part.error", error);
-}
-
-/**
- * Render any notices
- *
- * @since 3.0.0
- *
- * @return Vnode
- */
-function renderNotice() {
-    return notice === null ? null : Mithril("div.part.notice", notice);
-}
-
-/**
- * Render the list of available logins
- *
- * @since 3.0.0
- *
- * @return []Vnode
- */
-function renderList() {
-    if (!logins.length) {
-        showError("There are no matching logins available");
-        return null;
-    }
-
-    var list = [];
-    domainLogins.forEach(function(login) {
-        list.push(
-            Mithril("div.part.login", { title: login.domain }, login.store + ":" + login.login)
-        );
-    });
-    if (!list.length) {
-        showNotice("There are no logins matching " + settings.host + ".");
-    }
-
-    return Mithril("div.logins", list);
-}
-
-async function run() {
+async function run(settings) {
     try {
         // get list of logins
         var response = await browser.runtime.sendMessage({ action: "listFiles" });
+        var logins = [];
+        var index = 0;
         for (var store in response) {
             for (var key in response[store]) {
+                // set login fields
                 var login = {
+                    index: index++,
                     store: store,
                     login: response[store][key].replace(/\.gpg$/i, "")
                 };
                 login.domain = pathToDomain(login.store + "/" + login.login);
+                login.active =
+                    settings.host == login.domain || settings.host.endsWith("." + login.domain);
+
+                // bind handlers
+                login.doAction = withLogin.bind(login);
+
                 logins.push(login);
             }
         }
-
-        domainLogins = getDomainLogins(settings.host);
-
-        render();
+        var popup = new Interface(settings, logins);
+        popup.attach(document.body);
     } catch (e) {
-        showError(e.toString());
+        handleError(e);
     }
 }
 
 /**
- * Show an error message
+ * Do a login action
  *
  * @since 3.0.0
  *
- * @param string message Message text
+ * @param string action Action to take
+ * @return void
  */
-function showError(message) {
-    error = message;
-    Mithril.redraw();
-}
-
-/**
- * Show an informational message
- *
- * @since 3.0.0
- *
- * @param string message Message text
- */
-function showNotice(message) {
-    notice = message;
-    Mithril.redraw();
+function withLogin(action) {
+    // placeholder stub
+    alert("Login action (" + action + "): " + this.login);
 }

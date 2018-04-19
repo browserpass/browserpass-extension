@@ -1,6 +1,16 @@
-html, body {
+html,
+body {
     font-family: sans;
     font-size: 14px;
     margin: 0;
     padding: 0;
+}
+
+.badge {
+    background-color: #0a0;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    margin: 0 4px;
+    padding: 2px 4px;
 }

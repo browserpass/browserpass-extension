@@ -1,28 +1,76 @@
-html, body {
-    height: 100%;
+html,
+body {
     min-width: 260px;
+    white-space: nowrap;
 }
 
 body {
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
 }
 
-.part {
+.logins {
     box-sizing: border-box;
-    padding: 4px 4px 0 4px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    height: inherit;
+    max-height: 203px; /* 7 x 29px login part*/
+}
+
+.part {
+    border-bottom: 1px solid #eee;
+    box-sizing: border-box;
+    display: flex;
+    flex-shrink: 0;
+    min-height: 29px;
+    padding: 6px;
 }
 
 .part:last-child {
-    padding-bottom: 4px;
+    border-bottom: none;
+}
+
+.part > .badge:first-child {
+    margin-left: 0;
 }
 
 .part.error {
-    color: #F00;
+    color: #f00;
+    white-space: normal;
 }
 
 .part.notice {
     color: #090;
+    white-space: normal;
 }
 
+.part.search {
+    padding: none;
+}
+
+.part.search:focus-within {
+    background-color: #eef;
+}
+
+.part.search > .hint {
+    background-color: #66c;
+}
+
+.part.search > input[type="text"] {
+    background-color: inherit;
+    border: none;
+    outline: none;
+    width: 100%;
+}
+
+.part.login:hover,
+.part.login:focus {
+    background-color: #eee;
+    outline: none;
+}
+
+.part.login em {
+    color: #00c;
+    font-style: normal;
+}
