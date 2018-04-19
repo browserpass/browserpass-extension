@@ -107,29 +107,23 @@ async function handleMessage(settings, message, sendResponse) {
         case "fill":
             try {
                 var tab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
-                browser.tabs.executeScript(tab.id, { file: "js/inject.dist.js" }, function() {
-                    // check login fields
-                    if (message.login.fields.login === null) {
-                        throw new Error("No login is available");
-                    }
-                    if (message.login.fields.secret === null) {
-                        throw new Error("No password is available");
-                    }
-                    var fillFields = JSON.stringify({
-                        login: message.login.fields.login,
-                        secret: message.login.fields.secret
-                    });
-                    // fill form via injected script
-                    browser.tabs.executeScript(
-                        tab.id,
-                        {
-                            code: `window.browserpass.fillLogin(${fillFields});`
-                        },
-                        function() {
-                            sendResponse({ status: "ok" });
-                        }
-                    );
+                await browser.tabs.executeScript(tab.id, { file: "js/inject.dist.js" });
+                // check login fields
+                if (message.login.fields.login === null) {
+                    throw new Error("No login is available");
+                }
+                if (message.login.fields.secret === null) {
+                    throw new Error("No password is available");
+                }
+                var fillFields = JSON.stringify({
+                    login: message.login.fields.login,
+                    secret: message.login.fields.secret
                 });
+                // fill form via injected script
+                await browser.tabs.executeScript(tab.id, {
+                    code: `window.browserpass.fillLogin(${fillFields});`
+                });
+                sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
                     status: "error",
