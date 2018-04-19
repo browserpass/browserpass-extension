@@ -79,16 +79,15 @@ body {
 }
 
 .part.login > .name {
-    margin-right: 6px;
     width: 100%;
 }
 
 .part.login > .action {
-    background-position: right;
+    background-position: right 3px top 0;
     background-repeat: no-repeat;
     background-size: 20px;
     margin: -2px 0;
-    width: 20px;
+    width: 30px;
 }
 
 .past.login > .action:hover {
@@ -97,6 +96,10 @@ body {
 
 .part.login > .action.copy-password {
     background-image: url("icon-key.svg");
+}
+
+.part.login > .action.copy-user {
+    background-image: url("icon-user.svg");
 }
 
 .part.login em {

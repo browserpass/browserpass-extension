@@ -98,6 +98,12 @@ function view(ctl, params) {
                             onclick: function(e) {
                                 result.doAction("copyPassword");
                             }
+                        }),
+                        m("div.action.copy-user", {
+                            title: "Copy username",
+                            onclick: function(e) {
+                                result.doAction("copyUser");
+                            }
                         })
                     ]
                 );
