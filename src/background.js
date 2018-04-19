@@ -97,13 +97,13 @@ async function handleMessage(settings, message, sendResponse) {
                 }
                 chrome.tabs.update(tab.id, { url: url });
                 sendResponse({ status: "ok" });
-                break;
             } catch (e) {
                 sendResponse({
                     status: "error",
                     message: "Unable to launch URL: " + e.toString()
                 });
             }
+            break;
         default:
             sendResponse({
                 status: "error",
