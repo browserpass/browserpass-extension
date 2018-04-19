@@ -104,6 +104,33 @@ async function handleMessage(settings, message, sendResponse) {
                 });
             }
             break;
+        case "fill":
+            try {
+                var tab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
+                browser.tabs.executeScript(tab.id, { file: "js/inject.dist.js" }, function() {
+                    // fill username
+                    if (message.login.fields.login === null) {
+                        throw new Error("No login is available");
+                    }
+                    var login = message.login.fields.login.replace("'", "\\'");
+                    browser.tabs.executeScript(tab.id, {
+                        code: "window.browserpass.fillUsername('" + login + "');"
+                    });
+                    // fill password
+                    if (message.login.fields.secret === null) {
+                        throw new Error("No password is available");
+                    }
+                    var secret = message.login.fields.secret.replace("'", "\\'");
+                    browser.tabs.executeScript(tab.id, {
+                        code: "window.browserpass.fillPassword('" + secret + "');"
+                    });
+                });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to fill credentials: " + e.toString()
+                });
+            }
         default:
             sendResponse({
                 status: "error",
