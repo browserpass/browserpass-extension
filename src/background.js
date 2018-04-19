@@ -108,22 +108,27 @@ async function handleMessage(settings, message, sendResponse) {
             try {
                 var tab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
                 browser.tabs.executeScript(tab.id, { file: "js/inject.dist.js" }, function() {
-                    // fill username
+                    // check login fields
                     if (message.login.fields.login === null) {
                         throw new Error("No login is available");
                     }
-                    var login = message.login.fields.login.replace("'", "\\'");
-                    browser.tabs.executeScript(tab.id, {
-                        code: "window.browserpass.fillUsername('" + login + "');"
-                    });
-                    // fill password
                     if (message.login.fields.secret === null) {
                         throw new Error("No password is available");
                     }
-                    var secret = message.login.fields.secret.replace("'", "\\'");
-                    browser.tabs.executeScript(tab.id, {
-                        code: "window.browserpass.fillPassword('" + secret + "');"
+                    var fillFields = JSON.stringify({
+                        login: message.login.fields.login,
+                        secret: message.login.fields.secret
                     });
+                    // fill form via injected script
+                    browser.tabs.executeScript(
+                        tab.id,
+                        {
+                            code: `window.browserpass.fillLogin(${fillFields});`
+                        },
+                        function() {
+                            sendResponse({ status: "ok" });
+                        }
+                    );
                 });
             } catch (e) {
                 sendResponse({
