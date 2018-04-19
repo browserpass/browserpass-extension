@@ -142,7 +142,6 @@ function search(s) {
         var filter = s.split(/\s+/);
         // fuzzy-search first word & add highlighting
         candidates = FuzzySort.go(filter[0], candidates, {
-            limit: self.settings.maxSearchResults,
             keys: ["login", "store"],
             allowTypo: false
         }).map(result =>
