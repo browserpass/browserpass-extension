@@ -1,4 +1,6 @@
-src/node_modules
-src/*.js
-src/*.log
-!src/*.src.js
+/chrome
+/src/node_modules
+/src/js
+/src/*.js
+/src/*.log
+!/src/*.src.js
