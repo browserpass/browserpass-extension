@@ -60,6 +60,12 @@ async function handleMessage(settings, message, sendResponse) {
         sendResponse({ status: "error", message: "Action is missing" });
     }
 
+    // fetch file & parse fields if a login entry is present
+    if (typeof message.login !== "undefined") {
+        await parseFields(settings, message.login);
+    }
+
+    // route action
     switch (message.action) {
         case "getSettings":
             sendResponse({
@@ -76,7 +82,53 @@ async function handleMessage(settings, message, sendResponse) {
                 var response = await hostAction(settings, "list");
                 sendResponse(response.data.files);
             } catch (e) {
-                console.log(e);
+                sendResponse({
+                    status: "error",
+                    message: "Unable to enumerate password files" + e.toString()
+                });
+            }
+            break;
+        case "launch":
+            try {
+                var tab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
+                var url = message.login.fields.url ? message.login.fields.url : response.login.url;
+                if (!url.match(/:\/\//)) {
+                    url = "http://" + url;
+                }
+                chrome.tabs.update(tab.id, { url: url });
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to launch URL: " + e.toString()
+                });
+            }
+            break;
+        case "fill":
+            try {
+                var tab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
+                await browser.tabs.executeScript(tab.id, { file: "js/inject.dist.js" });
+                // check login fields
+                if (message.login.fields.login === null) {
+                    throw new Error("No login is available");
+                }
+                if (message.login.fields.secret === null) {
+                    throw new Error("No password is available");
+                }
+                var fillFields = JSON.stringify({
+                    login: message.login.fields.login,
+                    secret: message.login.fields.secret
+                });
+                // fill form via injected script
+                await browser.tabs.executeScript(tab.id, {
+                    code: `window.browserpass.fillLogin(${fillFields});`
+                });
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to fill credentials: " + e.toString()
+                });
             }
             break;
         default:
@@ -108,6 +160,65 @@ function hostAction(settings, action, params = {}) {
     }
 
     return browser.runtime.sendNativeMessage(appID, request);
+}
+
+/**
+ * Fetch file & parse fields
+ *
+ * @since 3.0.0
+ *
+ * @param object settings Settings object
+ * @param object login    Login object
+ * @return void
+ */
+async function parseFields(settings, login) {
+    var response = await hostAction(settings, "fetch", {
+        store: login.store,
+        file: login.login + ".gpg"
+    });
+    if (response.status != "ok") {
+        throw new Error(JSON.stringify(response)); // TODO handle host error
+    }
+
+    // save raw data inside login
+    login.raw = response.data.contents;
+
+    // parse lines
+    login.fields = {
+        secret: ["secret", "password", "pass"],
+        login: ["login", "username", "user", "email"],
+        url: ["url", "uri", "website", "site", "link", "launch"]
+    };
+    var lines = login.raw.split(/[\r\n]+/).filter(line => line.trim().length > 0);
+    lines.forEach(function(line) {
+        // split key / value
+        var parts = line
+            .split(":", 2)
+            .map(value => value.trim())
+            .filter(value => value.length);
+        if (parts.length != 2) {
+            return;
+        }
+
+        // assign to fields
+        for (var key in login.fields) {
+            if (Array.isArray(login.fields[key]) && login.fields[key].indexOf(parts[0]) >= 0) {
+                login.fields[key] = parts[1];
+                break;
+            }
+        }
+    });
+
+    // clean up unassigned fields
+    for (var key in login.fields) {
+        if (Array.isArray(login.fields[key])) {
+            if (key == "secret" && lines.length) {
+                login.fields.secret = lines[0];
+            } else {
+                login.fields[key] = null;
+            }
+        }
+    }
 }
 
 /**

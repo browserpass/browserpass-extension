@@ -15,7 +15,8 @@ CHROME_FILES := manifest.json \
 	       popup/*.svg
 CHROME_FILES := $(wildcard $(addprefix src/,$(CHROME_FILES))) \
 		src/js/background.dist.js \
-		src/js/popup.dist.js
+		src/js/popup.dist.js \
+		src/js/inject.dist.js
 CHROME_FILES := $(patsubst src/%,chrome/%,$(CHROME_FILES))
 
 .PHONY: chrome

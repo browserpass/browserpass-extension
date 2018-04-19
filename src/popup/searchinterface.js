@@ -32,17 +32,16 @@ function view(ctl, params) {
     return m(
         "form.part.search",
         {
-            onsubmit: function(e) {
-                e.preventDefault();
-            },
             onkeydown: function(e) {
                 switch (e.code) {
                     case "ArrowDown":
+                        e.preventDefault();
                         if (self.popup.results.length) {
                             document.querySelector("*[tabindex]").focus();
                         }
                         break;
                     case "Enter":
+                        e.preventDefault();
                         if (self.popup.results.length) {
                             self.popup.results[0].doAction("fill");
                         }
