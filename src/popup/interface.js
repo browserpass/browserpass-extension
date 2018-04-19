@@ -87,6 +87,9 @@ function view(ctl, params) {
                                 case "Enter":
                                     result.doAction("fill");
                                     break;
+                                case "KeyG":
+                                    result.doAction("launch");
+                                    break;
                             }
                         }
                     },
@@ -104,7 +107,7 @@ function view(ctl, params) {
                             title: "Copy username",
                             onclick: function(e) {
                                 e.stopPropagation();
-                                result.doAction("copyUser");
+                                result.doAction("copyUsername");
                             }
                         }),
                         m("div.action.launch", {

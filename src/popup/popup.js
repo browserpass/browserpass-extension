@@ -33,11 +33,14 @@ browser.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
  * @since 3.0.0
  *
  * @param Error error Error object
+ * @param string type Error type
  */
-function handleError(error) {
-    console.log(error);
+function handleError(error, type = "error") {
+    if (type == "error") {
+        console.log(error);
+    }
     var errorNode = document.createElement("div");
-    errorNode.setAttribute("class", "part error");
+    errorNode.setAttribute("class", "part " + type);
     errorNode.textContent = error.toString();
     document.body.innerHTML = "";
     document.body.appendChild(errorNode);
@@ -115,9 +118,31 @@ async function run(settings) {
  */
 async function withLogin(action) {
     try {
+        // replace popup with a "please wait" notice
+        switch (action) {
+            case "fill":
+                handleError("Filling login details...", "notice");
+                break;
+            case "launch":
+                handleError("Launching URL...", "notice");
+                break;
+            case "copyPassword":
+                handleError("Copying password to clipboard...", "notice");
+                break;
+            case "copyUsername":
+                handleError("Copying username to clipboard...", "notice");
+                break;
+            default:
+                handleError("Please wait...", "notice");
+                break;
+        }
+
+        // hand off action to background script
         var response = await browser.runtime.sendMessage({ action: action, login: this });
         if (response.status != "ok") {
             throw new Error(response.message);
+        } else {
+            window.close();
         }
     } catch (e) {
         handleError(e);
