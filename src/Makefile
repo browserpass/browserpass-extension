@@ -2,6 +2,7 @@ BROWSERIFY := node_modules/.bin/browserify
 PRETTIER := node_modules/.bin/prettier
 
 CLEAN_FILES := js
+PRETTIER_FILES := $(wildcard *.js popup/*.js *.css popup/*.css)
 
 .PHONY: all
 all: deps prettier js/background.dist.js js/popup.dist.js
@@ -10,8 +11,8 @@ all: deps prettier js/background.dist.js js/popup.dist.js
 deps:
 	yarn install
 
-prettier: $(PRETTIER) *.js popup/*.js
-	$(PRETTIER) --write *.js popup/*.js
+prettier: $(PRETTIER) $(PRETTIER_FILES)
+	$(PRETTIER) --write $(PRETTIER_FILES)
 
 js/background.dist.js: $(BROWSERIFY) background.js
 	[ -d js ] || mkdir -p js
