@@ -86,6 +86,7 @@ body {
     background-position: right 3px top 0;
     background-repeat: no-repeat;
     background-size: 20px;
+    filter: drop-shadow(2px 2px 1px #666) invert(18%);
     margin: -2px 0;
     width: 30px;
 }
