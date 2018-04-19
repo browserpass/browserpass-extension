@@ -61,6 +61,16 @@ body {
 
 .part.search > .hint {
     background-color: #66c;
+    display: flex;
+}
+
+.part.search > .hint > .remove-hint {
+    background-image: url("icon-bs-delete.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    height: 12px;
+    margin: 1px 0 1px 4px;
+    width: 16px;
 }
 
 .part.search > input[type="text"] {

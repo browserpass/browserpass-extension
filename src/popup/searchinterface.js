@@ -50,7 +50,24 @@ function view(ctl, params) {
             }
         },
         [
-            this.popup.active ? m("div.hint.badge", this.popup.settings.host) : null,
+            this.popup.active
+                ? m("div.hint.badge", [
+                      this.popup.settings.host,
+                      m("div.remove-hint", {
+                          onclick: function(e) {
+                              var target = document.querySelector(
+                                  ".part.search > input[type=text]"
+                              );
+                              target.focus();
+                              self.popup.active = false;
+                              self.popup.search(
+                                  target.value.trim(),
+                                  target.value.substr(0, 1) !== " "
+                              );
+                          }
+                      })
+                  ])
+                : null,
             m("input[type=text]", {
                 focused: true,
                 placeholder: "Search logins...",
