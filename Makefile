@@ -18,12 +18,14 @@ CHROME_FILES := $(wildcard $(addprefix src/,$(CHROME_FILES))) \
 		src/js/popup.dist.js
 CHROME_FILES := $(patsubst src/%,chrome/%,$(CHROME_FILES))
 
+.PHONY: chrome
 chrome: extension $(CHROME_FILES)
 
 $(CHROME_FILES) : chrome/% : src/%
 	[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	cp $< $@
 
+.PHONY: clean
 clean:
 	rm -rf $(CLEAN_FILES)
 	$(MAKE) -C src clean

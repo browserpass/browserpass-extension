@@ -11,6 +11,7 @@ all: deps prettier js/background.dist.js js/popup.dist.js
 deps:
 	yarn install
 
+.PHONY: prettier
 prettier: $(PRETTIER) $(PRETTIER_FILES)
 	$(PRETTIER) --write $(PRETTIER_FILES)
 
@@ -22,5 +23,6 @@ js/popup.dist.js: $(BROWSERIFY) popup/*.js
 	[ -d js ] || mkdir -p js
 	$(BROWSERIFY) -o js/popup.dist.js popup/popup.js
 
+.PHONY: clean
 clean:
 	rm -rf $(CLEAN_FILES)
