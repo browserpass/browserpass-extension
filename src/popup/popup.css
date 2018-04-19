@@ -102,6 +102,10 @@ body {
     background-image: url("icon-user.svg");
 }
 
+.part.login > .action.launch {
+    background-image: url("icon-launch.svg");
+}
+
 .part.login em {
     color: #00c;
     font-style: normal;

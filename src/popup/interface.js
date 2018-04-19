@@ -96,13 +96,22 @@ function view(ctl, params) {
                         m("div.action.copy-password", {
                             title: "Copy password",
                             onclick: function(e) {
+                                e.stopPropagation();
                                 result.doAction("copyPassword");
                             }
                         }),
                         m("div.action.copy-user", {
                             title: "Copy username",
                             onclick: function(e) {
+                                e.stopPropagation();
                                 result.doAction("copyUser");
+                            }
+                        }),
+                        m("div.action.launch", {
+                            title: "Open URL",
+                            onclick: function(e) {
+                                e.stopPropagation();
+                                result.doAction("launch");
                             }
                         })
                     ]
