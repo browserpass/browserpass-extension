@@ -90,7 +90,16 @@ function view(ctl, params) {
                             }
                         }
                     },
-                    [badges ? m("div.store.badge", result.store) : null, m.trust(result.display)]
+                    [
+                        badges ? m("div.store.badge", result.store) : null,
+                        m("div.name", m.trust(result.display)),
+                        m("div.action.copy-password", {
+                            title: "Copy password",
+                            onclick: function(e) {
+                                result.doAction("copyPassword");
+                            }
+                        })
+                    ]
                 );
             })
         )

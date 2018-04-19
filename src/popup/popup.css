@@ -68,10 +68,35 @@ body {
     width: 100%;
 }
 
+.part.login {
+    display: flex;
+}
+
 .part.login:hover,
 .part.login:focus {
     background-color: #eee;
     outline: none;
+}
+
+.part.login > .name {
+    margin-right: 6px;
+    width: 100%;
+}
+
+.part.login > .action {
+    background-position: right;
+    background-repeat: no-repeat;
+    background-size: 20px;
+    margin: -2px 0;
+    width: 20px;
+}
+
+.past.login > .action:hover {
+    background-color: #f00;
+}
+
+.part.login > .action.copy-password {
+    background-image: url("icon-key.svg");
 }
 
 .part.login em {
