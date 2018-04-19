@@ -126,10 +126,11 @@ function view(ctl, params) {
 /**
  * Run a search
  *
- * @param string s Search string
+ * @param string s              Search string
+ * @param bool   fuzzyFirstWord Whether to use fuzzy search on the first word
  * @return void
  */
-function search(s) {
+function search(s, fuzzyFirstWord = true) {
     var self = this;
 
     // get candidate list
@@ -141,18 +142,20 @@ function search(s) {
     if (s.length) {
         var filter = s.split(/\s+/);
         // fuzzy-search first word & add highlighting
-        candidates = FuzzySort.go(filter[0], candidates, {
-            keys: ["login", "store"],
-            allowTypo: false
-        }).map(result =>
-            Object.assign(result.obj, {
-                display: result[0]
-                    ? FuzzySort.highlight(result[0], "<em>", "</em>")
-                    : result.obj.login
-            })
-        );
+        if (fuzzyFirstWord) {
+            candidates = FuzzySort.go(filter[0], candidates, {
+                keys: ["login", "store"],
+                allowTypo: false
+            }).map(result =>
+                Object.assign(result.obj, {
+                    display: result[0]
+                        ? FuzzySort.highlight(result[0], "<em>", "</em>")
+                        : result.obj.login
+                })
+            );
+        }
         // substring-search to refine against each remaining word
-        filter.slice(1).forEach(function(word) {
+        filter.slice(fuzzyFirstWord ? 1 : 0).forEach(function(word) {
             candidates = candidates.filter(
                 login => login.login.toLowerCase().indexOf(word.toLowerCase()) >= 0
             );

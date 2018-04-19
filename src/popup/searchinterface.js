@@ -59,7 +59,7 @@ function view(ctl, params) {
                     e.dom.focus();
                 },
                 oninput: function(e) {
-                    self.popup.search(e.target.value.trim());
+                    self.popup.search(e.target.value.trim(), e.target.value.substr(0, 1) !== " ");
                 },
                 onkeydown: function(e) {
                     switch (e.code) {
