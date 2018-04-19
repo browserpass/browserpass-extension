@@ -72,6 +72,10 @@ body {
     display: flex;
 }
 
+.part.login:first-child {
+    background-color: #efe;
+}
+
 .part.login:hover,
 .part.login:focus {
     background-color: #eee;
