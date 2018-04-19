@@ -69,6 +69,7 @@ function view(ctl, params) {
                             result.doAction("fill");
                         },
                         onkeydown: function(e) {
+                            e.preventDefault();
                             switch (e.code) {
                                 case "ArrowDown":
                                     if (e.target.nextSibling) {
