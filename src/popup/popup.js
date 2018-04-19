@@ -13,14 +13,13 @@ if (typeof browser === "undefined") {
 browser.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
     try {
         var response = await browser.runtime.sendMessage({ action: "getSettings" });
-        if (response.status == "ok") {
-            var settings = response.settings;
-            settings.tab = tabs[0];
-            settings.host = new URL(settings.tab.url).hostname;
-            run(settings);
-        } else {
+        if (response.status != "ok") {
             throw new Error(response.message);
         }
+        var settings = response.settings;
+        settings.tab = tabs[0];
+        settings.host = new URL(settings.tab.url).hostname;
+        run(settings);
     } catch (e) {
         handleError(e);
     }
@@ -114,7 +113,13 @@ async function run(settings) {
  * @param string action Action to take
  * @return void
  */
-function withLogin(action) {
-    // placeholder stub
-    alert("Login action (" + action + "): " + this.login);
+async function withLogin(action) {
+    try {
+        var response = await browser.runtime.sendMessage({ action: action, login: this });
+        if (response.status != "ok") {
+            throw new Error(response.message);
+        }
+    } catch (e) {
+        handleError(e);
+    }
 }
