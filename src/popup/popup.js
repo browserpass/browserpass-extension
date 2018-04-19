@@ -89,7 +89,8 @@ async function run(settings) {
                 var login = {
                     index: index++,
                     store: store,
-                    login: response[store][key].replace(/\.gpg$/i, "")
+                    login: response[store][key].replace(/\.gpg$/i, ""),
+                    allowFill: true
                 };
                 login.domain = pathToDomain(login.store + "/" + login.login);
                 login.inCurrentDomain =
@@ -124,6 +125,12 @@ async function withLogin(action) {
                 handleError("Filling login details...", "notice");
                 break;
             case "launch":
+                var havePermission = await chrome.permissions.request({
+                    origins: ["http://*/*", "https://*/*"]
+                });
+                if (!havePermission) {
+                    throw new Error("Browserpass requires additional permissions to proceed");
+                }
                 handleError("Launching URL...", "notice");
                 break;
             case "copyPassword":

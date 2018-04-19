@@ -45,6 +45,70 @@ function getLocalSettings() {
 }
 
 /**
+ * Handle modal authentication requests (e.g. HTTP basic)
+ *
+ * @since 3.0.0
+ *
+ * @param object requestDetails Auth request details
+ * @return object Authentication credentials or {}
+ */
+function handleModalAuth(requestDetails) {
+    console.log(this, requestDetails);
+
+    var launchHost = requestDetails.url.match(/:\/\/([^\/]+)/)[1];
+
+    // don't attempt authentication against the same login more than once
+    if (!this.login.allowFill) {
+        return {};
+    }
+    this.login.allowFill = false;
+
+    // don't attempt authentication outside the main frame
+    if (requestDetails.type !== "main_frame") {
+        return {};
+    }
+
+    // ensure the auth domain is the same, or ask the user for permissions to continue
+    if (launchHost !== requestDetails.challenger.host) {
+        var message =
+            "You are about to send login credentials to a domain that is different than " +
+            "the one you lauched from the browserpass extension. Do you wish to proceed?\n\n" +
+            "Realm: " +
+            requestDetails.realm +
+            "\n" +
+            "Launched URL: " +
+            this.url +
+            "\n" +
+            "Authentication URL: " +
+            requestDetails.url;
+        if (!confirm(message)) {
+            return {};
+        }
+    }
+
+    // ask the user before sending credentials over an insecure connection
+    if (!requestDetails.url.match(/^https:/i)) {
+        var message =
+            "You are about to send login credentials via an insecure connection!\n\n" +
+            "Are you sure you want to do this? If there is an attacker watching your " +
+            "network traffic, they may be able to see your username and password.\n\n" +
+            "URL: " +
+            requestDetails.url;
+        if (!confirm(message)) {
+            return {};
+        }
+    }
+
+    // supply credentials
+    return {
+        authCredentials: {
+            username: this.login.fields.login,
+            password: this.login.fields.secret
+        }
+    };
+}
+
+/**
  * Handle a message from elsewhere within the extension
  *
  * @since 3.0.0
@@ -95,6 +159,29 @@ async function handleMessage(settings, message, sendResponse) {
                 if (!url.match(/:\/\//)) {
                     url = "http://" + url;
                 }
+                var modalAuthHandler = handleModalAuth.bind({ url: url, login: message.login });
+                chrome.webRequest.onAuthRequired.addListener(
+                    modalAuthHandler,
+                    { urls: ["*://*/*"], tabId: tab.id },
+                    ["blocking"]
+                );
+                chrome.tabs.onUpdated.addListener(function self(tabId, info) {
+                    // ignore other tabs
+                    if (tabId != tab) {
+                        return;
+                    }
+
+                    // ignore non-complete status
+                    if (info.status !== "complete") {
+                        return;
+                    }
+
+                    // remove auth handler once page is loaded
+                    chrome.webRequest.onAuthRequired.removeListener(modalAuthHandler);
+
+                    // remove updated handler
+                    chrome.tabs.onUpdated.removeListener(self);
+                });
                 chrome.tabs.update(tab.id, { url: url });
                 sendResponse({ status: "ok" });
             } catch (e) {
