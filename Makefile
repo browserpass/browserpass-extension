@@ -11,7 +11,8 @@ CHROME_FILES := manifest.json \
 	       *.css \
 	       *.png \
 	       popup/*.html \
-	       popup/*.css
+	       popup/*.css \
+	       popup/*.svg
 CHROME_FILES := $(wildcard $(addprefix src/,$(CHROME_FILES))) \
 		src/js/background.dist.js \
 		src/js/popup.dist.js

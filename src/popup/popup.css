@@ -46,7 +46,11 @@ body {
 }
 
 .part.search {
-    padding: none;
+    padding-right: 28px;
+    background-image: url("icon-search.svg");
+    background-position: top 6px right 6px;
+    background-repeat: no-repeat;
+    background-size: 18px;
 }
 
 .part.search:focus-within {
@@ -58,7 +62,7 @@ body {
 }
 
 .part.search > input[type="text"] {
-    background-color: inherit;
+    background-color: transparent;
     border: none;
     outline: none;
     width: 100%;
