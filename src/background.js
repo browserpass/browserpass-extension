@@ -131,6 +131,7 @@ async function handleMessage(settings, message, sendResponse) {
                     message: "Unable to fill credentials: " + e.toString()
                 });
             }
+            break;
         default:
             sendResponse({
                 status: "error",
