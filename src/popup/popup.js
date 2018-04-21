@@ -17,12 +17,18 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
         settings.tab = tabs[0];
         settings.host = new URL(settings.tab.url).hostname;
         for (var store in settings.stores) {
-            var when = localStorage.getItem("recent:" + sha1(settings.stores[store].path));
+            var when = localStorage.getItem("recent:" + settings.stores[store].path);
             if (when) {
                 settings.stores[store].when = JSON.parse(when);
             } else {
                 settings.stores[store].when = 0;
             }
+        }
+        settings.recent = localStorage.getItem("recent");
+        if (settings.recent) {
+            settings.recent = JSON.parse(settings.recent);
+        } else {
+            settings.recent = {};
         }
         run(settings);
     } catch (e) {
@@ -106,12 +112,12 @@ async function run(settings) {
                 login.inCurrentDomain =
                     settings.host == login.domain || settings.host.endsWith("." + login.domain);
 
-                login.recent = localStorage.getItem(
-                    "recent:" + sha1(settings.host + sha1(login.store.path + sha1(login.login)))
-                );
-                if (login.recent) {
-                    login.recent = JSON.parse(login.recent);
-                } else {
+                if (
+                    !(login.recent =
+                        settings.recent[
+                            sha1(settings.host + sha1(login.store.path + sha1(login.login)))
+                        ])
+                ) {
                     login.recent = {
                         when: 0,
                         count: 0
@@ -144,19 +150,18 @@ function saveRecent(settings, login, remove = false) {
     var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
 
     // save store timestamp
-    localStorage.setItem("recent:" + sha1(login.store.path), JSON.stringify(Date.now()));
+    localStorage.setItem("recent:" + login.store.path, JSON.stringify(Date.now()));
 
     // update login usage count & timestamp
     if (Date.now() > login.recent.when + ignoreInterval) {
         login.recent.count++;
     }
     login.recent.when = Date.now();
+    settings.recent[sha1(settings.host + sha1(login.store.path + sha1(login.login)))] =
+        login.recent;
 
     // save to local storage
-    localStorage.setItem(
-        "recent:" + sha1(settings.host + sha1(login.store.path + sha1(login.login))),
-        JSON.stringify(login.recent)
-    );
+    localStorage.setItem("recent", JSON.stringify(settings.recent));
 }
 
 /**
