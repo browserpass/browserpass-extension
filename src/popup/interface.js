@@ -165,19 +165,19 @@ function search(s) {
     var candidates = this.logins.map(result => Object.assign(result, { display: result.login }));
     if (this.currentDomainOnly) {
         var recent = candidates.filter(login => login.recent.count > 0);
-        recent.sort(function(a, b) {
-            if (a.store.when != b.store.when) {
-                return b.store.when - a.store.when;
-            }
-            if (a.recent.count != b.recent.count) {
-                return b.recent.count - a.recent.count;
-            }
-            return b.recent.when - a.recent.when;
-        });
         candidates = recent.concat(
             candidates.filter(login => login.inCurrentDomain && !login.recent.count)
         );
     }
+    candidates.sort(function(a, b) {
+        if (a.store.when != b.store.when) {
+            return b.store.when - a.store.when;
+        }
+        if (a.recent.count != b.recent.count) {
+            return b.recent.count - a.recent.count;
+        }
+        return b.recent.when - a.recent.when;
+    });
 
     if (s.length) {
         var filter = s.split(/\s+/);
