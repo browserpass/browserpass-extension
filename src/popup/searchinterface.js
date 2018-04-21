@@ -83,7 +83,7 @@ function view(ctl, params) {
                                     self.popup.search("");
                                 } else if (
                                     e.target.selectionStart == 0 &&
-                                    e.target.selectionStart == e.target.selectionEnd
+                                    e.target.selectionEnd == 0
                                 ) {
                                     self.popup.active = false;
                                     self.popup.search(e.target.value);
