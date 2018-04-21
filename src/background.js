@@ -209,9 +209,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "launch":
             try {
                 var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-                var url = message.login.fields.url
-                    ? message.login.fields.url
-                    : message.login.domain;
+                var url = message.login.fields.url || message.login.domain;
                 if (!url) {
                     throw new Error("No URL is defined for this entry");
                 }
