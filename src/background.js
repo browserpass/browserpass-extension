@@ -212,6 +212,9 @@ async function handleMessage(settings, message, sendResponse) {
                 var url = message.login.fields.url
                     ? message.login.fields.url
                     : message.login.domain;
+                if (!url) {
+                    throw new Error("No URL is defined for this entry");
+                }
                 if (!url.match(/:\/\//)) {
                     url = "http://" + url;
                 }
