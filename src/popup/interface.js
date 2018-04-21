@@ -70,7 +70,9 @@ function view(ctl, params) {
                             result.doAction("fill");
                         },
                         onkeydown: function(e) {
-                            e.preventDefault();
+                            if (e.code != "Tab") {
+                                e.preventDefault();
+                            }
                             switch (e.code) {
                                 case "ArrowDown":
                                     if (e.target.nextSibling) {
