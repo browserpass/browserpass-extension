@@ -92,19 +92,23 @@ async function run(settings) {
     try {
         // get list of logins
         var response = await chrome.runtime.sendMessage({ action: "listFiles" });
+        if (response.status != "ok") {
+            throw new Error(e);
+        }
+
         var logins = [];
         var index = 0;
         var recent = localStorage.getItem("recent:" + settings.host);
         if (recent) {
             recent = JSON.parse(recent);
         }
-        for (var store in response) {
-            for (var key in response[store]) {
+        for (var store in response.files) {
+            for (var key in response.files[store]) {
                 // set login fields
                 var login = {
                     index: index++,
                     store: settings.stores[store],
-                    login: response[store][key].replace(/\.gpg$/i, ""),
+                    login: response.files[store][key].replace(/\.gpg$/i, ""),
                     allowFill: true
                 };
                 login.domain = pathToDomain(store + "/" + login.login);
