@@ -114,7 +114,7 @@ function view(ctl, params) {
                                           " time" +
                                           (result.recent.count > 1 ? "s" : "") +
                                           ", last " +
-                                          Moment(new Date(result.recent.when)).calendar()
+                                          Moment(new Date(result.recent.when)).fromNow()
                                   })
                                 : null
                         ]),
