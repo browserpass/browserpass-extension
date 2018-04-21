@@ -109,7 +109,7 @@ function view(ctl, params) {
                             result.recent.when > 0
                                 ? m("div.recent", {
                                       title:
-                                          "Used here: " +
+                                          "Used here " +
                                           result.recent.count +
                                           " time" +
                                           (result.recent.count > 1 ? "s" : "") +
