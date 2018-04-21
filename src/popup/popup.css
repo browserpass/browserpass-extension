@@ -25,7 +25,6 @@ body {
     display: flex;
     flex-shrink: 0;
     min-height: 29px;
-    padding: 6px;
     width: 100%;
 }
 
@@ -48,15 +47,16 @@ body {
 }
 
 .part.search {
-    padding-right: 28px;
+    padding: 6px 28px 6px 6px;
     background-image: url("icon-search.svg");
     background-position: top 6px right 6px;
     background-repeat: no-repeat;
     background-size: 18px;
+    background-color: #f7f7f7;
 }
 
 .part.search:focus-within {
-    background-color: #eef;
+    background-color: #fff;
 }
 
 .part.search > .hint {
@@ -68,8 +68,9 @@ body {
     background-image: url("icon-bs-delete.svg");
     background-repeat: no-repeat;
     background-size: contain;
+    cursor: pointer;
     height: 12px;
-    margin: 1px 0 1px 4px;
+    margin: 3px 0 3px 4px;
     width: 16px;
 }
 
@@ -82,21 +83,28 @@ body {
 
 .part.login {
     display: flex;
+    cursor: pointer;
 }
 
-.part.login:first-child {
-    background-color: #efe;
+.logins:not(:hover):not(:focus-within) .part.login:first-child > .name {
+    background-color: #f7f7f7;
 }
 
 .part.login:hover,
 .part.login:focus {
-    background-color: #eee;
     outline: none;
+}
+
+.part.login > .name:hover,
+.part.login > .action:hover,
+.part.login:focus > .name {
+    background-color: #eee;
 }
 
 .part.login > .name {
     display: flex;
     width: 100%;
+    padding: 6px;
 }
 
 .part.login > .name > .recent {
@@ -104,16 +112,15 @@ body {
     background-repeat: no-repeat;
     background-size: contain;
     margin-left: 4px;
-    width: 16px;
+    width: 10px;
 }
 
 .part.login > .action {
-    background-position: right 3px top 0;
+    background-position: right 6px top 6px;
     background-repeat: no-repeat;
-    background-size: 20px;
-    filter: drop-shadow(2px 2px 1px #666) invert(18%);
-    margin: -2px 0;
+    background-size: 19px;
     width: 30px;
+    padding: 6px;
 }
 
 .past.login > .action:hover {
