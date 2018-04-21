@@ -404,7 +404,6 @@ async function receiveMessage(message, sender, sendResponse) {
         }
 
         // expand stores
-        var i = 0;
         var responseStores = {};
         for (var key in rd.stores) {
             if (rd.stores[key].length == 1) {
@@ -412,8 +411,10 @@ async function receiveMessage(message, sender, sendResponse) {
                 settings.stores[key].path = responseStores[key].path;
             } else {
                 rd.stores[key].forEach(function(responseStore) {
-                    var name = key + "/" + responseStore.path.match(/([^\/]+)$/)[1];
+                    var dirname = responseStore.path.match(/([^\/]+)$/)[1];
+                    var name = key + "/" + dirname;
                     settings.stores[name] = Object.assign({}, settings.stores[key], {
+                        display: dirname,
                         name: name,
                         path: responseStore.path
                     });
