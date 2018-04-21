@@ -165,9 +165,10 @@ function search(s) {
     var candidates = this.logins.map(result => Object.assign(result, { display: result.login }));
     if (this.currentDomainOnly) {
         var recent = candidates.filter(login => login.recent.count > 0);
-        candidates = recent.concat(
-            candidates.filter(login => login.inCurrentDomain && !login.recent.count)
+        var remainingInCurrentDomain = candidates.filter(
+            login => login.inCurrentDomain && !login.recent.count
         );
+        candidates = recent.concat(remainingInCurrentDomain);
     }
     candidates.sort(function(a, b) {
         if (a.store.when != b.store.when) {
