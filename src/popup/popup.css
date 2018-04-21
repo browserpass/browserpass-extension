@@ -87,6 +87,7 @@ body {
 .part.login {
     display: flex;
     cursor: pointer;
+    align-items: center;
 }
 
 .logins:not(:hover):not(:focus-within) .part.login:first-child > .name {
@@ -119,10 +120,11 @@ body {
 }
 
 .part.login > .action {
-    background-position: right 6px top 6px;
+    background-position: center;
     background-repeat: no-repeat;
     background-size: 19px;
     width: 30px;
+    height: 19px;
     padding: 6px;
 }
 
