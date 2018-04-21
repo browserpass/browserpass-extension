@@ -3,10 +3,6 @@
 
 require("chrome-extension-async");
 
-if (typeof browser === "undefined") {
-    var browser = chrome;
-}
-
 // native application id
 var appID = "com.github.browserpass.native";
 
@@ -16,8 +12,24 @@ var defaultSettings = {
     stores: {}
 };
 
+var authListeners = {};
+
+// watch for tab updates
+chrome.tabs.onUpdated.addListener(function(tab, info) {
+    // ignore non-complete status
+    if (info.status !== "complete") {
+        return;
+    }
+
+    // unregister any auth listeners for this tab
+    if (authListeners[tab.id]) {
+        chrome.tabs.onAuthRequired.removeListener(authListeners[tab.id]);
+        delete authListeners[tab.id];
+    }
+});
+
 // handle incoming messages
-browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     receiveMessage(message, sender, sendResponse);
 
     // allow async responses after this function returns
@@ -42,6 +54,68 @@ function getLocalSettings() {
     }
 
     return settings;
+}
+
+/**
+ * Handle modal authentication requests (e.g. HTTP basic)
+ *
+ * @since 3.0.0
+ *
+ * @param object requestDetails Auth request details
+ * @return object Authentication credentials or {}
+ */
+function handleModalAuth(requestDetails) {
+    var launchHost = requestDetails.url.match(/:\/\/([^\/]+)/)[1];
+
+    // don't attempt authentication against the same login more than once
+    if (!this.login.allowFill) {
+        return {};
+    }
+    this.login.allowFill = false;
+
+    // don't attempt authentication outside the main frame
+    if (requestDetails.type !== "main_frame") {
+        return {};
+    }
+
+    // ensure the auth domain is the same, or ask the user for permissions to continue
+    if (launchHost !== requestDetails.challenger.host) {
+        var message =
+            "You are about to send login credentials to a domain that is different than " +
+            "the one you lauched from the browserpass extension. Do you wish to proceed?\n\n" +
+            "Realm: " +
+            requestDetails.realm +
+            "\n" +
+            "Launched URL: " +
+            this.url +
+            "\n" +
+            "Authentication URL: " +
+            requestDetails.url;
+        if (!confirm(message)) {
+            return {};
+        }
+    }
+
+    // ask the user before sending credentials over an insecure connection
+    if (!requestDetails.url.match(/^https:/i)) {
+        var message =
+            "You are about to send login credentials via an insecure connection!\n\n" +
+            "Are you sure you want to do this? If there is an attacker watching your " +
+            "network traffic, they may be able to see your username and password.\n\n" +
+            "URL: " +
+            requestDetails.url;
+        if (!confirm(message)) {
+            return {};
+        }
+    }
+
+    // supply credentials
+    return {
+        authCredentials: {
+            username: this.login.fields.login,
+            password: this.login.fields.secret
+        }
+    };
 }
 
 /**
@@ -90,11 +164,21 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "launch":
             try {
-                var tab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
+                var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
                 var url = message.login.fields.url ? message.login.fields.url : response.login.url;
                 if (!url.match(/:\/\//)) {
                     url = "http://" + url;
                 }
+                if (authListeners[tab.id]) {
+                    chrome.tabs.onUpdated.removeListener(authListeners[tab.id]);
+                    delete authListeners[tab.id];
+                }
+                authListeners[tab.id] = handleModalAuth.bind({ url: url, login: message.login });
+                chrome.webRequest.onAuthRequired.addListener(
+                    authListeners[tab.id],
+                    { urls: ["*://*/*"], tabId: tab.id },
+                    ["blocking"]
+                );
                 chrome.tabs.update(tab.id, { url: url });
                 sendResponse({ status: "ok" });
             } catch (e) {
@@ -106,8 +190,8 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "fill":
             try {
-                var tab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
-                await browser.tabs.executeScript(tab.id, { file: "js/inject.dist.js" });
+                var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+                await chrome.tabs.executeScript(tab.id, { file: "js/inject.dist.js" });
                 // check login fields
                 if (message.login.fields.login === null) {
                     throw new Error("No login is available");
@@ -120,7 +204,7 @@ async function handleMessage(settings, message, sendResponse) {
                     secret: message.login.fields.secret
                 });
                 // fill form via injected script
-                await browser.tabs.executeScript(tab.id, {
+                await chrome.tabs.executeScript(tab.id, {
                     code: `window.browserpass.fillLogin(${fillFields});`
                 });
                 sendResponse({ status: "ok" });
@@ -159,7 +243,7 @@ function hostAction(settings, action, params = {}) {
         request[key] = params[key];
     }
 
-    return browser.runtime.sendNativeMessage(appID, request);
+    return chrome.runtime.sendNativeMessage(appID, request);
 }
 
 /**
@@ -233,7 +317,7 @@ async function parseFields(settings, login) {
  */
 async function receiveMessage(message, sender, sendResponse) {
     // restrict messages to this extension only
-    if (sender.id !== browser.runtime.id) {
+    if (sender.id !== chrome.runtime.id) {
         // silently exit without responding when the source is foreign
         return;
     }
@@ -241,7 +325,7 @@ async function receiveMessage(message, sender, sendResponse) {
     var settings = getLocalSettings();
     try {
         var configureSettings = Object.assign(settings, { defaultStore: {} });
-        var response = await browser.runtime.sendNativeMessage(appID, {
+        var response = await chrome.runtime.sendNativeMessage(appID, {
             settings: configureSettings,
             action: "configure"
         });
