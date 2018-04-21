@@ -5,14 +5,10 @@ require("chrome-extension-async");
 var TldJS = require("tldjs");
 var Interface = require("./interface");
 
-if (typeof browser === "undefined") {
-    var browser = chrome;
-}
-
 // wrap with current tab & settings
-browser.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
+chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
     try {
-        var response = await browser.runtime.sendMessage({ action: "getSettings" });
+        var response = await chrome.runtime.sendMessage({ action: "getSettings" });
         if (response.status != "ok") {
             throw new Error(response.message);
         }
@@ -80,7 +76,7 @@ function pathToDomain(path) {
 async function run(settings) {
     try {
         // get list of logins
-        var response = await browser.runtime.sendMessage({ action: "listFiles" });
+        var response = await chrome.runtime.sendMessage({ action: "listFiles" });
         var logins = [];
         var index = 0;
         for (var store in response) {
@@ -89,7 +85,8 @@ async function run(settings) {
                 var login = {
                     index: index++,
                     store: store,
-                    login: response[store][key].replace(/\.gpg$/i, "")
+                    login: response[store][key].replace(/\.gpg$/i, ""),
+                    allowFill: true
                 };
                 login.domain = pathToDomain(login.store + "/" + login.login);
                 login.inCurrentDomain =
@@ -124,6 +121,13 @@ async function withLogin(action) {
                 handleError("Filling login details...", "notice");
                 break;
             case "launch":
+                var havePermission = await chrome.permissions.request({
+                    permissions: ["webRequest", "webRequestBlocking"],
+                    origins: ["http://*/*", "https://*/*"]
+                });
+                if (!havePermission) {
+                    throw new Error("Browserpass requires additional permissions to proceed");
+                }
                 handleError("Launching URL...", "notice");
                 break;
             case "copyPassword":
@@ -138,7 +142,7 @@ async function withLogin(action) {
         }
 
         // hand off action to background script
-        var response = await browser.runtime.sendMessage({ action: action, login: this });
+        var response = await chrome.runtime.sendMessage({ action: action, login: this });
         if (response.status != "ok") {
             throw new Error(response.message);
         } else {
