@@ -209,7 +209,9 @@ async function handleMessage(settings, message, sendResponse) {
         case "launch":
             try {
                 var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-                var url = message.login.fields.url ? message.login.fields.url : response.login.url;
+                var url = message.login.fields.url
+                    ? message.login.fields.url
+                    : message.login.domain;
                 if (!url.match(/:\/\//)) {
                     url = "http://" + url;
                 }
