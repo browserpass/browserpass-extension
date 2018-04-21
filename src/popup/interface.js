@@ -103,14 +103,14 @@ function view(ctl, params) {
                         }
                     },
                     [
-                        badges ? m("div.store.badge", result.store) : null,
+                        badges ? m("div.store.badge", result.store.name) : null,
                         m("div.name", [
                             m.trust(result.display),
-                            result.recent >= 0
+                            result.recent.when > 0
                                 ? m("div.recent", {
                                       title:
                                           "Last used here: " +
-                                          Moment(new Date(result.when)).calendar()
+                                          Moment(new Date(result.recent.when)).calendar()
                                   })
                                 : null
                         ]),
@@ -158,12 +158,15 @@ function search(s) {
     // get candidate list
     var candidates = this.logins.map(result => Object.assign(result, { display: result.login }));
     if (this.currentDomainOnly) {
-        var recent = candidates.filter(login => login.recent >= 0);
+        var recent = candidates.filter(login => login.recent.count > 0);
         recent.sort(function(a, b) {
-            return b.recent - a.recent;
+            if (a.store.when != b.store.when) {
+                return b.store.when - a.store.when;
+            }
+            return b.recent.count - a.recent.count;
         });
         candidates = recent.concat(
-            candidates.filter(login => login.inCurrentDomain && login.recent == -1)
+            candidates.filter(login => login.inCurrentDomain && recent.indexOf(login) == -1)
         );
     }
 
@@ -172,7 +175,7 @@ function search(s) {
         // fuzzy-search first word & add highlighting
         if (fuzzyFirstWord) {
             candidates = FuzzySort.go(filter[0], candidates, {
-                keys: ["login", "store"],
+                keys: ["login", "store.name"],
                 allowTypo: false
             }).map(result =>
                 Object.assign(result.obj, {

@@ -3,6 +3,7 @@
 
 require("chrome-extension-async");
 var TldJS = require("tldjs");
+var sha1 = require("sha1");
 var Interface = require("./interface");
 
 // wrap with current tab & settings
@@ -15,6 +16,14 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
         var settings = response.settings;
         settings.tab = tabs[0];
         settings.host = new URL(settings.tab.url).hostname;
+        for (var store in settings.stores) {
+            var when = localStorage.getItem("recent:" + sha1(settings.stores[store].path));
+            if (when) {
+                settings.stores[store].when = JSON.parse(when);
+            } else {
+                settings.stores[store].when = 0;
+            }
+        }
         run(settings);
     } catch (e) {
         handleError(e);
@@ -84,29 +93,30 @@ async function run(settings) {
             recent = JSON.parse(recent);
         }
         for (var store in response) {
-            var storePath = settings.stores[store].path;
             for (var key in response[store]) {
                 // set login fields
                 var login = {
                     index: index++,
-                    store: store,
+                    store: settings.stores[store],
                     login: response[store][key].replace(/\.gpg$/i, ""),
                     allowFill: true,
                     recent: -1
                 };
-                login.domain = pathToDomain(login.store + "/" + login.login);
+                login.domain = pathToDomain(store + "/" + login.login);
                 login.inCurrentDomain =
                     settings.host == login.domain || settings.host.endsWith("." + login.domain);
-                if (recent) {
-                    for (var i = 0; i < recent.length; i++) {
-                        if (recent[i].store == storePath && recent[i].login == login.login) {
-                            login.recent = i;
-                            login.when = recent[i].when;
-                            break;
-                        }
-                    }
-                }
 
+                login.recent = localStorage.getItem(
+                    "recent:" + sha1(settings.host + sha1(login.store.path + sha1(login.login)))
+                );
+                if (login.recent) {
+                    login.recent = JSON.parse(login.recent);
+                } else {
+                    login.recent = {
+                        when: 0,
+                        count: 0
+                    };
+                }
                 // bind handlers
                 login.doAction = withLogin.bind({ settings: settings, login: login });
 
@@ -131,23 +141,22 @@ async function run(settings) {
  * @return void
  */
 function saveRecent(settings, login, remove = false) {
-    var recentName = "recent:" + settings.host;
-    var recent = localStorage.getItem(recentName);
-    if (recent) {
-        recent = JSON.parse(recent).filter(
-            entry => entry.store != settings.stores[login.store].path || entry.login != login.login
-        );
-    } else {
-        recent = [];
+    var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
+
+    // save store timestamp
+    localStorage.setItem("recent:" + sha1(login.store.path), JSON.stringify(Date.now()));
+
+    // update login usage count & timestamp
+    if (Date.now() > login.recent.when + ignoreInterval) {
+        login.recent.count++;
     }
-    if (!remove) {
-        recent.push({
-            store: settings.stores[login.store].path,
-            login: login.login,
-            when: Date.now()
-        });
-    }
-    localStorage.setItem(recentName, JSON.stringify(recent));
+    login.recent.when = Date.now();
+
+    // save to local storage
+    localStorage.setItem(
+        "recent:" + sha1(settings.host + sha1(login.store.path + sha1(login.login))),
+        JSON.stringify(login.recent)
+    );
 }
 
 /**
