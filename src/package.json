@@ -18,6 +18,8 @@
         "chrome-extension-async": "^3.0.0",
         "fuzzysort": "^1.1.0",
         "mithril": "^1.1.0",
+        "moment": "^2.22.1",
+        "sha1": "^1.1.1",
         "tldjs": "^2.3.0"
     },
     "devDependencies": {

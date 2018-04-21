@@ -2,6 +2,7 @@ module.exports = Interface;
 
 var m = require("mithril");
 var FuzzySort = require("fuzzysort");
+var Moment = require("moment");
 var SearchInterface = require("./searchinterface");
 
 /**
@@ -102,8 +103,21 @@ function view(ctl, params) {
                         }
                     },
                     [
-                        badges ? m("div.store.badge", result.store) : null,
-                        m("div.name", m.trust(result.display)),
+                        badges ? m("div.store.badge", result.store.name) : null,
+                        m("div.name", [
+                            m.trust(result.display),
+                            result.recent.when > 0
+                                ? m("div.recent", {
+                                      title:
+                                          "Used here " +
+                                          result.recent.count +
+                                          " time" +
+                                          (result.recent.count > 1 ? "s" : "") +
+                                          ", last " +
+                                          Moment(new Date(result.recent.when)).fromNow()
+                                  })
+                                : null
+                        ]),
                         m("div.action.copy-password", {
                             title: "Copy password",
                             onclick: function(e) {
@@ -148,7 +162,19 @@ function search(s) {
     // get candidate list
     var candidates = this.logins.map(result => Object.assign(result, { display: result.login }));
     if (this.currentDomainOnly) {
-        candidates = candidates.filter(login => login.inCurrentDomain);
+        var recent = candidates.filter(login => login.recent.count > 0);
+        recent.sort(function(a, b) {
+            if (a.store.when != b.store.when) {
+                return b.store.when - a.store.when;
+            }
+            if (a.recent.count != b.recent.count) {
+                return b.recent.count - a.recent.count;
+            }
+            return b.recent.when - a.recent.when;
+        });
+        candidates = recent.concat(
+            candidates.filter(login => login.inCurrentDomain && !login.recent.count)
+        );
     }
 
     if (s.length) {
@@ -156,7 +182,7 @@ function search(s) {
         // fuzzy-search first word & add highlighting
         if (fuzzyFirstWord) {
             candidates = FuzzySort.go(filter[0], candidates, {
-                keys: ["login", "store"],
+                keys: ["login", "store.name"],
                 allowTypo: false
             }).map(result =>
                 Object.assign(result.obj, {
