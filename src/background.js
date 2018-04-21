@@ -24,7 +24,7 @@ chrome.tabs.onUpdated.addListener(function(tab, info) {
     // unregister any auth listeners for this tab
     if (authListeners[tab.id]) {
         chrome.tabs.onAuthRequired.removeListener(authListeners[tab.id]);
-        authListeners[tab.id] = null;
+        delete authListeners[tab.id];
     }
 });
 
@@ -171,7 +171,7 @@ async function handleMessage(settings, message, sendResponse) {
                 }
                 if (authListeners[tab.id]) {
                     chrome.tabs.onUpdated.removeListener(authListeners[tab.id]);
-                    authListeners[tab.id] = null;
+                    delete authListeners[tab.id];
                 }
                 authListeners[tab.id] = handleModalAuth.bind({ url: url, login: message.login });
                 chrome.webRequest.onAuthRequired.addListener(
