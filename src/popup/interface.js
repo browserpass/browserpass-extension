@@ -173,7 +173,7 @@ function search(s) {
             return b.recent.when - a.recent.when;
         });
         candidates = recent.concat(
-            candidates.filter(login => login.inCurrentDomain && recent.indexOf(login) == -1)
+            candidates.filter(login => login.inCurrentDomain && !login.recent.count)
         );
     }
 
