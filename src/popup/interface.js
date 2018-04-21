@@ -23,7 +23,7 @@ function Interface(settings, logins) {
     this.settings = settings;
     this.logins = logins;
     this.results = [];
-    this.active = !settings.tab.url.match(/^chrome:\/\//);
+    this.currentDomainOnly = !settings.tab.url.match(/^chrome:\/\//);
     this.searchPart = new SearchInterface(this);
 
     // initialise with empty search
@@ -131,16 +131,17 @@ function view(ctl, params) {
  * Run a search
  *
  * @param string s              Search string
- * @param bool   fuzzyFirstWord Whether to use fuzzy search on the first word
  * @return void
  */
-function search(s, fuzzyFirstWord = true) {
+function search(s) {
     var self = this;
+    var fuzzyFirstWord = s.substr(0, 1) !== " ";
+    s = s.trim();
 
     // get candidate list
     var candidates = this.logins.map(result => Object.assign(result, { display: result.login }));
-    if (this.active) {
-        candidates = candidates.filter(login => login.active);
+    if (this.currentDomainOnly) {
+        candidates = candidates.filter(login => login.inCurrentDomain);
     }
 
     if (s.length) {

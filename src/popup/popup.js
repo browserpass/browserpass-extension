@@ -92,7 +92,7 @@ async function run(settings) {
                     login: response[store][key].replace(/\.gpg$/i, "")
                 };
                 login.domain = pathToDomain(login.store + "/" + login.login);
-                login.active =
+                login.inCurrentDomain =
                     settings.host == login.domain || settings.host.endsWith("." + login.domain);
 
                 // bind handlers
