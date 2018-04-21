@@ -115,7 +115,7 @@ function view(ctl, params) {
                                           result.recent.count +
                                           " time" +
                                           (result.recent.count > 1 ? "s" : "") +
-                                          ", last " +
+                                          ", last used " +
                                           Moment(new Date(result.recent.when)).fromNow()
                                   })
                                 : null
