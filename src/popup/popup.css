@@ -117,6 +117,7 @@ body {
     background-size: contain;
     margin-left: 4px;
     width: 10px;
+    margin-top: 2px;
 }
 
 .part.login > .action {
@@ -142,6 +143,7 @@ body {
 
 .part.login > .action.launch {
     background-image: url("icon-launch.svg");
+    background-position-y: 5.5px;
 }
 
 .part.login em {
