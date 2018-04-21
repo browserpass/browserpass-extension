@@ -347,6 +347,8 @@ async function parseFields(settings, login) {
         if (Array.isArray(login.fields[key])) {
             if (key == "secret" && lines.length) {
                 login.fields.secret = lines[0];
+            } else if (key == "login") {
+                login.fields[key] = login.login.match(/([^\/]+)$/)[1];
             } else {
                 login.fields[key] = null;
             }
