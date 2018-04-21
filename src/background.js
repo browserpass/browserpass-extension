@@ -12,6 +12,22 @@ var defaultSettings = {
     stores: {}
 };
 
+var authListeners = {};
+
+// unregister auth handlers
+chrome.tabs.onUpdated.addListener(function(tab, info) {
+    // ignore non-complete status
+    if (info.status !== "complete") {
+        return;
+    }
+
+    // unregister any auth listeners for this tab
+    if (authListeners[tab.id]) {
+        chrome.tabs.onAuthRequired.removeListener(authListeners[tab.id]);
+        authListeners[tab.id] = null;
+    }
+});
+
 // handle incoming messages
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     receiveMessage(message, sender, sendResponse);
@@ -153,29 +169,16 @@ async function handleMessage(settings, message, sendResponse) {
                 if (!url.match(/:\/\//)) {
                     url = "http://" + url;
                 }
-                var modalAuthHandler = handleModalAuth.bind({ url: url, login: message.login });
+                if (authListeners[tab.id]) {
+                    chrome.tabs.onUpdated.removeListener(authListeners[tab.id]);
+                    authListeners[tab.id] = null;
+                }
+                authListeners[tab.id] = handleModalAuth.bind({ url: url, login: message.login });
                 chrome.webRequest.onAuthRequired.addListener(
-                    modalAuthHandler,
+                    authListeners[tab.id],
                     { urls: ["*://*/*"], tabId: tab.id },
                     ["blocking"]
                 );
-                chrome.tabs.onUpdated.addListener(function self(tabId, info) {
-                    // ignore other tabs
-                    if (tabId != tab) {
-                        return;
-                    }
-
-                    // ignore non-complete status
-                    if (info.status !== "complete") {
-                        return;
-                    }
-
-                    // remove auth handler once page is loaded
-                    chrome.webRequest.onAuthRequired.removeListener(modalAuthHandler);
-
-                    // remove updated handler
-                    chrome.tabs.onUpdated.removeListener(self);
-                });
                 chrome.tabs.update(tab.id, { url: url });
                 sendResponse({ status: "ok" });
             } catch (e) {
