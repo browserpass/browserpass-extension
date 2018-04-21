@@ -37,6 +37,27 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 });
 
 //----------------------------------- Function definitions ----------------------------------//
+
+/**
+ * Copy text to clipboard
+ *
+ * @since 3.0.0
+ *
+ * @param string text Text to copy
+ * @return void
+ */
+function copyToClipboard(text) {
+    document.addEventListener(
+        "copy",
+        function(e) {
+            e.clipboardData.setData("text/plain", text);
+            e.preventDefault();
+        },
+        { once: true }
+    );
+    document.execCommand("copy");
+}
+
 /**
  * Get Local settings from the extension
  *
@@ -162,6 +183,29 @@ async function handleMessage(settings, message, sendResponse) {
                 });
             }
             break;
+        case "copyPassword":
+            try {
+                copyToClipboard(message.login.fields.secret);
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to copy password"
+                });
+            }
+            break;
+        case "copyUsername":
+            try {
+                copyToClipboard(message.login.fields.login);
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to copy username"
+                });
+            }
+            break;
+
         case "launch":
             try {
                 var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
