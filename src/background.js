@@ -175,7 +175,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "listFiles":
             try {
                 var response = await hostAction(settings, "list");
-                sendResponse(response.data.files);
+                sendResponse({ status: "ok", files: response.data.files });
             } catch (e) {
                 sendResponse({
                     status: "error",
@@ -378,31 +378,69 @@ async function receiveMessage(message, sender, sendResponse) {
             settings: configureSettings,
             action: "configure"
         });
+        var rd = response.data;
         settings.version = response.version;
-        if (settings.stores.length) {
-            // there are user-configured stores present
+
+        // ------------------ BEGIN DEBUG CODE ----------------//
+        // Transform old host response to new format for testing
+        if (typeof rd.stores === "undefined") {
+            rd.stores = {};
             for (var key in settings.stores) {
-                if (response.data.storeSettings.hasOwnProperty(key)) {
-                    var fileSettings = JSON.parse(response.data.storeSettings[key]);
-                    if (typeof settings.stores[key].settings !== "object") {
-                        settings.stores[key].settings = {};
+                rd.stores[key] = [
+                    {
+                        path: settings.stores[key].path,
+                        settings: rd.storeSettings[key]
                     }
-                    var storeSettings = settings.stores[key].settings;
-                    for (var settingKey in fileSettings) {
-                        if (!storeSettings.hasOwnProperty(settingKey)) {
-                            storeSettings[settingKey] = fileSettings[settingKey];
-                        }
+                ];
+            }
+            delete rd.storeSettings;
+        }
+        // ------------------- END DEBUG CODE -----------------//
+
+        // use default store
+        if (!settings.stores.length) {
+            settings.stores.default = { name: "default", path: rd.defaultStore.path };
+            rd.stores.default = [rd.defaultStore];
+        }
+
+        // expand stores
+        var responseStores = {};
+        for (var key in rd.stores) {
+            if (rd.stores[key].length == 1) {
+                responseStores[key] = rd.stores[key][0];
+                settings.stores[key].path = responseStores[key].path;
+            } else {
+                rd.stores[key].forEach(function(responseStore) {
+                    var dirname = responseStore.path.match(/([^\/]+)$/)[1];
+                    var name = key + "/" + dirname;
+                    settings.stores[name] = Object.assign({}, settings.stores[key], {
+                        display: dirname,
+                        name: name,
+                        path: responseStore.path
+                    });
+                    responseStores[name] = responseStore;
+                });
+                delete settings.stores[key];
+            }
+        }
+
+        // apply settings from .browserpass.json
+        for (var key in settings.stores) {
+            if (responseStores.hasOwnProperty(key) && responseStores[key].settings.length) {
+                var fileSettings = JSON.parse(responseStores[key].settings);
+                if (typeof settings.stores[key].settings !== "object") {
+                    settings.stores[key].settings = {};
+                }
+                var storeSettings = settings.stores[key].settings;
+                for (var settingKey in fileSettings) {
+                    if (!storeSettings.hasOwnProperty(settingKey)) {
+                        storeSettings[settingKey] = fileSettings[settingKey];
                     }
                 }
             }
-        } else {
-            // no user-configured stores, so use the default store
-            settings.stores.default = {
-                name: "default",
-                path: response.data.defaultStore.path,
-                settings: response.data.defaultStore.settings
-            };
         }
+
+        console.log(settings);
         handleMessage(settings, message, sendResponse);
     } catch (e) {
         // handle error

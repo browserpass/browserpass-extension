@@ -105,7 +105,9 @@ function view(ctl, params) {
                         }
                     },
                     [
-                        badges ? m("div.store.badge", result.store.name) : null,
+                        badges
+                            ? m("div.store.badge", result.store.display || result.store.name)
+                            : null,
                         m("div.name", [
                             m.trust(result.display),
                             result.recent.when > 0
@@ -115,7 +117,7 @@ function view(ctl, params) {
                                           result.recent.count +
                                           " time" +
                                           (result.recent.count > 1 ? "s" : "") +
-                                          ", last " +
+                                          ", last used " +
                                           Moment(new Date(result.recent.when)).fromNow()
                                   })
                                 : null
