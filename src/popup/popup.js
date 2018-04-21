@@ -79,6 +79,10 @@ async function run(settings) {
         var response = await chrome.runtime.sendMessage({ action: "listFiles" });
         var logins = [];
         var index = 0;
+        var recent = localStorage.getItem("recent:" + settings.host);
+        if (recent) {
+            recent = JSON.parse(recent);
+        }
         for (var store in response) {
             var storePath = settings.stores[store].path;
             for (var key in response[store]) {
@@ -93,9 +97,7 @@ async function run(settings) {
                 login.domain = pathToDomain(login.store + "/" + login.login);
                 login.inCurrentDomain =
                     settings.host == login.domain || settings.host.endsWith("." + login.domain);
-                var recent = localStorage.getItem("recent:" + settings.host);
                 if (recent) {
-                    recent = JSON.parse(recent);
                     for (var i = 0; i < recent.length; i++) {
                         if (recent[i].store == storePath && recent[i].login == login.login) {
                             login.recent = i;
