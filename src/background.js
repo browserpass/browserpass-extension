@@ -301,7 +301,7 @@ function hostAction(settings, action, params = {}) {
  */
 async function parseFields(settings, login) {
     var response = await hostAction(settings, "fetch", {
-        store: login.store,
+        store: login.store.name,
         file: login.login + ".gpg"
     });
     if (response.status != "ok") {

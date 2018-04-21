@@ -3,6 +3,7 @@
 
 require("chrome-extension-async");
 var TldJS = require("tldjs");
+var sha1 = require("sha1");
 var Interface = require("./interface");
 
 // wrap with current tab & settings
@@ -15,6 +16,20 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
         var settings = response.settings;
         settings.tab = tabs[0];
         settings.host = new URL(settings.tab.url).hostname;
+        for (var store in settings.stores) {
+            var when = localStorage.getItem("recent:" + settings.stores[store].path);
+            if (when) {
+                settings.stores[store].when = JSON.parse(when);
+            } else {
+                settings.stores[store].when = 0;
+            }
+        }
+        settings.recent = localStorage.getItem("recent");
+        if (settings.recent) {
+            settings.recent = JSON.parse(settings.recent);
+        } else {
+            settings.recent = {};
+        }
         run(settings);
     } catch (e) {
         handleError(e);
@@ -79,21 +94,34 @@ async function run(settings) {
         var response = await chrome.runtime.sendMessage({ action: "listFiles" });
         var logins = [];
         var index = 0;
+        var recent = localStorage.getItem("recent:" + settings.host);
+        if (recent) {
+            recent = JSON.parse(recent);
+        }
         for (var store in response) {
             for (var key in response[store]) {
                 // set login fields
                 var login = {
                     index: index++,
-                    store: store,
+                    store: settings.stores[store],
                     login: response[store][key].replace(/\.gpg$/i, ""),
                     allowFill: true
                 };
-                login.domain = pathToDomain(login.store + "/" + login.login);
+                login.domain = pathToDomain(store + "/" + login.login);
                 login.inCurrentDomain =
                     settings.host == login.domain || settings.host.endsWith("." + login.domain);
-
+                login.recent =
+                    settings.recent[
+                        sha1(settings.host + sha1(login.store.path + sha1(login.login)))
+                    ];
+                if (!login.recent) {
+                    login.recent = {
+                        when: 0,
+                        count: 0
+                    };
+                }
                 // bind handlers
-                login.doAction = withLogin.bind(login);
+                login.doAction = withLogin.bind({ settings: settings, login: login });
 
                 logins.push(login);
             }
@@ -103,6 +131,34 @@ async function run(settings) {
     } catch (e) {
         handleError(e);
     }
+}
+
+/**
+ * Save login to recent list for current domain
+ *
+ * @since 3.0.0
+ *
+ * @param object settings Settings object
+ * @param object login    Login object
+ * @param bool   remove   Remove this item from recent history
+ * @return void
+ */
+function saveRecent(settings, login, remove = false) {
+    var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
+
+    // save store timestamp
+    localStorage.setItem("recent:" + login.store.path, JSON.stringify(Date.now()));
+
+    // update login usage count & timestamp
+    if (Date.now() > login.recent.when + ignoreInterval) {
+        login.recent.count++;
+    }
+    login.recent.when = Date.now();
+    settings.recent[sha1(settings.host + sha1(login.store.path + sha1(login.login)))] =
+        login.recent;
+
+    // save to local storage
+    localStorage.setItem("recent", JSON.stringify(settings.recent));
 }
 
 /**
@@ -142,10 +198,19 @@ async function withLogin(action) {
         }
 
         // hand off action to background script
-        var response = await chrome.runtime.sendMessage({ action: action, login: this });
+        var response = await chrome.runtime.sendMessage({
+            action: action,
+            login: this.login
+        });
         if (response.status != "ok") {
             throw new Error(response.message);
         } else {
+            switch (action) {
+                case "fill":
+                case "copyPassword":
+                case "copyUsername":
+                    saveRecent(this.settings, this.login);
+            }
             window.close();
         }
     } catch (e) {
