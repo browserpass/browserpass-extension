@@ -88,6 +88,13 @@ function view(ctl, params) {
                                 case "Enter":
                                     result.doAction("fill");
                                     break;
+                                case "KeyC":
+                                    if (e.ctrlKey) {
+                                        result.doAction(
+                                            e.shiftKey ? "copyUsername" : "copyPassword"
+                                        );
+                                    }
+                                    break;
                                 case "KeyG":
                                     result.doAction("launch");
                                     break;
