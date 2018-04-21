@@ -3,10 +3,6 @@
 
 require("chrome-extension-async");
 
-if (typeof browser === "undefined") {
-    var browser = chrome;
-}
-
 // native application id
 var appID = "com.github.browserpass.native";
 
@@ -17,7 +13,7 @@ var defaultSettings = {
 };
 
 // handle incoming messages
-browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     receiveMessage(message, sender, sendResponse);
 
     // allow async responses after this function returns
@@ -152,7 +148,7 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "launch":
             try {
-                var tab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
+                var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
                 var url = message.login.fields.url ? message.login.fields.url : response.login.url;
                 if (!url.match(/:\/\//)) {
                     url = "http://" + url;
@@ -191,8 +187,8 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "fill":
             try {
-                var tab = (await browser.tabs.query({ active: true, currentWindow: true }))[0];
-                await browser.tabs.executeScript(tab.id, { file: "js/inject.dist.js" });
+                var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+                await chrome.tabs.executeScript(tab.id, { file: "js/inject.dist.js" });
                 // check login fields
                 if (message.login.fields.login === null) {
                     throw new Error("No login is available");
@@ -205,7 +201,7 @@ async function handleMessage(settings, message, sendResponse) {
                     secret: message.login.fields.secret
                 });
                 // fill form via injected script
-                await browser.tabs.executeScript(tab.id, {
+                await chrome.tabs.executeScript(tab.id, {
                     code: `window.browserpass.fillLogin(${fillFields});`
                 });
                 sendResponse({ status: "ok" });
@@ -244,7 +240,7 @@ function hostAction(settings, action, params = {}) {
         request[key] = params[key];
     }
 
-    return browser.runtime.sendNativeMessage(appID, request);
+    return chrome.runtime.sendNativeMessage(appID, request);
 }
 
 /**
@@ -318,7 +314,7 @@ async function parseFields(settings, login) {
  */
 async function receiveMessage(message, sender, sendResponse) {
     // restrict messages to this extension only
-    if (sender.id !== browser.runtime.id) {
+    if (sender.id !== chrome.runtime.id) {
         // silently exit without responding when the source is foreign
         return;
     }
@@ -326,7 +322,7 @@ async function receiveMessage(message, sender, sendResponse) {
     var settings = getLocalSettings();
     try {
         var configureSettings = Object.assign(settings, { defaultStore: {} });
-        var response = await browser.runtime.sendNativeMessage(appID, {
+        var response = await chrome.runtime.sendNativeMessage(appID, {
             settings: configureSettings,
             action: "configure"
         });
