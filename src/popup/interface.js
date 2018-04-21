@@ -177,7 +177,13 @@ function search(s) {
         if (a.recent.count != b.recent.count) {
             return b.recent.count - a.recent.count;
         }
-        return b.recent.when - a.recent.when;
+        if (a.recent.when != b.recent.when) {
+            return b.recent.when - a.recent.when;
+        }
+        if (a.store.name != b.store.name) {
+            return a.store.name.localeCompare(b.store.name);
+        }
+        return a.login.localeCompare(b.login);
     });
 
     if (s.length) {
