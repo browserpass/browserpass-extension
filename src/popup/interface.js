@@ -162,7 +162,9 @@ function search(s) {
         recent.sort(function(a, b) {
             return b.recent - a.recent;
         });
-        candidates = recent.concat(candidates.filter(login => login.active && login.recent == -1));
+        candidates = recent.concat(
+            candidates.filter(login => login.inCurrentDomain && login.recent == -1)
+        );
     }
 
     if (s.length) {

@@ -87,7 +87,7 @@ async function run(settings) {
                     index: index++,
                     store: store,
                     login: response[store][key].replace(/\.gpg$/i, ""),
-                    allowFill: true
+                    allowFill: true,
                     recent: -1
                 };
                 login.domain = pathToDomain(login.store + "/" + login.login);
