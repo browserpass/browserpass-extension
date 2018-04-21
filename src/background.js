@@ -400,7 +400,7 @@ async function receiveMessage(message, sender, sendResponse) {
         // use default store
         if (!settings.stores.length) {
             settings.stores.default = { name: "default", path: rd.defaultStore.path };
-            rd.stores.default = [rd.defaultStore, rd.defaultStore];
+            rd.stores.default = [rd.defaultStore];
         }
 
         // expand stores
@@ -439,6 +439,7 @@ async function receiveMessage(message, sender, sendResponse) {
             }
         }
 
+        console.log(settings);
         handleMessage(settings, message, sendResponse);
     } catch (e) {
         // handle error
