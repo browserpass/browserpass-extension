@@ -53,8 +53,6 @@ function getLocalSettings() {
  * @return object Authentication credentials or {}
  */
 function handleModalAuth(requestDetails) {
-    console.log(this, requestDetails);
-
     var launchHost = requestDetails.url.match(/:\/\/([^\/]+)/)[1];
 
     // don't attempt authentication against the same login more than once
