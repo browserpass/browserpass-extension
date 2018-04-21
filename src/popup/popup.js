@@ -105,19 +105,16 @@ async function run(settings) {
                     index: index++,
                     store: settings.stores[store],
                     login: response[store][key].replace(/\.gpg$/i, ""),
-                    allowFill: true,
-                    recent: -1
+                    allowFill: true
                 };
                 login.domain = pathToDomain(store + "/" + login.login);
                 login.inCurrentDomain =
                     settings.host == login.domain || settings.host.endsWith("." + login.domain);
-
-                if (
-                    !(login.recent =
-                        settings.recent[
-                            sha1(settings.host + sha1(login.store.path + sha1(login.login)))
-                        ])
-                ) {
+                login.recent =
+                    settings.recent[
+                        sha1(settings.host + sha1(login.store.path + sha1(login.login)))
+                    ];
+                if (!login.recent) {
                     login.recent = {
                         when: 0,
                         count: 0
