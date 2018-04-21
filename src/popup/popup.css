@@ -63,6 +63,8 @@ body {
 .part.search > .hint {
     background-color: #66c;
     display: flex;
+    align-items: center;
+    line-height: 19px;
 }
 
 .part.search > .hint > .remove-hint {
