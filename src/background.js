@@ -324,7 +324,7 @@ async function parseFields(settings, login) {
     lines.forEach(function(line) {
         // split key / value
         var parts = line
-            .split(/(<=^[^:]+):/)
+            .split(/(?<=^[^:]+):/)
             .map(value => value.trim())
             .filter(value => value.length);
         if (parts.length != 2) {
