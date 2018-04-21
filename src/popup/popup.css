@@ -16,7 +16,7 @@ body {
     flex-direction: column;
     overflow-y: auto;
     height: inherit;
-    max-height: 203px; /* 7 x 29px login part*/
+    max-height: 217px; /* 7 x 31px login part*/
 }
 
 .part {
