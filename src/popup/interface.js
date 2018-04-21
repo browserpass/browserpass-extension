@@ -109,7 +109,11 @@ function view(ctl, params) {
                             result.recent.when > 0
                                 ? m("div.recent", {
                                       title:
-                                          "Last used here: " +
+                                          "Used here: " +
+                                          result.recent.count +
+                                          " time" +
+                                          (result.recent.count > 1 ? "s" : "") +
+                                          ", last " +
                                           Moment(new Date(result.recent.when)).calendar()
                                   })
                                 : null
