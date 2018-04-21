@@ -14,7 +14,7 @@ var defaultSettings = {
 
 var authListeners = {};
 
-// unregister auth handlers
+// watch for tab updates
 chrome.tabs.onUpdated.addListener(function(tab, info) {
     // ignore non-complete status
     if (info.status !== "complete") {
