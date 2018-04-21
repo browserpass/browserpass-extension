@@ -95,7 +95,16 @@ body {
 }
 
 .part.login > .name {
+    display: flex;
     width: 100%;
+}
+
+.part.login > .name > .recent {
+    background-image: url("icon-history.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    margin-left: 4px;
+    width: 16px;
 }
 
 .part.login > .action {

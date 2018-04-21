@@ -80,6 +80,7 @@ async function run(settings) {
         var logins = [];
         var index = 0;
         for (var store in response) {
+            var storePath = settings.stores[store].path;
             for (var key in response[store]) {
                 // set login fields
                 var login = {
@@ -87,13 +88,25 @@ async function run(settings) {
                     store: store,
                     login: response[store][key].replace(/\.gpg$/i, ""),
                     allowFill: true
+                    recent: -1
                 };
                 login.domain = pathToDomain(login.store + "/" + login.login);
                 login.inCurrentDomain =
                     settings.host == login.domain || settings.host.endsWith("." + login.domain);
+                var recent = localStorage.getItem("recent:" + settings.host);
+                if (recent) {
+                    recent = JSON.parse(recent);
+                    for (var i = 0; i < recent.length; i++) {
+                        if (recent[i].store == storePath && recent[i].login == login.login) {
+                            login.recent = i;
+                            login.when = recent[i].when;
+                            break;
+                        }
+                    }
+                }
 
                 // bind handlers
-                login.doAction = withLogin.bind(login);
+                login.doAction = withLogin.bind({ settings: settings, login: login });
 
                 logins.push(login);
             }
@@ -103,6 +116,36 @@ async function run(settings) {
     } catch (e) {
         handleError(e);
     }
+}
+
+/**
+ * Save login to recent list for current domain
+ *
+ * @since 3.0.0
+ *
+ * @param object settings Settings object
+ * @param object login    Login object
+ * @param bool   remove   Remove this item from recent history
+ * @return void
+ */
+function saveRecent(settings, login, remove = false) {
+    var recentName = "recent:" + settings.host;
+    var recent = localStorage.getItem(recentName);
+    if (recent) {
+        recent = JSON.parse(recent).filter(
+            entry => entry.store != settings.stores[login.store].path || entry.login != login.login
+        );
+    } else {
+        recent = [];
+    }
+    if (!remove) {
+        recent.push({
+            store: settings.stores[login.store].path,
+            login: login.login,
+            when: Date.now()
+        });
+    }
+    localStorage.setItem(recentName, JSON.stringify(recent));
 }
 
 /**
@@ -142,10 +185,19 @@ async function withLogin(action) {
         }
 
         // hand off action to background script
-        var response = await chrome.runtime.sendMessage({ action: action, login: this });
+        var response = await chrome.runtime.sendMessage({
+            action: action,
+            login: this.login
+        });
         if (response.status != "ok") {
             throw new Error(response.message);
         } else {
+            switch (action) {
+                case "fill":
+                case "copyPassword":
+                case "copyUsername":
+                    saveRecent(this.settings, this.login);
+            }
             window.close();
         }
     } catch (e) {

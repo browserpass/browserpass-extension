@@ -2,6 +2,7 @@ module.exports = Interface;
 
 var m = require("mithril");
 var FuzzySort = require("fuzzysort");
+var Moment = require("moment");
 var SearchInterface = require("./searchinterface");
 
 /**
@@ -103,7 +104,16 @@ function view(ctl, params) {
                     },
                     [
                         badges ? m("div.store.badge", result.store) : null,
-                        m("div.name", m.trust(result.display)),
+                        m("div.name", [
+                            m.trust(result.display),
+                            result.recent >= 0
+                                ? m("div.recent", {
+                                      title:
+                                          "Last used here: " +
+                                          Moment(new Date(result.when)).calendar()
+                                  })
+                                : null
+                        ]),
                         m("div.action.copy-password", {
                             title: "Copy password",
                             onclick: function(e) {
@@ -148,7 +158,11 @@ function search(s) {
     // get candidate list
     var candidates = this.logins.map(result => Object.assign(result, { display: result.login }));
     if (this.currentDomainOnly) {
-        candidates = candidates.filter(login => login.inCurrentDomain);
+        var recent = candidates.filter(login => login.recent >= 0);
+        recent.sort(function(a, b) {
+            return b.recent - a.recent;
+        });
+        candidates = recent.concat(candidates.filter(login => login.active && login.recent == -1));
     }
 
     if (s.length) {
