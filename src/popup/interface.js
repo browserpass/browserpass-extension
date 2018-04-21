@@ -23,7 +23,7 @@ function Interface(settings, logins) {
     this.settings = settings;
     this.logins = logins;
     this.results = [];
-    this.active = !settings.tab.url.match(/^chrome:\/\//);
+    this.currentDomainOnly = !settings.tab.url.match(/^chrome:\/\//);
     this.searchPart = new SearchInterface(this);
 
     // initialise with empty search
@@ -140,8 +140,8 @@ function search(s) {
 
     // get candidate list
     var candidates = this.logins.map(result => Object.assign(result, { display: result.login }));
-    if (this.active) {
-        candidates = candidates.filter(login => login.active);
+    if (this.currentDomainOnly) {
+        candidates = candidates.filter(login => login.inCurrentDomain);
     }
 
     if (s.length) {

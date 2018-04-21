@@ -50,7 +50,7 @@ function view(ctl, params) {
             }
         },
         [
-            this.popup.active
+            this.popup.currentDomainOnly
                 ? m("div.hint.badge", [
                       this.popup.settings.host,
                       m("div.remove-hint", {
@@ -59,7 +59,7 @@ function view(ctl, params) {
                                   ".part.search > input[type=text]"
                               );
                               target.focus();
-                              self.popup.active = false;
+                              self.popup.currentDomainOnly = false;
                               self.popup.search(target.value);
                           }
                       })
@@ -77,15 +77,15 @@ function view(ctl, params) {
                 onkeydown: function(e) {
                     switch (e.code) {
                         case "Backspace":
-                            if (self.popup.active) {
+                            if (self.popup.currentDomainOnly) {
                                 if (e.target.value.length == 0) {
-                                    self.popup.active = false;
+                                    self.popup.currentDomainOnly = false;
                                     self.popup.search("");
                                 } else if (
                                     e.target.selectionStart == 0 &&
                                     e.target.selectionEnd == 0
                                 ) {
-                                    self.popup.active = false;
+                                    self.popup.currentDomainOnly = false;
                                     self.popup.search(e.target.value);
                                 }
                             }
