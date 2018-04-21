@@ -122,6 +122,7 @@ async function withLogin(action) {
                 break;
             case "launch":
                 var havePermission = await chrome.permissions.request({
+                    permissions: ["webRequest", "webRequestBlocking"],
                     origins: ["http://*/*", "https://*/*"]
                 });
                 if (!havePermission) {

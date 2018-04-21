@@ -21,11 +21,11 @@
     },
     "permissions": [
         "activeTab",
-        "nativeMessaging",
-        "webRequest",
-        "webRequestBlocking"
+        "nativeMessaging"
     ],
     "optional_permissions": [
+        "webRequest",
+        "webRequestBlocking",
         "http://*/*",
         "https://*/*"
     ],
