@@ -50,7 +50,21 @@ function view(ctl, params) {
             }
         },
         [
-            this.popup.active ? m("div.hint.badge", this.popup.settings.host) : null,
+            this.popup.currentDomainOnly
+                ? m("div.hint.badge", [
+                      this.popup.settings.host,
+                      m("div.remove-hint", {
+                          onclick: function(e) {
+                              var target = document.querySelector(
+                                  ".part.search > input[type=text]"
+                              );
+                              target.focus();
+                              self.popup.currentDomainOnly = false;
+                              self.popup.search(target.value);
+                          }
+                      })
+                  ])
+                : null,
             m("input[type=text]", {
                 focused: true,
                 placeholder: "Search logins...",
@@ -58,14 +72,22 @@ function view(ctl, params) {
                     e.dom.focus();
                 },
                 oninput: function(e) {
-                    self.popup.search(e.target.value.trim(), e.target.value.substr(0, 1) !== " ");
+                    self.popup.search(e.target.value);
                 },
                 onkeydown: function(e) {
                     switch (e.code) {
                         case "Backspace":
-                            if (self.popup.active && e.target.value.length == 0) {
-                                self.popup.active = false;
-                                self.popup.search("");
+                            if (self.popup.currentDomainOnly) {
+                                if (e.target.value.length == 0) {
+                                    self.popup.currentDomainOnly = false;
+                                    self.popup.search("");
+                                } else if (
+                                    e.target.selectionStart == 0 &&
+                                    e.target.selectionEnd == 0
+                                ) {
+                                    self.popup.currentDomainOnly = false;
+                                    self.popup.search(e.target.value);
+                                }
                             }
                             break;
                     }
