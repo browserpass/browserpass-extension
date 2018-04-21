@@ -60,10 +60,7 @@ function view(ctl, params) {
                               );
                               target.focus();
                               self.popup.active = false;
-                              self.popup.search(
-                                  target.value.trim(),
-                                  target.value.substr(0, 1) !== " "
-                              );
+                              self.popup.search(target.value);
                           }
                       })
                   ])
@@ -75,7 +72,7 @@ function view(ctl, params) {
                     e.dom.focus();
                 },
                 oninput: function(e) {
-                    self.popup.search(e.target.value.trim(), e.target.value.substr(0, 1) !== " ");
+                    self.popup.search(e.target.value);
                 },
                 onkeydown: function(e) {
                     switch (e.code) {
