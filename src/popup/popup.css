@@ -24,7 +24,7 @@ body {
     box-sizing: border-box;
     display: flex;
     flex-shrink: 0;
-    min-height: 29px;
+    min-height: 22px;
     width: 100%;
 }
 
@@ -39,11 +39,13 @@ body {
 .part.error {
     color: #f00;
     white-space: normal;
+    padding: 7px;
 }
 
 .part.notice {
     color: #090;
     white-space: normal;
+    padding: 7px;
 }
 
 .part.search {
