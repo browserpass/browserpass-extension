@@ -209,7 +209,10 @@ async function handleMessage(settings, message, sendResponse) {
         case "launch":
             try {
                 var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-                var url = message.login.fields.url ? message.login.fields.url : response.login.url;
+                var url = message.login.fields.url || message.login.domain;
+                if (!url) {
+                    throw new Error("No URL is defined for this entry");
+                }
                 if (!url.match(/:\/\//)) {
                     url = "http://" + url;
                 }
@@ -321,7 +324,7 @@ async function parseFields(settings, login) {
     lines.forEach(function(line) {
         // split key / value
         var parts = line
-            .split(":", 2)
+            .split(/(?<=^[^:]+):/)
             .map(value => value.trim())
             .filter(value => value.length);
         if (parts.length != 2) {
@@ -342,6 +345,8 @@ async function parseFields(settings, login) {
         if (Array.isArray(login.fields[key])) {
             if (key == "secret" && lines.length) {
                 login.fields.secret = lines[0];
+            } else if (key == "login") {
+                login.fields[key] = login.login.match(/([^\/]+)$/)[1];
             } else {
                 login.fields[key] = null;
             }
