@@ -167,7 +167,10 @@ function search(s) {
             if (a.store.when != b.store.when) {
                 return b.store.when - a.store.when;
             }
-            return b.recent.count - a.recent.count;
+            if (a.recent.count != b.recent.count) {
+                return b.recent.count - a.recent.count;
+            }
+            return b.recent.when - a.recent.when;
         });
         candidates = recent.concat(
             candidates.filter(login => login.inCurrentDomain && recent.indexOf(login) == -1)
