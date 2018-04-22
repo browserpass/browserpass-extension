@@ -1,5 +1,6 @@
 html,
 body {
+    background-color: #fff;
     font-family: sans;
     font-size: 14px;
     margin: 0;
@@ -11,6 +12,6 @@ body {
     border-radius: 4px;
     color: #fff;
     font-size: 12px;
-    margin: 0 4px;
-    padding: 2px 4px;
+    margin: 0 6px;
+    padding: 1px 4px;
 }
