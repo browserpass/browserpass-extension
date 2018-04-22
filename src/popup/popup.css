@@ -5,7 +5,8 @@ body {
     white-space: nowrap;
 }
 
-html::-webkit-scrollbar {
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
     display: none;
 }
 
