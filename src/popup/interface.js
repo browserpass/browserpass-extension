@@ -204,7 +204,9 @@ function search(s) {
         // substring-search to refine against each remaining word
         filter.slice(fuzzyFirstWord ? 1 : 0).forEach(function(word) {
             candidates = candidates.filter(
-                login => login.name.toLowerCase().indexOf(word.toLowerCase()) >= 0
+                login =>
+                    login.name.toLowerCase().indexOf(word.toLowerCase()) >= 0 ||
+                    login.badge.toLowerCase().indexOf(word.toLowerCase()) >= 0
             );
         });
     }
