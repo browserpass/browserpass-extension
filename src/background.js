@@ -381,13 +381,13 @@ async function receiveMessage(message, sender, sendResponse) {
         settings.version = response.version;
         if (settings.stores.length) {
             // there are user-configured stores present
-            for (var key in settings.stores) {
-                if (response.data.storeSettings.hasOwnProperty(key)) {
-                    var fileSettings = JSON.parse(response.data.storeSettings[key]);
-                    if (typeof settings.stores[key].settings !== "object") {
-                        settings.stores[key].settings = {};
+            for (var storeId in settings.stores) {
+                if (response.data.storeSettings.hasOwnProperty(storeId)) {
+                    var fileSettings = JSON.parse(response.data.storeSettings[storeId]);
+                    if (typeof settings.stores[storeId].settings !== "object") {
+                        settings.stores[storeId].settings = {};
                     }
-                    var storeSettings = settings.stores[key].settings;
+                    var storeSettings = settings.stores[storeId].settings;
                     for (var settingKey in fileSettings) {
                         if (!storeSettings.hasOwnProperty(settingKey)) {
                             storeSettings[settingKey] = fileSettings[settingKey];
