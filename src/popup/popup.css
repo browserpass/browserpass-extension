@@ -5,6 +5,10 @@ body {
     white-space: nowrap;
 }
 
+html::-webkit-scrollbar {
+    display: none;
+}
+
 body {
     display: flex;
     flex-direction: column;
