@@ -36,10 +36,6 @@ body {
     border-bottom: none;
 }
 
-.part > .badge:first-child {
-    margin-left: 0;
-}
-
 .part.error {
     color: #f00;
     white-space: normal;
@@ -96,7 +92,7 @@ body {
     height: 31px;
 }
 
-.logins:not(:hover):not(:focus-within) .part.login:first-child > .name {
+.logins:not(:hover):not(:focus-within) .part.login:first-child {
     background-color: #f7f7f7;
 }
 
@@ -105,9 +101,9 @@ body {
     outline: none;
 }
 
-.part.login > .name:hover,
+.part.login:hover,
 .part.login > .action:hover,
-.part.login:focus > .name {
+.part.login:focus {
     background-color: #eee;
 }
 
@@ -116,6 +112,10 @@ body {
     width: 100%;
     height: 19px;
     padding: 6px;
+}
+
+.part.login > .name:not(:first-child) {
+    padding-left: 0;
 }
 
 .part.login > .name > .recent {
@@ -128,16 +128,13 @@ body {
 }
 
 .part.login > .action {
+    background-color: #fff;
     background-position: center;
     background-repeat: no-repeat;
     background-size: 19px;
     width: 30px;
     height: 19px;
     padding: 6px;
-}
-
-.past.login > .action:hover {
-    background-color: #f00;
 }
 
 .part.login > .action.copy-password {
