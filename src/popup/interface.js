@@ -53,7 +53,7 @@ function attach(element) {
  * @return []Vnode
  */
 function view(ctl, params) {
-    var badges = Object.keys(this.settings.stores).length > 1;
+    var self = this;
     var nodes = [];
     nodes.push(m(this.searchPart));
 
@@ -105,7 +105,7 @@ function view(ctl, params) {
                         }
                     },
                     [
-                        badges ? m("div.store.badge", result.store.name) : null,
+                        self.settings.showBadges ? m("div.store.badge", result.badge) : null,
                         m("div.name", [
                             m.trust(result.display),
                             result.recent.when > 0
@@ -162,7 +162,7 @@ function search(s) {
     s = s.trim();
 
     // get candidate list
-    var candidates = this.logins.map(result => Object.assign(result, { display: result.login }));
+    var candidates = this.logins.map(result => Object.assign(result, { display: result.name }));
     if (this.currentDomainOnly) {
         var recent = candidates.filter(login => login.recent.count > 0);
         var remainingInCurrentDomain = candidates.filter(
@@ -191,20 +191,20 @@ function search(s) {
         // fuzzy-search first word & add highlighting
         if (fuzzyFirstWord) {
             candidates = FuzzySort.go(filter[0], candidates, {
-                keys: ["login", "store.name"],
+                keys: ["name", "badge"],
                 allowTypo: false
             }).map(result =>
                 Object.assign(result.obj, {
                     display: result[0]
                         ? FuzzySort.highlight(result[0], "<em>", "</em>")
-                        : result.obj.login
+                        : result.obj.name
                 })
             );
         }
         // substring-search to refine against each remaining word
         filter.slice(fuzzyFirstWord ? 1 : 0).forEach(function(word) {
             candidates = candidates.filter(
-                login => login.login.toLowerCase().indexOf(word.toLowerCase()) >= 0
+                login => login.name.toLowerCase().indexOf(word.toLowerCase()) >= 0
             );
         });
     }

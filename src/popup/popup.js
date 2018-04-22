@@ -6,6 +6,11 @@ var TldJS = require("tldjs");
 var sha1 = require("sha1");
 var Interface = require("./interface");
 
+var defaultStoreSettings = {
+    autoSubmit: false,
+    container: true // TODO set to false before PR merge
+};
+
 // wrap with current tab & settings
 chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
     try {
@@ -16,12 +21,17 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
         var settings = response.settings;
         settings.tab = tabs[0];
         settings.host = new URL(settings.tab.url).hostname;
+        settings.showBadges = Object.keys(settings.stores).length > 1;
         for (var store in settings.stores) {
+            settings.stores[store] = Object.assign(defaultStoreSettings, settings.stores[store]);
             var when = localStorage.getItem("recent:" + settings.stores[store].path);
             if (when) {
                 settings.stores[store].when = JSON.parse(when);
             } else {
                 settings.stores[store].when = 0;
+            }
+            if (settings.stores[store].container) {
+                settings.showBadges = true;
             }
         }
         settings.recent = localStorage.getItem("recent");
@@ -30,6 +40,7 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
         } else {
             settings.recent = {};
         }
+        console.log(settings);
         run(settings);
     } catch (e) {
         handleError(e);
@@ -109,7 +120,8 @@ async function run(settings) {
                     index: index++,
                     store: settings.stores[store],
                     login: response.files[store][key].replace(/\.gpg$/i, ""),
-                    allowFill: true
+                    allowFill: true,
+                    badge: store
                 };
                 login.domain = pathToDomain(store + "/" + login.login);
                 login.inCurrentDomain =
@@ -124,6 +136,13 @@ async function run(settings) {
                         count: 0
                     };
                 }
+                login.name = login.login;
+                if (login.store.container && login.login.indexOf("/") >= 0) {
+                    var parts = login.login.split("/");
+                    login.badge = parts[0];
+                    login.name = parts.slice(1).join("/");
+                }
+
                 // bind handlers
                 login.doAction = withLogin.bind({ settings: settings, login: login });
 
