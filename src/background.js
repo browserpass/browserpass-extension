@@ -304,7 +304,7 @@ function hostAction(settings, action, params = {}) {
  */
 async function parseFields(settings, login) {
     var response = await hostAction(settings, "fetch", {
-        store: login.store.name,
+        storeId: login.store.id,
         file: login.login + ".gpg"
     });
     if (response.status != "ok") {
@@ -398,6 +398,7 @@ async function receiveMessage(message, sender, sendResponse) {
         } else {
             // no user-configured stores, so use the default store
             settings.stores.default = {
+                id: "default",
                 name: "default",
                 path: response.data.defaultStore.path,
                 settings: response.data.defaultStore.settings
