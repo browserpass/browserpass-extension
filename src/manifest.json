@@ -15,6 +15,9 @@
             "js/background.dist.js"
         ]
     },
+    "icons": {
+        "128": "icon-lock.png"
+    },
     "browser_action": {
         "default_icon": "icon-lock.png",
         "default_popup": "popup/popup.html"
