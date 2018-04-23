@@ -16,12 +16,12 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
         var settings = response.settings;
         settings.tab = tabs[0];
         settings.host = new URL(settings.tab.url).hostname;
-        for (var store in settings.stores) {
-            var when = localStorage.getItem("recent:" + settings.stores[store].path);
+        for (var storeId in settings.stores) {
+            var when = localStorage.getItem("recent:" + storeId);
             if (when) {
-                settings.stores[store].when = JSON.parse(when);
+                settings.stores[storeId].when = JSON.parse(when);
             } else {
-                settings.stores[store].when = 0;
+                settings.stores[storeId].when = 0;
             }
         }
         settings.recent = localStorage.getItem("recent");
@@ -102,22 +102,20 @@ async function run(settings) {
         if (recent) {
             recent = JSON.parse(recent);
         }
-        for (var store in response.files) {
-            for (var key in response.files[store]) {
+        for (var storeId in response.files) {
+            for (var key in response.files[storeId]) {
                 // set login fields
                 var login = {
                     index: index++,
-                    store: settings.stores[store],
-                    login: response.files[store][key].replace(/\.gpg$/i, ""),
+                    store: settings.stores[storeId],
+                    login: response.files[storeId][key].replace(/\.gpg$/i, ""),
                     allowFill: true
                 };
-                login.domain = pathToDomain(store + "/" + login.login);
+                login.domain = pathToDomain(storeId + "/" + login.login);
                 login.inCurrentDomain =
                     settings.host == login.domain || settings.host.endsWith("." + login.domain);
                 login.recent =
-                    settings.recent[
-                        sha1(settings.host + sha1(login.store.path + sha1(login.login)))
-                    ];
+                    settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))];
                 if (!login.recent) {
                     login.recent = {
                         when: 0,
@@ -151,15 +149,14 @@ function saveRecent(settings, login, remove = false) {
     var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
 
     // save store timestamp
-    localStorage.setItem("recent:" + login.store.path, JSON.stringify(Date.now()));
+    localStorage.setItem("recent:" + login.store.id, JSON.stringify(Date.now()));
 
     // update login usage count & timestamp
     if (Date.now() > login.recent.when + ignoreInterval) {
         login.recent.count++;
     }
     login.recent.when = Date.now();
-    settings.recent[sha1(settings.host + sha1(login.store.path + sha1(login.login)))] =
-        login.recent;
+    settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))] = login.recent;
 
     // save to local storage
     localStorage.setItem("recent", JSON.stringify(settings.recent));
