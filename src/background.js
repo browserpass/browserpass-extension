@@ -304,7 +304,7 @@ function hostAction(settings, action, params = {}) {
  */
 async function parseFields(settings, login) {
     var response = await hostAction(settings, "fetch", {
-        store: login.store.name,
+        storeId: login.store.id,
         file: login.login + ".gpg"
     });
     if (response.status != "ok") {
@@ -381,13 +381,13 @@ async function receiveMessage(message, sender, sendResponse) {
         settings.version = response.version;
         if (settings.stores.length) {
             // there are user-configured stores present
-            for (var key in settings.stores) {
-                if (response.data.storeSettings.hasOwnProperty(key)) {
-                    var fileSettings = JSON.parse(response.data.storeSettings[key]);
-                    if (typeof settings.stores[key].settings !== "object") {
-                        settings.stores[key].settings = {};
+            for (var storeId in settings.stores) {
+                if (response.data.storeSettings.hasOwnProperty(storeId)) {
+                    var fileSettings = JSON.parse(response.data.storeSettings[storeId]);
+                    if (typeof settings.stores[storeId].settings !== "object") {
+                        settings.stores[storeId].settings = {};
                     }
-                    var storeSettings = settings.stores[key].settings;
+                    var storeSettings = settings.stores[storeId].settings;
                     for (var settingKey in fileSettings) {
                         if (!storeSettings.hasOwnProperty(settingKey)) {
                             storeSettings[settingKey] = fileSettings[settingKey];
@@ -398,6 +398,7 @@ async function receiveMessage(message, sender, sendResponse) {
         } else {
             // no user-configured stores, so use the default store
             settings.stores.default = {
+                id: "default",
                 name: "default",
                 path: response.data.defaultStore.path,
                 settings: response.data.defaultStore.settings
