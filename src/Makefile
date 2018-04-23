@@ -2,7 +2,7 @@ BROWSERIFY := node_modules/.bin/browserify
 PRETTIER := node_modules/.bin/prettier
 
 CLEAN_FILES := js
-PRETTIER_FILES := $(wildcard *.js popup/*.js *.css popup/*.css)
+PRETTIER_FILES := $(wildcard *.js *.json popup/*.js *.css popup/*.css)
 
 .PHONY: all
 all: deps prettier js/background.dist.js js/popup.dist.js js/inject.dist.js

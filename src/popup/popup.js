@@ -179,8 +179,7 @@ async function withLogin(action) {
                 break;
             case "launch":
                 var havePermission = await chrome.permissions.request({
-                    permissions: ["webRequest", "webRequestBlocking"],
-                    origins: ["http://*/*", "https://*/*"]
+                    permissions: ["webRequest", "webRequestBlocking"]
                 });
                 if (!havePermission) {
                     throw new Error("Browserpass requires additional permissions to proceed");
