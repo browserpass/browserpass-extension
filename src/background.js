@@ -36,6 +36,8 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     return true;
 });
 
+chrome.runtime.onInstalled.addListener(onExtensionInstalled);
+
 //----------------------------------- Function definitions ----------------------------------//
 
 /**
@@ -425,5 +427,59 @@ function saveSettings(settings) {
         if (settings.hasOwnProperty(key)) {
             localStorage.setItem(key, JSON.stringify(settings[key]));
         }
+    }
+}
+
+/**
+ * Handle browser extension installation and updates
+ *
+ * @since 3.0.0
+ *
+ * @param object Event details
+ * @return void
+ */
+function onExtensionInstalled(details) {
+    // No permissions
+    if (!chrome.notifications) {
+        return;
+    }
+
+    var show = (id, title, message) => {
+        chrome.notifications.create(id, {
+            title: title,
+            message: message,
+            iconUrl: "icon-lock.png",
+            type: "basic"
+        });
+    };
+
+    if (details.reason == "install") {
+        show(
+            "installed",
+            "browserpass: Install native host app",
+            "Remember to install the complementary native host app to use this extension.\n" +
+                "Instructions here: https://github.com/browserpass/browserpass-native"
+        );
+    } else if (details.reason == "update") {
+        var changelog = {
+            3000000:
+                "New major update is out, please update the native host app to v3.\n" +
+                "Instructions here: https://github.com/browserpass/browserpass-native"
+        };
+
+        var parseVersion = version => {
+            var [major, minor, patch] = version.split(".");
+            return parseInt(major) * 1000000 + parseInt(minor) * 1000 + parseInt(patch);
+        };
+        var newVersion = parseVersion(chrome.runtime.getManifest().version);
+        var prevVersion = parseVersion(details.previousVersion);
+
+        Object.keys(changelog)
+            .sort()
+            .forEach(function(version) {
+                if (prevVersion < version && newVersion >= version) {
+                    show(version.toString(), "browserpass: Important changes", changelog[version]);
+                }
+            });
     }
 }
