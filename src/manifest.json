@@ -24,7 +24,8 @@
     },
     "permissions": [
         "activeTab",
-        "nativeMessaging"
+        "nativeMessaging",
+        "notifications"
     ],
     "optional_permissions": [
         "webRequest",
