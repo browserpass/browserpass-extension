@@ -240,7 +240,11 @@ async function handleMessage(settings, message, sendResponse) {
         case "fill":
             try {
                 var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-                await chrome.tabs.executeScript(tab.id, { file: "js/inject.dist.js" });
+                await chrome.tabs.executeScript(tab.id, {
+                    allFrames: true,
+                    file: "js/inject.dist.js"
+                });
+                var tabOrigin = new URL(tab.url).origin;
                 // check login fields
                 if (message.login.fields.login === null) {
                     throw new Error("No login is available");
@@ -250,12 +254,23 @@ async function handleMessage(settings, message, sendResponse) {
                 }
                 var fillFields = JSON.stringify({
                     login: message.login.fields.login,
-                    secret: message.login.fields.secret
+                    secret: message.login.fields.secret,
+                    origin: tabOrigin
                 });
                 // fill form via injected script
-                await chrome.tabs.executeScript(tab.id, {
+                var fillResponse = await chrome.tabs.executeScript(tab.id, {
                     code: `window.browserpass.fillLogin(${fillFields});`
                 });
+                if (!fillResponse[0]) {
+                    // try again using all available frames
+                    fillResponse = await chrome.tabs.executeScript(tab.id, {
+                        allFrames: true,
+                        code: `window.browserpass.fillLogin(${fillFields});`
+                    });
+                }
+                if (!fillResponse[0]) {
+                    throw new Error("No fillable forms available");
+                }
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({

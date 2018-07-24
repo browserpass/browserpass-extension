@@ -78,10 +78,37 @@
      * @return void
      */
     function fillLogin(login, autoSubmit = false) {
-        var loginForm = form();
+        // ensure the origin is the same, or ask the user for permissions to continue
+        if (window.location.origin !== login.origin) {
+            var message =
+                "You have requested to fill login credentials into an embedded document from a " +
+                "different origin than the main document in this tab. Do you wish to proceed?\n\n" +
+                `Tab origin: ${login.origin}\n` +
+                `Embedded origin: ${window.location.origin}`;
+            if (!confirm(message)) {
+                return false;
+            }
+        }
 
-        update(USERNAME_FIELDS, login.login, loginForm);
-        update(PASSWORD_FIELDS, login.secret, loginForm);
+        // get the login form
+        var loginForm = form();
+        if (!loginForm) {
+            return false;
+        }
+
+        // fill available fields
+        var filledCount = 0;
+        if (update(USERNAME_FIELDS, login.login, loginForm)) {
+            filledCount++;
+        }
+        if (update(PASSWORD_FIELDS, login.secret, loginForm)) {
+            filledCount++;
+        }
+
+        // no fields filled, so return failure state
+        if (!filledCount) {
+            return false;
+        }
 
         var password_inputs = queryAllVisible(document, PASSWORD_FIELDS, loginForm);
         if (password_inputs.length > 1) {
@@ -115,6 +142,9 @@
                 }
             });
         }
+
+        // finished filling things successfully
+        return true;
     }
 
     /**
