@@ -97,17 +97,12 @@
         }
 
         // fill available fields
-        var filledCount = 0;
+        var filledFields = [];
         if (update(USERNAME_FIELDS, login.login, loginForm)) {
-            filledCount++;
+            filledFields.push("login");
         }
         if (update(PASSWORD_FIELDS, login.secret, loginForm)) {
-            filledCount++;
-        }
-
-        // no fields filled, so return failure state
-        if (!filledCount) {
-            return false;
+            filledFields.push("secret");
         }
 
         var password_inputs = queryAllVisible(document, PASSWORD_FIELDS, loginForm);
@@ -144,7 +139,7 @@
         }
 
         // finished filling things successfully
-        return true;
+        return filledFields;
     }
 
     /**

@@ -205,7 +205,9 @@ async function withLogin(action) {
                 case "copyUsername":
                     saveRecent(this.settings, this.login);
             }
-            window.close();
+            // advise the user which fields were filled & close the popup
+            handleError(`Filled fields: ${response.filledFields.join(", ")}`, "notice");
+            setInterval(() => window.close(), 1000);
         }
     } catch (e) {
         handleError(e);
