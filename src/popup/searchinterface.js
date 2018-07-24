@@ -34,6 +34,12 @@ function view(ctl, params) {
         {
             onkeydown: function(e) {
                 switch (e.code) {
+                    case "Tab":
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            break;
+                        }
+                    // fall through to ArrowDown
                     case "ArrowDown":
                         e.preventDefault();
                         if (self.popup.results.length) {
