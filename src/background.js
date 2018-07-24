@@ -86,6 +86,7 @@ async function fillFields(tab, login, fields) {
 
     // build fill request
     var fillRequest = {
+        allowForeign: false,
         autoSubmit: login.autoSubmit ? autoSubmitFields : [],
         origin: new URL(tab.url).origin,
         login: login,
@@ -97,8 +98,19 @@ async function fillFields(tab, login, fields) {
         code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
     });
 
+    // try again using same-origin frames if we couldn't fill a password field
+    if (!filledFields[0].includes("secret")) {
+        filledFields = filledFields.concat(
+            await chrome.tabs.executeScript(tab.id, {
+                allFrames: true,
+                code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
+            })
+        );
+    }
+
     // try again using all available frames if we couldn't fill a password field
     if (!filledFields[0].includes("secret")) {
+        fillRequest.allowForeign = true;
         filledFields = filledFields.concat(
             await chrome.tabs.executeScript(tab.id, {
                 allFrames: true,

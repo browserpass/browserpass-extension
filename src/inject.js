@@ -83,30 +83,34 @@
         // get the login form
         var loginForm = form();
 
-        // ensure the origin is the same, or ask the user for permissions to continue
-        if (window.location.origin !== request.origin) {
-            var message =
-                "You have requested to fill login credentials into an embedded document from a " +
-                "different origin than the main document in this tab. Do you wish to proceed?\n\n" +
-                `Tab origin: ${request.origin}\n` +
-                `Embedded origin: ${window.location.origin}`;
-            if (!confirm(message)) {
-                return filledFields;
-            }
-        }
-
-        // fill available fields
+        // fill login field
         if (
             request.fields.includes("login") &&
             update(USERNAME_FIELDS, request.login.fields.login, loginForm)
         ) {
             filledFields.push("login");
         }
-        if (
-            request.fields.includes("secret") &&
-            update(PASSWORD_FIELDS, request.login.fields.secret, loginForm)
-        ) {
-            filledFields.push("secret");
+
+        // fill secret field
+        if (request.fields.includes("secret") && find(PASSWORD_FIELDS, loginForm)) {
+            // ensure the origin is the same, or ask the user for permissions to continue
+            if (window.location.origin !== request.origin) {
+                if (!request.allowForeign) {
+                    return filledFields;
+                }
+                var message =
+                    "You have requested to fill sensitive credentials into an embedded document from a " +
+                    "different origin than the main document in this tab. Do you wish to proceed?\n\n" +
+                    `Tab origin: ${request.origin}\n` +
+                    `Embedded origin: ${window.location.origin}`;
+                if (confirm(message)) {
+                    update(PASSWORD_FIELDS, request.login.fields.secret, loginForm);
+                    filledFields.push("secret");
+                }
+            } else {
+                update(PASSWORD_FIELDS, request.login.fields.secret, loginForm);
+                filledFields.push("secret");
+            }
         }
 
         // check whether we filled something that should be auto-submitted
