@@ -138,10 +138,27 @@
             password_inputs[1].select();
         } else {
             window.requestAnimationFrame(function() {
-                // Try to submit the form, or focus on the submit button (based on user settings)
+                // try to locate the submit button
                 var submit = request.submitTarget
                     ? document.querySelector(request.submitTarget)
                     : find(SUBMIT_FIELDS, loginForm);
+                var submit = null;
+                if (request.submitTarget) {
+                    if (loginForm) {
+                        for (var el = loginForm; el.parentNode; el = el.parentNode) {
+                            if ((submit = el.querySelector(request.submitTarget))) {
+                                break;
+                            }
+                        }
+                    } else {
+                        submit = document.querySelector(request.submitTarget);
+                    }
+                }
+                if (!submit) {
+                    submit = find(SUBMIT_FIELDS, loginForm);
+                }
+
+                // Try to submit the form, or focus on the submit button (based on user settings)
                 if (submit) {
                     if (autoSubmit) {
                         submit.click();
