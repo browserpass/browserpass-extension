@@ -74,10 +74,10 @@
      * @since 3.0.0
      *
      * @param object login      Login fields
-     * @param bool   autoSubmit Whether to autosubmit the login form
      * @return void
      */
-    function fillLogin(login, autoSubmit = false) {
+    function fillLogin(login) {
+        var autoSubmit = false;
         var filledFields = [];
 
         // get the login form
@@ -104,6 +104,14 @@
         }
         if (update(PASSWORD_FIELDS, login.secret, loginForm)) {
             filledFields.push("secret");
+        }
+
+        // check whether we filled something that should be auto-submitted
+        for (var field of login.autoSubmit) {
+            if (filledFields.includes(field)) {
+                autoSubmit = true;
+                break;
+            }
         }
 
         var password_inputs = queryAllVisible(document, PASSWORD_FIELDS, loginForm);

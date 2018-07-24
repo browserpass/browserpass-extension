@@ -255,22 +255,19 @@ async function handleMessage(settings, message, sendResponse) {
                 var fillFields = JSON.stringify({
                     login: message.login.fields.login,
                     secret: message.login.fields.secret,
-                    origin: tabOrigin
+                    origin: tabOrigin,
+                    autoSubmit: message.login.autoSubmit ? ["login", "secret"] : []
                 });
                 // fill form via injected script
                 var filledFields = await chrome.tabs.executeScript(tab.id, {
-                    code: `window.browserpass.fillLogin(${fillFields}, ${
-                        message.login.autoSubmit ? "true" : "false"
-                    });`
+                    code: `window.browserpass.fillLogin(${fillFields});`
                 });
                 // try again using all available frames if we couldn't fill a password field
                 if (!filledFields[0].includes("secret")) {
                     filledFields = filledFields.concat(
                         await chrome.tabs.executeScript(tab.id, {
                             allFrames: true,
-                            code: `window.browserpass.fillLogin(${fillFields}, ${
-                                message.login.autoSubmit ? "true" : "false"
-                            });`
+                            code: `window.browserpass.fillLogin(${fillFields});`
                         })
                     );
                 }
