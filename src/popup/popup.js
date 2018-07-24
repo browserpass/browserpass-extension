@@ -201,13 +201,17 @@ async function withLogin(action) {
         } else {
             switch (action) {
                 case "fill":
+                    // advise the user which fields were filled & close the popup
+                    handleError(
+                        `Filled fields: ${response.filledFields.sort().join(", ")}`,
+                        "notice"
+                    );
+                // fall through to update recent
                 case "copyPassword":
                 case "copyUsername":
                     saveRecent(this.settings, this.login);
             }
-            // advise the user which fields were filled & close the popup
-            handleError(`Filled fields: ${response.filledFields.sort().join(", ")}`, "notice");
-            setInterval(() => window.close(), 1000);
+            setInterval(() => window.close(), action == "fill" ? 1000 : 0);
         }
     } catch (e) {
         handleError(e);
