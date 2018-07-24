@@ -249,7 +249,7 @@ async function handleMessage(settings, message, sendResponse) {
                 var fields = await fillFields(targetTab, message.login, remainingFields);
                 filledFields = fields;
                 remainingFields = remainingFields.filter(field => !filledFields.includes(field));
-                if (remainingFields.length) {
+                if (remainingFields.length && message.login.autoSubmit) {
                     // use tab event handler for multiple-submit autofill
                     chrome.tabs.onUpdated.addListener(async function listener(tabID, info) {
                         if (tabID !== targetTab.id || info.status !== "complete") {
