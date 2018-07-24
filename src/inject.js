@@ -82,9 +82,6 @@
 
         // get the login form
         var loginForm = form();
-        if (!loginForm) {
-            return filledFields;
-        }
 
         // ensure the origin is the same, or ask the user for permissions to continue
         if (window.location.origin !== request.origin) {
