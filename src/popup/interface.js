@@ -75,13 +75,13 @@ function view(ctl, params) {
                             }
                             switch (e.code) {
                                 case "ArrowDown":
-                                    if (e.target.nextSibling) {
-                                        e.target.nextSibling.focus();
+                                    if (e.target.nextElementSibling) {
+                                        e.target.nextElementSibling.focus();
                                     }
                                     break;
                                 case "ArrowUp":
-                                    if (e.target.previousSibling) {
-                                        e.target.previousSibling.focus();
+                                    if (e.target.previousElementSibling) {
+                                        e.target.previousElementSibling.focus();
                                     } else {
                                         document
                                             .querySelector(".part.search input[type=text]")
