@@ -327,32 +327,34 @@ async function handleMessage(settings, message, sendResponse) {
                 remainingFields = remainingFields.filter(field => !filledFields.includes(field));
                 if (remainingFields.length && message.login.autoSubmit) {
                     // use tab event handler for multiple-submit autofill
-                    chrome.tabs.onUpdated.addListener(async function listener(tabID, info) {
+                    chrome.tabs.onUpdated.addListener(function listener(tabID, info) {
                         if (tabID !== targetTab.id || info.status !== "complete") {
                             return;
                         }
-                        try {
-                            filledFields = filledFields.concat(
-                                (fields = await fillFields(
-                                    targetTab,
-                                    message.login,
-                                    remainingFields
-                                ))
-                            );
-                            remainingFields = remainingFields.filter(
-                                field => !filledFields.includes(field)
-                            );
-                            if (!remainingFields.length) {
+                        setTimeout(async function() {
+                            try {
+                                filledFields = filledFields.concat(
+                                    (fields = await fillFields(
+                                        targetTab,
+                                        message.login,
+                                        remainingFields
+                                    ))
+                                );
+                                remainingFields = remainingFields.filter(
+                                    field => !filledFields.includes(field)
+                                );
+                                if (!remainingFields.length) {
+                                    chrome.tabs.onUpdated.removeListener(listener);
+                                    sendResponse({ status: "ok", filledFields: filledFields });
+                                }
+                            } catch (e) {
                                 chrome.tabs.onUpdated.removeListener(listener);
-                                sendResponse({ status: "ok", filledFields: filledFields });
+                                sendResponse({
+                                    status: "error",
+                                    message: `Multi-stage autofill failed: ${e.toString()}`
+                                });
                             }
-                        } catch (e) {
-                            chrome.tabs.onUpdated.removeListener(listener);
-                            sendResponse({
-                                status: "error",
-                                message: `Multi-stage autofill failed: ${e.toString()}`
-                            });
-                        }
+                        }, 1000);
                     });
                 } else {
                     sendResponse({ status: "ok", filledFields: filledFields });
