@@ -1,4 +1,7 @@
 (function() {
+    const SUBMIT_SPECIAL_CASES = {
+        "accounts.google.com": "[id $= 'Next']"
+    };
     const FORM_MARKERS = ["login", "log-in", "log_in", "signin", "sign-in", "sign_in"];
     const USERNAME_FIELDS = {
         selectors: [
@@ -79,6 +82,14 @@
     function fillLogin(request) {
         var autoSubmit = false;
         var filledFields = [];
+
+        // set special-case submit target
+        if (
+            request.submitTarget === null &&
+            SUBMIT_SPECIAL_CASES.hasOwnProperty(window.location.host)
+        ) {
+            request.submitTarget = SUBMIT_SPECIAL_CASES[window.location.host];
+        }
 
         // get the login form
         var loginForm = form();
