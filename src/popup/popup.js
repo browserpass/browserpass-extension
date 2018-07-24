@@ -178,13 +178,6 @@ async function withLogin(action) {
                 handleError("Filling login details...", "notice");
                 break;
             case "launch":
-                var havePermission = await chrome.permissions.request({
-                    permissions: ["webRequest", "webRequestBlocking"],
-                    origins: ["http://*/*", "https://*/*"]
-                });
-                if (!havePermission) {
-                    throw new Error("Browserpass requires additional permissions to proceed");
-                }
                 handleError("Launching URL...", "notice");
                 break;
             case "copyPassword":
