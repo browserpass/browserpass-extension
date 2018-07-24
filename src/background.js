@@ -274,6 +274,7 @@ async function handleMessage(settings, message, sendResponse) {
                         })
                     );
                 }
+                // simplify the list of filled fields
                 filledFields = filledFields
                     .reduce((fields, addFields) => fields.concat(addFields), [])
                     .reduce(function(fields, field) {
