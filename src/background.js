@@ -61,6 +61,69 @@ function copyToClipboard(text) {
 }
 
 /**
+ * Fill form fields
+ *
+ * @param object tab    Target tab
+ * @param object login  Login object
+ * @param array  fields List of fields to fill
+ * @return array List of filled fields
+ */
+async function fillFields(tab, login, fields) {
+    var autoSubmitFields = ["login", "secret"];
+
+    // inject script
+    await chrome.tabs.executeScript(tab.id, {
+        allFrames: true,
+        file: "js/inject.dist.js"
+    });
+
+    // check that required fields are present
+    for (var field of fields) {
+        if (login.fields[field] === null) {
+            throw new Error(`Required field is missing: ${field}`);
+        }
+    }
+
+    // build fill request
+    var fillRequest = {
+        autoSubmit: login.autoSubmit ? autoSubmitFields : [],
+        origin: new URL(tab.url).origin,
+        login: login,
+        fields: fields
+    };
+
+    // fill form via injected script
+    var filledFields = await chrome.tabs.executeScript(tab.id, {
+        code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
+    });
+
+    // try again using all available frames if we couldn't fill a password field
+    if (!filledFields[0].includes("secret")) {
+        filledFields = filledFields.concat(
+            await chrome.tabs.executeScript(tab.id, {
+                allFrames: true,
+                code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
+            })
+        );
+    }
+
+    // simplify the list of filled fields
+    filledFields = filledFields
+        .reduce((fields, addFields) => fields.concat(addFields), [])
+        .reduce(function(fields, field) {
+            if (!fields.includes(field)) {
+                fields.push(field);
+            }
+            return fields;
+        }, []);
+    if (!filledFields.length) {
+        throw new Error(`No fillable forms available for fields: ${fields.join(", ")}`);
+    }
+
+    return filledFields;
+}
+
+/**
  * Get Local settings from the extension
  *
  * @since 3.0.0
@@ -295,69 +358,6 @@ async function handleMessage(settings, message, sendResponse) {
             });
             break;
     }
-}
-
-/**
- * Fill form fields
- *
- * @param object tab    Target tab
- * @param object login  Login object
- * @param array  fields List of fields to fill
- * @return array List of filled fields
- */
-async function fillFields(tab, login, fields) {
-    var autoSubmitFields = ["login", "secret"];
-
-    // inject script
-    await chrome.tabs.executeScript(tab.id, {
-        allFrames: true,
-        file: "js/inject.dist.js"
-    });
-
-    // check that required fields are present
-    for (var field of fields) {
-        if (login.fields[field] === null) {
-            throw new Error(`Required field is missing: ${field}`);
-        }
-    }
-
-    // build fill request
-    var fillRequest = {
-        autoSubmit: login.autoSubmit ? autoSubmitFields : [],
-        origin: new URL(tab.url).origin,
-        login: login,
-        fields: fields
-    };
-
-    // fill form via injected script
-    var filledFields = await chrome.tabs.executeScript(tab.id, {
-        code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
-    });
-
-    // try again using all available frames if we couldn't fill a password field
-    if (!filledFields[0].includes("secret")) {
-        filledFields = filledFields.concat(
-            await chrome.tabs.executeScript(tab.id, {
-                allFrames: true,
-                code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
-            })
-        );
-    }
-
-    // simplify the list of filled fields
-    filledFields = filledFields
-        .reduce((fields, addFields) => fields.concat(addFields), [])
-        .reduce(function(fields, field) {
-            if (!fields.includes(field)) {
-                fields.push(field);
-            }
-            return fields;
-        }, []);
-    if (!filledFields.length) {
-        throw new Error(`No fillable forms available for fields: ${fields.join(", ")}`);
-    }
-
-    return filledFields;
 }
 
 /**
