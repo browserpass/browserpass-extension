@@ -266,15 +266,16 @@ async function handleMessage(settings, message, sendResponse) {
                             remainingFields = remainingFields.filter(
                                 field => !filledFields.includes(field)
                             );
+                            if (!remainingFields.length) {
+                                chrome.tabs.onUpdated.removeListener(listener);
+                                sendResponse({ status: "ok", filledFields: filledFields });
+                            }
                         } catch (e) {
                             chrome.tabs.onUpdated.removeListener(listener);
                             sendResponse({
                                 status: "error",
                                 message: `Multi-stage autofill failed: ${e.toString()}`
                             });
-                        }
-                        if (!remainingFields.length) {
-                            sendResponse({ status: "ok", filledFields: filledFields });
                         }
                     });
                 } else {
