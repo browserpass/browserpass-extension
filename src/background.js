@@ -261,19 +261,23 @@ async function handleMessage(settings, message, sendResponse) {
                 var filledFields = await chrome.tabs.executeScript(tab.id, {
                     code: `window.browserpass.fillLogin(${fillFields});`
                 });
-                if (filledFields[0] === false) {
-                    // try again using all available frames
-                    filledFields = await chrome.tabs.executeScript(tab.id, {
-                        allFrames: true,
-                        code: `window.browserpass.fillLogin(${fillFields});`
-                    });
+                // try again using all available frames if we couldn't fill a password field
+                if (!filledFields[0].includes("secret")) {
+                    filledFields = filledFields.concat(
+                        await chrome.tabs.executeScript(tab.id, {
+                            allFrames: true,
+                            code: `window.browserpass.fillLogin(${fillFields});`
+                        })
+                    );
                 }
-                filledFields = filledFields.reduce(function(fields, addFields) {
-                    if (Array.isArray(addFields)) {
-                        return fields.concat(addFields);
-                    }
-                    return fields;
-                }, []);
+                filledFields = filledFields
+                    .reduce((fields, addFields) => fields.concat(addFields), [])
+                    .reduce(function(fields, field) {
+                        if (!fields.includes(field)) {
+                            fields.push(field);
+                        }
+                        return fields;
+                    }, []);
                 if (!filledFields.length) {
                     throw new Error("No fillable forms available");
                 }

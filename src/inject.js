@@ -78,10 +78,12 @@
      * @return void
      */
     function fillLogin(login, autoSubmit = false) {
+        var filledFields = [];
+
         // get the login form
         var loginForm = form();
         if (!loginForm) {
-            return false;
+            return filledFields;
         }
 
         // ensure the origin is the same, or ask the user for permissions to continue
@@ -92,12 +94,11 @@
                 `Tab origin: ${login.origin}\n` +
                 `Embedded origin: ${window.location.origin}`;
             if (!confirm(message)) {
-                return false;
+                return filledFields;
             }
         }
 
         // fill available fields
-        var filledFields = [];
         if (update(USERNAME_FIELDS, login.login, loginForm)) {
             filledFields.push("login");
         }
