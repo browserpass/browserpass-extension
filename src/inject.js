@@ -128,7 +128,9 @@
         } else {
             window.requestAnimationFrame(function() {
                 // Try to submit the form, or focus on the submit button (based on user settings)
-                var submit = find(SUBMIT_FIELDS, loginForm);
+                var submit = request.submitTarget
+                    ? document.querySelector(request.submitTarget)
+                    : find(SUBMIT_FIELDS, loginForm);
                 if (submit) {
                     if (autoSubmit) {
                         submit.click();
