@@ -239,51 +239,47 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "fill":
             try {
-                var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-                await chrome.tabs.executeScript(tab.id, {
-                    allFrames: true,
-                    file: "js/inject.dist.js"
-                });
-                var tabOrigin = new URL(tab.url).origin;
-                // check login fields
-                if (message.login.fields.login === null) {
-                    throw new Error("No login is available");
-                }
-                if (message.login.fields.secret === null) {
-                    throw new Error("No password is available");
-                }
-                var fillFields = JSON.stringify({
-                    login: message.login.fields.login,
-                    secret: message.login.fields.secret,
-                    origin: tabOrigin,
-                    autoSubmit: message.login.autoSubmit ? ["login", "secret"] : []
-                });
-                // fill form via injected script
-                var filledFields = await chrome.tabs.executeScript(tab.id, {
-                    code: `window.browserpass.fillLogin(${fillFields});`
-                });
-                // try again using all available frames if we couldn't fill a password field
-                if (!filledFields[0].includes("secret")) {
-                    filledFields = filledFields.concat(
-                        await chrome.tabs.executeScript(tab.id, {
-                            allFrames: true,
-                            code: `window.browserpass.fillLogin(${fillFields});`
-                        })
-                    );
-                }
-                // simplify the list of filled fields
-                filledFields = filledFields
-                    .reduce((fields, addFields) => fields.concat(addFields), [])
-                    .reduce(function(fields, field) {
-                        if (!fields.includes(field)) {
-                            fields.push(field);
+                var remainingFields = ["login", "secret"];
+                var filledFields = [];
+
+                // get tab info
+                var targetTab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+
+                // dispatch initial fill request
+                var fields = await fillFields(targetTab, message.login, remainingFields);
+                filledFields = fields;
+                remainingFields = remainingFields.filter(field => !filledFields.includes(field));
+                if (remainingFields.length) {
+                    // use tab event handler for multiple-submit autofill
+                    chrome.tabs.onUpdated.addListener(async function listener(tabID, info) {
+                        if (tabID !== targetTab.id || info.status !== "complete") {
+                            return;
                         }
-                        return fields;
-                    }, []);
-                if (!filledFields.length) {
-                    throw new Error("No fillable forms available");
+                        try {
+                            filledFields = filledFields.concat(
+                                (fields = await fillFields(
+                                    targetTab,
+                                    message.login,
+                                    remainingFields
+                                ))
+                            );
+                            remainingFields = remainingFields.filter(
+                                field => !filledFields.includes(field)
+                            );
+                        } catch (e) {
+                            chrome.tabs.onUpdated.removeListener(listener);
+                            sendResponse({
+                                status: "error",
+                                message: `Multi-stage autofill failed: ${e.toString()}`
+                            });
+                        }
+                        if (!remainingFields.length) {
+                            sendResponse({ status: "ok", filledFields: filledFields });
+                        }
+                    });
+                } else {
+                    sendResponse({ status: "ok", filledFields: filledFields });
                 }
-                sendResponse({ status: "ok", filledFields: filledFields });
             } catch (e) {
                 sendResponse({
                     status: "error",
@@ -298,6 +294,69 @@ async function handleMessage(settings, message, sendResponse) {
             });
             break;
     }
+}
+
+/**
+ * Fill form fields
+ *
+ * @param object tab    Target tab
+ * @param object login  Login object
+ * @param array  fields List of fields to fill
+ * @return array List of filled fields
+ */
+async function fillFields(tab, login, fields) {
+    var autoSubmitFields = ["login", "secret"];
+
+    // inject script
+    await chrome.tabs.executeScript(tab.id, {
+        allFrames: true,
+        file: "js/inject.dist.js"
+    });
+
+    // check that required fields are present
+    for (var field of fields) {
+        if (login.fields[field] === null) {
+            throw new Error(`Required field is missing: ${field}`);
+        }
+    }
+
+    // build fill request
+    var fillRequest = {
+        autoSubmit: login.autoSubmit ? autoSubmitFields : [],
+        origin: new URL(tab.url).origin,
+        login: login,
+        fields: fields
+    };
+
+    // fill form via injected script
+    var filledFields = await chrome.tabs.executeScript(tab.id, {
+        code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
+    });
+
+    // try again using all available frames if we couldn't fill a password field
+    if (!filledFields[0].includes("secret")) {
+        filledFields = filledFields.concat(
+            await chrome.tabs.executeScript(tab.id, {
+                allFrames: true,
+                code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
+            })
+        );
+    }
+
+    // simplify the list of filled fields
+    filledFields = filledFields
+        .reduce((fields, addFields) => fields.concat(addFields), [])
+        .reduce(function(fields, field) {
+            if (!fields.includes(field)) {
+                fields.push(field);
+            }
+            return fields;
+        }, []);
+    if (!filledFields.length) {
+        throw new Error(`No fillable forms available for fields: ${fields.join(", ")}`);
+    }
+
+    return filledFields;
 }
 
 /**

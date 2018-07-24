@@ -73,10 +73,10 @@
      *
      * @since 3.0.0
      *
-     * @param object login      Login fields
+     * @param object request Form fill request
      * @return void
      */
-    function fillLogin(login) {
+    function fillLogin(request) {
         var autoSubmit = false;
         var filledFields = [];
 
@@ -87,11 +87,11 @@
         }
 
         // ensure the origin is the same, or ask the user for permissions to continue
-        if (window.location.origin !== login.origin) {
+        if (window.location.origin !== request.origin) {
             var message =
                 "You have requested to fill login credentials into an embedded document from a " +
                 "different origin than the main document in this tab. Do you wish to proceed?\n\n" +
-                `Tab origin: ${login.origin}\n` +
+                `Tab origin: ${request.origin}\n` +
                 `Embedded origin: ${window.location.origin}`;
             if (!confirm(message)) {
                 return filledFields;
@@ -99,15 +99,21 @@
         }
 
         // fill available fields
-        if (update(USERNAME_FIELDS, login.login, loginForm)) {
+        if (
+            request.fields.includes("login") &&
+            update(USERNAME_FIELDS, request.login.fields.login, loginForm)
+        ) {
             filledFields.push("login");
         }
-        if (update(PASSWORD_FIELDS, login.secret, loginForm)) {
+        if (
+            request.fields.includes("secret") &&
+            update(PASSWORD_FIELDS, request.login.fields.secret, loginForm)
+        ) {
             filledFields.push("secret");
         }
 
         // check whether we filled something that should be auto-submitted
-        for (var field of login.autoSubmit) {
+        for (var field of request.autoSubmit) {
             if (filledFields.includes(field)) {
                 autoSubmit = true;
                 break;
