@@ -206,7 +206,7 @@ async function withLogin(action) {
                     saveRecent(this.settings, this.login);
             }
             // advise the user which fields were filled & close the popup
-            handleError(`Filled fields: ${response.filledFields.join(", ")}`, "notice");
+            handleError(`Filled fields: ${response.filledFields.sort().join(", ")}`, "notice");
             setInterval(() => window.close(), 1000);
         }
     } catch (e) {

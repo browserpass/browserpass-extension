@@ -259,14 +259,18 @@ async function handleMessage(settings, message, sendResponse) {
                 });
                 // fill form via injected script
                 var filledFields = await chrome.tabs.executeScript(tab.id, {
-                    code: `window.browserpass.fillLogin(${fillFields});`
+                    code: `window.browserpass.fillLogin(${fillFields}, ${
+                        message.login.autoSubmit ? "true" : "false"
+                    });`
                 });
                 // try again using all available frames if we couldn't fill a password field
                 if (!filledFields[0].includes("secret")) {
                     filledFields = filledFields.concat(
                         await chrome.tabs.executeScript(tab.id, {
                             allFrames: true,
-                            code: `window.browserpass.fillLogin(${fillFields});`
+                            code: `window.browserpass.fillLogin(${fillFields}, ${
+                                message.login.autoSubmit ? "true" : "false"
+                            });`
                         })
                     );
                 }
@@ -343,6 +347,7 @@ async function parseFields(settings, login) {
 
     // parse lines
     login.fields = {
+        autoSubmit: ["auto-submit", "autosubmit"],
         secret: ["secret", "password", "pass"],
         login: ["login", "username", "user", "email"],
         url: ["url", "uri", "website", "site", "link", "launch"]
@@ -360,7 +365,10 @@ async function parseFields(settings, login) {
 
         // assign to fields
         for (var key in login.fields) {
-            if (Array.isArray(login.fields[key]) && login.fields[key].indexOf(parts[0]) >= 0) {
+            if (
+                Array.isArray(login.fields[key]) &&
+                login.fields[key].indexOf(parts[0].toLowerCase()) >= 0
+            ) {
                 login.fields[key] = parts[1];
                 break;
             }
@@ -378,6 +386,12 @@ async function parseFields(settings, login) {
                 login.fields[key] = null;
             }
         }
+    }
+
+    // move browserpass settings out of fields
+    for (var field of ["autoSubmit"]) {
+        login[field] = login.fields[field];
+        delete login.fields[field];
     }
 }
 
