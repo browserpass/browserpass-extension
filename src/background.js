@@ -88,7 +88,6 @@ async function fillFields(tab, login, fields) {
     var fillRequest = {
         allowForeign: false,
         autoSubmit: login.autoSubmit ? autoSubmitFields : [],
-        submitTarget: login.submitTarget,
         origin: new URL(tab.url).origin,
         login: login,
         fields: fields
@@ -421,7 +420,6 @@ async function parseFields(settings, login) {
     // parse lines
     login.fields = {
         autoSubmit: ["auto-submit", "autosubmit"],
-        submitTarget: ["submit-target", "submittarget"],
         secret: ["secret", "password", "pass"],
         login: ["login", "username", "user", "email"],
         url: ["url", "uri", "website", "site", "link", "launch"]
@@ -463,7 +461,7 @@ async function parseFields(settings, login) {
     }
 
     // move browserpass settings out of fields
-    for (var field of ["autoSubmit", "submitTarget"]) {
+    for (var field of ["autoSubmit"]) {
         login[field] = login.fields[field];
         delete login.fields[field];
     }

@@ -1,7 +1,4 @@
 (function() {
-    const SUBMIT_SPECIAL_CASES = {
-        "accounts.google.com": "[id $= 'Next']"
-    };
     const FORM_MARKERS = ["login", "log-in", "log_in", "signin", "sign-in", "sign_in"];
     const USERNAME_FIELDS = {
         selectors: [
@@ -83,14 +80,6 @@
         var autoSubmit = false;
         var filledFields = [];
 
-        // set special-case submit target
-        if (
-            request.submitTarget === null &&
-            SUBMIT_SPECIAL_CASES.hasOwnProperty(window.location.host)
-        ) {
-            request.submitTarget = SUBMIT_SPECIAL_CASES[window.location.host];
-        }
-
         // get the login form
         var loginForm = form();
 
@@ -139,24 +128,7 @@
         } else {
             window.requestAnimationFrame(function() {
                 // try to locate the submit button
-                var submit = request.submitTarget
-                    ? document.querySelector(request.submitTarget)
-                    : find(SUBMIT_FIELDS, loginForm);
-                var submit = null;
-                if (request.submitTarget) {
-                    if (loginForm) {
-                        for (var el = loginForm; el.parentNode; el = el.parentNode) {
-                            if ((submit = el.querySelector(request.submitTarget))) {
-                                break;
-                            }
-                        }
-                    } else {
-                        submit = document.querySelector(request.submitTarget);
-                    }
-                }
-                if (!submit) {
-                    submit = find(SUBMIT_FIELDS, loginForm);
-                }
+                var submit = find(SUBMIT_FIELDS, loginForm);
 
                 // Try to submit the form, or focus on the submit button (based on user settings)
                 if (submit) {
