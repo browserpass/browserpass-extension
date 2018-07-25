@@ -205,7 +205,7 @@ function keyHandler(e) {
         case "Tab":
             var partElement = e.target.closest(".part");
             var targetElement = e.shiftKey ? "previousElementSibling" : "nextElementSibling";
-            if (partElement[targetElement] && e.target[targetElement].hasAttribute("tabindex")) {
+            if (partElement[targetElement] && partElement[targetElement].hasAttribute("tabindex")) {
                 partElement[targetElement].focus();
             } else {
                 document.querySelector(".part.search input[type=text]").focus();
