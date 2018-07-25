@@ -69,18 +69,18 @@ function copyToClipboard(text) {
  * @return array List of filled fields
  */
 async function fillFields(tab, login, fields) {
-    // inject script
-    await chrome.tabs.executeScript(tab.id, {
-        allFrames: true,
-        file: "js/inject.dist.js"
-    });
-
     // check that required fields are present
     for (var field of fields) {
         if (login.fields[field] === null) {
             throw new Error(`Required field is missing: ${field}`);
         }
     }
+
+    // inject script
+    await chrome.tabs.executeScript(tab.id, {
+        allFrames: true,
+        file: "js/inject.dist.js"
+    });
 
     // build fill request
     var fillRequest = {
