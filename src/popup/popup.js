@@ -200,13 +200,8 @@ async function withLogin(action) {
             throw new Error(response.message);
         } else {
             switch (action) {
-                case "fill":
-                    // advise the user which fields were filled & close the popup
-                    handleError(
-                        `Filled fields: ${response.filledFields.sort().join(", ")}`,
-                        "notice"
-                    );
                 // fall through to update recent
+                case "fill":
                 case "copyPassword":
                 case "copyUsername":
                     saveRecent(this.settings, this.login);
