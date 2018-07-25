@@ -211,7 +211,7 @@ async function withLogin(action) {
                 case "copyUsername":
                     saveRecent(this.settings, this.login);
             }
-            setInterval(() => window.close(), action == "fill" ? 1000 : 0);
+            window.close();
         }
     } catch (e) {
         handleError(e);
