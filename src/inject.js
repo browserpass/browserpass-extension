@@ -113,14 +113,6 @@
             }
         }
 
-        // check whether we filled something that should be auto-submitted
-        for (var field of request.autoSubmit) {
-            if (filledFields.includes(field)) {
-                autoSubmit = true;
-                break;
-            }
-        }
-
         var password_inputs = queryAllVisible(document, PASSWORD_FIELDS, loginForm);
         if (password_inputs.length > 1) {
             // There is likely a field asking for OTP code, so do not submit form just yet

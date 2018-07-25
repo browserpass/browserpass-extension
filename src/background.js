@@ -69,8 +69,6 @@ function copyToClipboard(text) {
  * @return array List of filled fields
  */
 async function fillFields(tab, login, fields) {
-    var autoSubmitFields = ["login", "secret"];
-
     // inject script
     await chrome.tabs.executeScript(tab.id, {
         allFrames: true,
@@ -87,7 +85,6 @@ async function fillFields(tab, login, fields) {
     // build fill request
     var fillRequest = {
         allowForeign: false,
-        autoSubmit: login.autoSubmit ? autoSubmitFields : [],
         origin: new URL(tab.url).origin,
         login: login,
         fields: fields
@@ -314,50 +311,16 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "fill":
             try {
-                var remainingFields = ["login", "secret"];
-                var filledFields = [];
-
                 // get tab info
                 var targetTab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
 
                 // dispatch initial fill request
-                var fields = await fillFields(targetTab, message.login, remainingFields);
-                filledFields = fields;
-                remainingFields = remainingFields.filter(field => !filledFields.includes(field));
-                if (remainingFields.length && message.login.autoSubmit) {
-                    // use tab event handler for multiple-submit autofill
-                    chrome.tabs.onUpdated.addListener(function listener(tabID, info) {
-                        if (tabID !== targetTab.id || info.status !== "complete") {
-                            return;
-                        }
-                        setTimeout(async function() {
-                            try {
-                                filledFields = filledFields.concat(
-                                    (fields = await fillFields(
-                                        targetTab,
-                                        message.login,
-                                        remainingFields
-                                    ))
-                                );
-                                remainingFields = remainingFields.filter(
-                                    field => !filledFields.includes(field)
-                                );
-                                if (!remainingFields.length) {
-                                    chrome.tabs.onUpdated.removeListener(listener);
-                                    sendResponse({ status: "ok", filledFields: filledFields });
-                                }
-                            } catch (e) {
-                                chrome.tabs.onUpdated.removeListener(listener);
-                                sendResponse({
-                                    status: "error",
-                                    message: `Multi-stage autofill failed: ${e.toString()}`
-                                });
-                            }
-                        }, 1000);
-                    });
-                } else {
-                    sendResponse({ status: "ok", filledFields: filledFields });
+                var filledFields = await fillFields(targetTab, message.login, ["login", "secret"]);
+                if (!filledFields.length) {
+                    throw new Error("Unable to fill credentials");
                 }
+
+                sendResponse({ status: "ok", filledFields: filledFields });
             } catch (e) {
                 sendResponse({
                     status: "error",
@@ -419,7 +382,6 @@ async function parseFields(settings, login) {
 
     // parse lines
     login.fields = {
-        autoSubmit: ["auto-submit", "autosubmit"],
         secret: ["secret", "password", "pass"],
         login: ["login", "username", "user", "email"],
         url: ["url", "uri", "website", "site", "link", "launch"]
@@ -458,12 +420,6 @@ async function parseFields(settings, login) {
                 login.fields[key] = null;
             }
         }
-    }
-
-    // move browserpass settings out of fields
-    for (var field of ["autoSubmit"]) {
-        login[field] = login.fields[field];
-        delete login.fields[field];
     }
 }
 
