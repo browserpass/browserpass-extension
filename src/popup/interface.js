@@ -163,26 +163,39 @@ function search(s) {
 
     // get candidate list
     var candidates = this.logins.map(result => Object.assign(result, { display: result.login }));
+    var mostRecent = null;
     if (this.currentDomainOnly) {
-        var recent = candidates.filter(login => login.recent.count > 0);
+        var recent = candidates.filter(function(login) {
+            if (login.recent.count > 0) {
+                // find most recently used login
+                if (!mostRecent || login.recent.when > mostRecent.recent.when) {
+                    mostRecent = login;
+                }
+                return true;
+            }
+            return false;
+        });
         var remainingInCurrentDomain = candidates.filter(
             login => login.inCurrentDomain && !login.recent.count
         );
         candidates = recent.concat(remainingInCurrentDomain);
     }
     candidates.sort(function(a, b) {
-        if (a.store.when != b.store.when) {
-            return b.store.when - a.store.when;
+        // sort most recent first
+        if (a === mostRecent) {
+            return -1;
         }
-        if (a.recent.count != b.recent.count) {
-            return b.recent.count - a.recent.count;
+        if (b === mostRecent) {
+            return 1;
         }
-        if (a.recent.when != b.recent.when) {
-            return b.recent.when - a.recent.when;
+
+        // sort by count
+        var countDiff = b.recent.count - a.recent.count;
+        if (countDiff) {
+            return countDiff;
         }
-        if (a.store.name != b.store.name) {
-            return a.store.name.localeCompare(b.store.name);
-        }
+
+        // sort alphabetically
         return a.login.localeCompare(b.login);
     });
 
