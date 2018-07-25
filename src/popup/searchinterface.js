@@ -37,6 +37,7 @@ function view(ctl, params) {
                     case "Tab":
                         e.preventDefault();
                         if (e.shiftKey) {
+                            document.querySelector(".part.login:last-child").focus();
                             break;
                         }
                     // fall through to ArrowDown

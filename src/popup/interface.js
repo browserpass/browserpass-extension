@@ -203,17 +203,12 @@ function keyHandler(e) {
     var login = e.target.classList.contains("login") ? e.target : e.target.closest(".login");
     switch (e.code) {
         case "Tab":
+            var partElement = e.target.closest(".part");
             var targetElement = e.shiftKey ? "previousElementSibling" : "nextElementSibling";
-            if (e.target[targetElement] && e.target[targetElement].hasAttribute("tabindex")) {
-                e.target[targetElement].focus();
-            } else if (e.shiftKey && e.target.classList.contains("login")) {
+            if (partElement[targetElement] && e.target[targetElement].hasAttribute("tabindex")) {
+                partElement[targetElement].focus();
+            } else {
                 document.querySelector(".part.search input[type=text]").focus();
-            } else if (e.target.classList.contains("action")) {
-                if (e.shiftKey) {
-                    login.focus();
-                } else if (login.nextElementSibling) {
-                    login.nextElementSibling.focus();
-                }
             }
             break;
         case "ArrowDown":
