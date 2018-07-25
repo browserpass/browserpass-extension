@@ -34,6 +34,13 @@ function view(ctl, params) {
         {
             onkeydown: function(e) {
                 switch (e.code) {
+                    case "Tab":
+                        e.preventDefault();
+                        if (e.shiftKey) {
+                            document.querySelector(".part.login:last-child").focus();
+                            break;
+                        }
+                    // fall through to ArrowDown
                     case "ArrowDown":
                         e.preventDefault();
                         if (self.popup.results.length) {

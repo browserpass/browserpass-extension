@@ -67,42 +67,14 @@ function view(ctl, params) {
                         key: result.index,
                         tabindex: 0,
                         onclick: function(e) {
-                            result.doAction("fill");
+                            var action = e.target.getAttribute("action");
+                            if (action) {
+                                result.doAction(action);
+                            } else {
+                                result.doAction("fill");
+                            }
                         },
-                        onkeydown: function(e) {
-                            if (e.code != "Tab") {
-                                e.preventDefault();
-                            }
-                            switch (e.code) {
-                                case "ArrowDown":
-                                    if (e.target.nextSibling) {
-                                        e.target.nextSibling.focus();
-                                    }
-                                    break;
-                                case "ArrowUp":
-                                    if (e.target.previousSibling) {
-                                        e.target.previousSibling.focus();
-                                    } else {
-                                        document
-                                            .querySelector(".part.search input[type=text]")
-                                            .focus();
-                                    }
-                                    break;
-                                case "Enter":
-                                    result.doAction("fill");
-                                    break;
-                                case "KeyC":
-                                    if (e.ctrlKey) {
-                                        result.doAction(
-                                            e.shiftKey ? "copyUsername" : "copyPassword"
-                                        );
-                                    }
-                                    break;
-                                case "KeyG":
-                                    result.doAction("launch");
-                                    break;
-                            }
-                        }
+                        onkeydown: keyHandler.bind(result)
                     },
                     [
                         badges ? m("div.store.badge", result.store.name) : null,
@@ -121,25 +93,19 @@ function view(ctl, params) {
                                 : null
                         ]),
                         m("div.action.copy-password", {
+                            tabindex: 0,
                             title: "Copy password",
-                            onclick: function(e) {
-                                e.stopPropagation();
-                                result.doAction("copyPassword");
-                            }
+                            action: "copyPassword"
                         }),
                         m("div.action.copy-user", {
+                            tabindex: 0,
                             title: "Copy username",
-                            onclick: function(e) {
-                                e.stopPropagation();
-                                result.doAction("copyUsername");
-                            }
+                            action: "copyUsername"
                         }),
                         m("div.action.launch", {
+                            tabindex: 0,
                             title: "Open URL",
-                            onclick: function(e) {
-                                e.stopPropagation();
-                                result.doAction("launch");
-                            }
+                            action: "launch"
                         })
                     ]
                 );
@@ -223,4 +189,68 @@ function search(s) {
     }
 
     this.results = candidates;
+}
+
+/**
+ * Handle result key presses
+ *
+ * @param Event  e    Keydown event
+ * @param object this Result object
+ * @return void
+ */
+function keyHandler(e) {
+    e.preventDefault();
+    var login = e.target.classList.contains("login") ? e.target : e.target.closest(".login");
+    switch (e.code) {
+        case "Tab":
+            var partElement = e.target.closest(".part");
+            var targetElement = e.shiftKey ? "previousElementSibling" : "nextElementSibling";
+            if (partElement[targetElement] && e.target[targetElement].hasAttribute("tabindex")) {
+                partElement[targetElement].focus();
+            } else {
+                document.querySelector(".part.search input[type=text]").focus();
+            }
+            break;
+        case "ArrowDown":
+            if (login.nextElementSibling) {
+                login.nextElementSibling.focus();
+            }
+            break;
+        case "ArrowUp":
+            if (login.previousElementSibling) {
+                login.previousElementSibling.focus();
+            } else {
+                document.querySelector(".part.search input[type=text]").focus();
+            }
+            break;
+        case "ArrowRight":
+            if (e.target.classList.contains("login")) {
+                e.target.querySelector(".action").focus();
+            } else if (e.target.nextElementSibling) {
+                e.target.nextElementSibling.focus();
+            }
+            break;
+        case "ArrowLeft":
+            if (e.target.previousElementSibling.classList.contains("action")) {
+                e.target.previousElementSibling.focus();
+            } else {
+                login.focus();
+            }
+            break;
+        case "Enter":
+            if (e.target.hasAttribute("action")) {
+                this.doAction(e.target.getAttribute("action"));
+            } else {
+                this.doAction("fill");
+            }
+            break;
+        case "KeyC":
+            if (e.ctrlKey) {
+                this.doAction(e.shiftKey ? "copyUsername" : "copyPassword");
+            }
+            break;
+        case "KeyG":
+            this.doAction("launch");
+            break;
+    }
 }
