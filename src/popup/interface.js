@@ -67,8 +67,8 @@ function view(ctl, params) {
                         key: result.index,
                         tabindex: 0,
                         onclick: function(e) {
-                            var action = null;
-                            if ((action = e.target.getAttribute("action"))) {
+                            var action = e.target.getAttribute("action");
+                            if (action) {
                                 result.doAction(action);
                             } else {
                                 result.doAction("fill");
