@@ -106,9 +106,12 @@ body {
 }
 
 .part.login > .name:hover,
+.part.login > .name:focus,
 .part.login > .action:hover,
+.part.login > .action:focus,
 .part.login:focus > .name {
     background-color: #eee;
+    outline: none;
 }
 
 .part.login > .name {
