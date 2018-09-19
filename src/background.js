@@ -351,10 +351,17 @@ async function handleMessage(settings, message, sendResponse) {
 
                 sendResponse({ status: "ok", filledFields: filledFields });
             } catch (e) {
-                sendResponse({
-                    status: "error",
-                    message: "Unable to fill credentials: " + e.toString()
-                });
+                try {
+                    sendResponse({
+                        status: "error",
+                        message: e.toString()
+                    });
+                } catch (e) {
+                    // TODO An error here is typically a closed message port, due to a popup taking focus
+                    // away from the extension menu and the menu closing as a result. Need to investigate
+                    // whether triggering the extension menu from the background script is possible.
+                    console.log(e);
+                }
             }
             break;
         default:
