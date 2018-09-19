@@ -83,6 +83,23 @@
         // get the login form
         var loginForm = form();
 
+        // don't attempt to fill non-secret forms unless non-secret filling is allowed
+        if (!find(PASSWORD_FIELDS, loginForm) && !request.allowNoSecret) {
+            return filledFields;
+        }
+
+        // ensure the origin is the same, or ask the user for permissions to continue
+        if (window.location.origin !== request.origin) {
+            var message =
+                "You have requested to fill login credentials into an embedded document from a " +
+                "different origin than the main document in this tab. Do you wish to proceed?\n\n" +
+                `Tab origin: ${request.origin}\n` +
+                `Embedded origin: ${window.location.origin}`;
+            if (!request.allowForeign || !confirm(message)) {
+                return filledFields;
+            }
+        }
+
         // fill login field
         if (
             request.fields.includes("login") &&
@@ -92,27 +109,12 @@
         }
 
         // fill secret field
-        if (request.fields.includes("secret") && find(PASSWORD_FIELDS, loginForm)) {
-            // ensure the origin is the same, or ask the user for permissions to continue
-            if (window.location.origin !== request.origin) {
-                if (!request.allowForeign) {
-                    return filledFields;
-                }
-                var message =
-                    "You have requested to fill sensitive credentials into an embedded document from a " +
-                    "different origin than the main document in this tab. Do you wish to proceed?\n\n" +
-                    `Tab origin: ${request.origin}\n` +
-                    `Embedded origin: ${window.location.origin}`;
-                if (confirm(message)) {
-                    update(PASSWORD_FIELDS, request.login.fields.secret, loginForm);
-                    filledFields.push("secret");
-                }
-            } else {
-                update(PASSWORD_FIELDS, request.login.fields.secret, loginForm);
-                filledFields.push("secret");
-            }
+        if (find(PASSWORD_FIELDS, loginForm)) {
+            update(PASSWORD_FIELDS, request.login.fields.secret, loginForm);
+            filledFields.push("secret");
         }
 
+        // check for multiple password fields in the login form
         var password_inputs = queryAllVisible(document, PASSWORD_FIELDS, loginForm);
         if (password_inputs.length > 1) {
             // There is likely a field asking for OTP code, so do not submit form just yet

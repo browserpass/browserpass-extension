@@ -61,6 +61,46 @@ function copyToClipboard(text) {
 }
 
 /**
+ * Call injected form-fill code
+ *
+ * @param object  tab           Target tab
+ * @param object  fillRequest   Fill request details
+ * @param boolean allFrames     Dispatch to all frames
+ * @param boolean allowForeign  Allow foreign-origin iframes
+ * @param boolean allowNoSecret Allow forms that don't contain a password field
+ * @return array list of filled fields
+ */
+async function dispatchFill(
+    tab,
+    fillRequest,
+    allFrames = false,
+    allowForeign = false,
+    allowNoSecret = false
+) {
+    fillRequest = Object.assign({}, fillRequest, {
+        allowForeign: allowForeign,
+        allowNoSecret: allowNoSecret
+    });
+
+    var filledFields = await chrome.tabs.executeScript(tab.id, {
+        allFrames: allFrames,
+        code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
+    });
+
+    // simplify the list of filled fields
+    filledFields = filledFields
+        .reduce((fields, addFields) => fields.concat(addFields), [])
+        .reduce(function(fields, field) {
+            if (!fields.includes(field)) {
+                fields.push(field);
+            }
+            return fields;
+        }, []);
+
+    return filledFields;
+}
+
+/**
  * Fill form fields
  *
  * @param object tab    Target tab
@@ -85,46 +125,35 @@ async function fillFields(tab, login, fields) {
     // build fill request
     var fillRequest = {
         allowForeign: false,
+        allowNoSecret: false,
         origin: new URL(tab.url).origin,
         login: login,
         fields: fields
     };
 
     // fill form via injected script
-    var filledFields = await chrome.tabs.executeScript(tab.id, {
-        code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
-    });
+    var filledFields = await dispatchFill(tab, fillRequest);
 
     // try again using same-origin frames if we couldn't fill a password field
-    if (!filledFields[0].includes("secret")) {
-        filledFields = filledFields.concat(
-            await chrome.tabs.executeScript(tab.id, {
-                allFrames: true,
-                code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
-            })
-        );
+    if (!filledFields.includes("secret")) {
+        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true));
     }
 
     // try again using all available frames if we couldn't fill a password field
-    if (!filledFields[0].includes("secret")) {
-        fillRequest.allowForeign = true;
-        filledFields = filledFields.concat(
-            await chrome.tabs.executeScript(tab.id, {
-                allFrames: true,
-                code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
-            })
-        );
+    if (!filledFields.includes("secret")) {
+        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true, true));
     }
 
-    // simplify the list of filled fields
-    filledFields = filledFields
-        .reduce((fields, addFields) => fields.concat(addFields), [])
-        .reduce(function(fields, field) {
-            if (!fields.includes(field)) {
-                fields.push(field);
-            }
-            return fields;
-        }, []);
+    // try again using same-origin frames, and don't require a password field
+    if (!filledFields.length) {
+        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true, false, true));
+    }
+
+    // try again using all available frames, and don't require a password field
+    if (!filledFields.length) {
+        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true, true, true));
+    }
+
     if (!filledFields.length) {
         throw new Error(`No fillable forms available for fields: ${fields.join(", ")}`);
     }
