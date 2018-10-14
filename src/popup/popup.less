@@ -14,6 +14,11 @@
 
 @match-text-color: @hint-bg-color;
 
+@login-height: 53px;
+@max-logins-height: @login-height * 7;
+@login-part-padding: 6px;
+@login-part-height: @login-height - 2 * @login-part-padding;
+
 html,
 body {
     font-family: sans;
@@ -25,6 +30,7 @@ body {
     white-space: nowrap;
     background-color: @bg-color;
     color: @text-color;
+    font-weight: 200;
 }
 
 html::-webkit-scrollbar,
@@ -43,15 +49,16 @@ body {
     flex-direction: column;
     overflow-y: auto;
     height: inherit;
-    max-height: 217px; /* 7 x 31px login part */
+    max-height: @max-logins-height;
 }
 
 .badge {
-    background-color: #0a0;
+    display: flex;
+    align-items: center;
+    background-color: #626262;
     border-radius: 4px;
-    color: #fff;
     font-size: 12px;
-    margin: 0 6px;
+    margin-right: 8px;
     padding: 1px 4px;
 }
 
@@ -97,8 +104,6 @@ body {
 .part.search > .hint {
     background-color: @hint-bg-color;
     color: @hint-color;
-    display: flex;
-    align-items: center;
     line-height: 19px;
 }
 
@@ -124,20 +129,8 @@ body {
     color: @dim-text-color;
 }
 
-.part.login {
-    display: flex;
-    cursor: pointer;
-    align-items: center;
-    height: 31px;
-}
-
 .logins:not(:hover):not(:focus-within) .part.login:first-child > .name {
     background-color: @default-bg-color;
-}
-
-.part.login:hover,
-.part.login:focus {
-    outline: none;
 }
 
 .part.login > .name:hover,
@@ -149,42 +142,65 @@ body {
     outline: none;
 }
 
-.part.login > .name {
+.part.login {
     display: flex;
-    width: 100%;
-    height: 19px;
-    padding: 6px;
-}
+    cursor: pointer;
+    align-items: center;
+    height: @login-height;
 
-.part.login > .name > .recent {
-    background-image: url("/popup/icon-history.svg");
-    background-repeat: no-repeat;
-    background-size: contain;
-    margin-left: 4px;
-    width: 10px;
-    margin-top: 2px;
-}
+    &:hover,
+    &:focus {
+        outline: none;
+    }
 
-.part.login > .action {
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 19px;
-    width: 30px;
-    height: 19px;
-    padding: 6px;
-}
+    .name {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: @login-part-height;
+        padding: @login-part-padding;
 
-.part.login > .action.copy-password {
-    background-image: url("/popup/icon-key.svg");
-}
+        .line1 {
+            display: flex;
+            flex-direction: row;
+            font-size: 12px;
 
-.part.login > .action.copy-user {
-    background-image: url("/popup/icon-user.svg");
-}
+            .recent {
+                background-image: url("/popup/icon-history.svg");
+                background-repeat: no-repeat;
+                background-size: contain;
+                margin-left: 8px;
+                width: 9.5px;
+                margin-top: 4px;
+            }
+        }
 
-.part.login > .action.launch {
-    background-image: url("/popup/icon-launch.svg");
-    background-position-y: 5.5px;
+        .line2 {
+            font-size: 18px;
+        }
+    }
+
+    .action {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 19px;
+        width: 30px;
+        height: @login-part-height;
+        padding: @login-part-padding;
+
+        &.copy-password {
+            background-image: url("/popup/icon-key.svg");
+        }
+
+        &.copy-user {
+            background-image: url("/popup/icon-user.svg");
+        }
+
+        &.launch {
+            background-image: url("/popup/icon-launch.svg");
+            background-position-y: 16px;
+        }
+    }
 }
 
 .part.login em {

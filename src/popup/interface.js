@@ -53,7 +53,6 @@ function attach(element) {
  * @return []Vnode
  */
 function view(ctl, params) {
-    var badges = Object.keys(this.settings.stores).length > 1;
     var nodes = [];
     nodes.push(m(this.searchPart));
 
@@ -77,20 +76,23 @@ function view(ctl, params) {
                         onkeydown: keyHandler.bind(result)
                     },
                     [
-                        badges ? m("div.store.badge", result.store.name) : null,
                         m("div.name", [
-                            m.trust(result.display),
-                            result.recent.when > 0
-                                ? m("div.recent", {
-                                      title:
-                                          "Used here " +
-                                          result.recent.count +
-                                          " time" +
-                                          (result.recent.count > 1 ? "s" : "") +
-                                          ", last used " +
-                                          Moment(new Date(result.recent.when)).fromNow()
-                                  })
-                                : null
+                            m("div.line1", [
+                                m("div.store.badge", result.store.name),
+                                m("div.path", [m.trust(result.path)]),
+                                result.recent.when > 0
+                                    ? m("div.recent", {
+                                          title:
+                                              "Used here " +
+                                              result.recent.count +
+                                              " time" +
+                                              (result.recent.count > 1 ? "s" : "") +
+                                              ", last " +
+                                              Moment(new Date(result.recent.when)).fromNow()
+                                      })
+                                    : null
+                            ]),
+                            m("div.line2", [m.trust(result.display)])
                         ]),
                         m("div.action.copy-password", {
                             tabindex: 0,
@@ -119,7 +121,7 @@ function view(ctl, params) {
 /**
  * Run a search
  *
- * @param string s              Search string
+ * @param string s Search string
  * @return void
  */
 function search(s) {
@@ -128,7 +130,13 @@ function search(s) {
     s = s.trim();
 
     // get candidate list
-    var candidates = this.logins.map(result => Object.assign(result, { display: result.login }));
+    var candidates = this.logins.map(candidate => {
+        let lastSlashIndex = candidate.login.lastIndexOf("/") + 1;
+        return Object.assign(candidate, {
+            path: candidate.login.substr(0, lastSlashIndex),
+            display: candidate.login.substr(lastSlashIndex)
+        });
+    });
     var mostRecent = null;
     if (this.currentDomainOnly) {
         var recent = candidates.filter(function(login) {
@@ -166,29 +174,107 @@ function search(s) {
     });
 
     if (s.length) {
-        var filter = s.split(/\s+/);
-        // fuzzy-search first word & add highlighting
-        if (fuzzyFirstWord) {
-            candidates = FuzzySort.go(filter[0], candidates, {
+        let filter = s.split(/\s+/);
+        let fuzzyFilter = fuzzyFirstWord ? filter[0] : "";
+        let substringFilters = filter.slice(fuzzyFirstWord ? 1 : 0).map(w => w.toLowerCase());
+
+        // First reduce the list by running the substring search
+        substringFilters.forEach(function(word) {
+            candidates = candidates.filter(c => c.login.toLowerCase().indexOf(word) >= 0);
+        });
+
+        // Then run the fuzzy filter
+        let fuzzyResults = {};
+        if (fuzzyFilter) {
+            candidates = FuzzySort.go(fuzzyFilter, candidates, {
                 keys: ["login", "store.name"],
                 allowTypo: false
-            }).map(result =>
-                Object.assign(result.obj, {
-                    display: result[0]
-                        ? FuzzySort.highlight(result[0], "<em>", "</em>")
-                        : result.obj.login
-                })
-            );
+            }).map(result => {
+                fuzzyResults[result.obj.login] = result;
+                return result.obj;
+            });
         }
-        // substring-search to refine against each remaining word
-        filter.slice(fuzzyFirstWord ? 1 : 0).forEach(function(word) {
-            candidates = candidates.filter(
-                login => login.login.toLowerCase().indexOf(word.toLowerCase()) >= 0
-            );
-        });
+
+        // Finally highlight all matches
+        candidates = candidates.map(c => highlightMatches(c, fuzzyResults, substringFilters));
     }
 
+    // Prefix root entries with slash to let them have some visible path
+    candidates.forEach(c => {
+        c.path = c.path || "/";
+    });
+
     this.results = candidates;
+}
+
+function highlightMatches(candidate, fuzzyResults, substringFilters) {
+    // Add all positions of the fuzzy search to the array
+    let matches = (fuzzyResults[candidate.login] && fuzzyResults[candidate.login][0]
+        ? fuzzyResults[candidate.login][0].indexes
+        : []
+    ).slice();
+
+    // Add all positions of substring searches to the array
+    let login = candidate.login.toLowerCase();
+    for (let word of substringFilters) {
+        let startIndex = login.indexOf(word);
+        for (let i = 0; i < word.length; i++) {
+            matches.push(startIndex + i);
+        }
+    }
+
+    // Prepare the final array of matches before
+    matches = sortUnique(matches, (a, b) => a - b);
+
+    const OPEN = "<em>";
+    const CLOSE = "</em>";
+    let highlighted = "";
+    var matchesIndex = 0;
+    var opened = false;
+    for (var i = 0; i < candidate.login.length; ++i) {
+        var char = candidate.login[i];
+
+        if (i == candidate.path.length) {
+            if (opened) {
+                highlighted += CLOSE;
+            }
+            var path = highlighted;
+            highlighted = "";
+            if (opened) {
+                highlighted += OPEN;
+            }
+        }
+
+        if (matches[matchesIndex] === i) {
+            matchesIndex++;
+            if (!opened) {
+                opened = true;
+                highlighted += OPEN;
+            }
+        } else {
+            if (opened) {
+                opened = false;
+                highlighted += CLOSE;
+            }
+        }
+        highlighted += char;
+    }
+    if (opened) {
+        opened = false;
+        highlighted += CLOSE;
+    }
+    let display = highlighted;
+
+    return Object.assign(candidate, {
+        path: path,
+        display: display
+    });
+}
+
+function sortUnique(array, comparator) {
+    return array
+        .sort(comparator)
+        .filter((elem, index, arr) => index == !arr.length || arr[index - 1] != elem);
 }
 
 /**
