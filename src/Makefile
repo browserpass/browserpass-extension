@@ -1,11 +1,12 @@
 BROWSERIFY := node_modules/.bin/browserify
 PRETTIER := node_modules/.bin/prettier
+LESSC := node_modules/.bin/lessc
 
 CLEAN_FILES := js
-PRETTIER_FILES := $(wildcard *.js popup/*.js *.css popup/*.css)
+PRETTIER_FILES := $(wildcard *.js popup/*.js *.less popup/*.less)
 
 .PHONY: all
-all: deps prettier js/background.dist.js js/popup.dist.js js/inject.dist.js
+all: deps prettier css/popup.css js/background.dist.js js/popup.dist.js js/inject.dist.js
 
 .PHONY: deps
 deps:
@@ -14,6 +15,10 @@ deps:
 .PHONY: prettier
 prettier: $(PRETTIER) $(PRETTIER_FILES)
 	$(PRETTIER) --write $(PRETTIER_FILES)
+
+css/popup.css: $(LESSC) popup/popup.less
+	[ -d css ] || mkdir -p css
+	$(LESSC) popup/popup.less css/popup.css
 
 js/background.dist.js: $(BROWSERIFY) background.js
 	[ -d js ] || mkdir -p js

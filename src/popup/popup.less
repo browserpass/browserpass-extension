@@ -1,8 +1,30 @@
+@bg-color: #414141;
+@default-bg-color: #393939;
+@hover-bg-color: #363636;
+@text-color: #c4c4c4;
+@error-text-color: #f00;
+@dim-text-color: #808080;
+
+@input-bg-color: #4a4a4a;
+@active-input-bg-color: #4f4f4f;
+@input-text-color: #eee;
+
+@hint-bg-color: #d79921;
+@hint-color: #363636;
+
+@match-text-color: @hint-bg-color;
+
 html,
 body {
+    font-family: sans;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
     min-width: 260px;
     overflow-x: hidden;
     white-space: nowrap;
+    background-color: @bg-color;
+    color: @text-color;
 }
 
 html::-webkit-scrollbar,
@@ -21,11 +43,19 @@ body {
     flex-direction: column;
     overflow-y: auto;
     height: inherit;
-    max-height: 217px; /* 7 x 31px login part*/
+    max-height: 217px; /* 7 x 31px login part */
+}
+
+.badge {
+    background-color: #0a0;
+    border-radius: 4px;
+    color: #fff;
+    font-size: 12px;
+    margin: 0 6px;
+    padding: 1px 4px;
 }
 
 .part {
-    border-bottom: 1px solid #eee;
     box-sizing: border-box;
     display: flex;
     flex-shrink: 0;
@@ -41,39 +71,39 @@ body {
 }
 
 .part.error {
-    color: #f00;
+    color: @error-text-color;
     white-space: normal;
     padding: 7px;
 }
 
 .part.notice {
-    color: #090;
     white-space: normal;
     padding: 7px;
 }
 
 .part.search {
     padding: 6px 28px 6px 6px;
-    background-image: url("icon-search.svg");
+    background-image: url("/popup/icon-search.svg");
     background-position: top 6px right 6px;
     background-repeat: no-repeat;
     background-size: 18px;
-    background-color: #f7f7f7;
+    background-color: @input-bg-color;
 }
 
 .part.search:focus-within {
-    background-color: #fff;
+    background-color: @active-input-bg-color;
 }
 
 .part.search > .hint {
-    background-color: #66c;
+    background-color: @hint-bg-color;
+    color: @hint-color;
     display: flex;
     align-items: center;
     line-height: 19px;
 }
 
 .part.search > .hint > .remove-hint {
-    background-image: url("icon-bs-delete.svg");
+    background-image: url("/popup/icon-bs-delete.svg");
     background-repeat: no-repeat;
     background-size: contain;
     cursor: pointer;
@@ -87,6 +117,11 @@ body {
     border: none;
     outline: none;
     width: 100%;
+    color: @input-text-color;
+}
+
+.part.search > input[type="text"]::placeholder {
+    color: @dim-text-color;
 }
 
 .part.login {
@@ -97,7 +132,7 @@ body {
 }
 
 .logins:not(:hover):not(:focus-within) .part.login:first-child > .name {
-    background-color: #f7f7f7;
+    background-color: @default-bg-color;
 }
 
 .part.login:hover,
@@ -110,7 +145,7 @@ body {
 .part.login > .action:hover,
 .part.login > .action:focus,
 .part.login:focus > .name {
-    background-color: #eee;
+    background-color: @hover-bg-color;
     outline: none;
 }
 
@@ -122,7 +157,7 @@ body {
 }
 
 .part.login > .name > .recent {
-    background-image: url("icon-history.svg");
+    background-image: url("/popup/icon-history.svg");
     background-repeat: no-repeat;
     background-size: contain;
     margin-left: 4px;
@@ -139,24 +174,20 @@ body {
     padding: 6px;
 }
 
-.past.login > .action:hover {
-    background-color: #f00;
-}
-
 .part.login > .action.copy-password {
-    background-image: url("icon-key.svg");
+    background-image: url("/popup/icon-key.svg");
 }
 
 .part.login > .action.copy-user {
-    background-image: url("icon-user.svg");
+    background-image: url("/popup/icon-user.svg");
 }
 
 .part.login > .action.launch {
-    background-image: url("icon-launch.svg");
+    background-image: url("/popup/icon-launch.svg");
     background-position-y: 5.5px;
 }
 
 .part.login em {
-    color: #00c;
+    color: @match-text-color;
     font-style: normal;
 }
