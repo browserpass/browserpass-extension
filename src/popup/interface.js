@@ -207,15 +207,25 @@ function search(s) {
     this.results = candidates;
 }
 
-function highlightMatches(candidate, fuzzyResults, substringFilters) {
+/**
+ * Highlight filter matches
+ *
+ * @since 3.0.0
+ *
+ * @param object entry password entry
+ * @param object fuzzyResults positions of fuzzy filter matches
+ * @param array substringFilters list of substring filters applied
+ * @return object entry with highlighted matches
+ */
+function highlightMatches(entry, fuzzyResults, substringFilters) {
     // Add all positions of the fuzzy search to the array
-    let matches = (fuzzyResults[candidate.login] && fuzzyResults[candidate.login][0]
-        ? fuzzyResults[candidate.login][0].indexes
+    let matches = (fuzzyResults[entry.login] && fuzzyResults[entry.login][0]
+        ? fuzzyResults[entry.login][0].indexes
         : []
     ).slice();
 
     // Add all positions of substring searches to the array
-    let login = candidate.login.toLowerCase();
+    let login = entry.login.toLowerCase();
     for (let word of substringFilters) {
         let startIndex = login.indexOf(word);
         for (let i = 0; i < word.length; i++) {
@@ -231,10 +241,10 @@ function highlightMatches(candidate, fuzzyResults, substringFilters) {
     let highlighted = "";
     var matchesIndex = 0;
     var opened = false;
-    for (var i = 0; i < candidate.login.length; ++i) {
-        var char = candidate.login[i];
+    for (var i = 0; i < entry.login.length; ++i) {
+        var char = entry.login[i];
 
-        if (i == candidate.path.length) {
+        if (i == entry.path.length) {
             if (opened) {
                 highlighted += CLOSE;
             }
@@ -265,12 +275,21 @@ function highlightMatches(candidate, fuzzyResults, substringFilters) {
     }
     let display = highlighted;
 
-    return Object.assign(candidate, {
+    return Object.assign(entry, {
         path: path,
         display: display
     });
 }
 
+/**
+ * Sort and remove duplicates
+ *
+ * @since 3.0.0
+ *
+ * @param array array items to sort
+ * @param function comparator sort comparator
+ * @return array sorted items without duplicates
+ */
 function sortUnique(array, comparator) {
     return array
         .sort(comparator)
