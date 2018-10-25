@@ -13,7 +13,7 @@ CHROME_FILES := manifest.json \
 	       popup/*.html \
 	       popup/*.svg
 CHROME_FILES := $(wildcard $(addprefix src/,$(CHROME_FILES))) \
-		src/css/popup.css \
+		src/css/popup.dist.css \
 		src/js/background.dist.js \
 		src/js/popup.dist.js \
 		src/js/inject.dist.js

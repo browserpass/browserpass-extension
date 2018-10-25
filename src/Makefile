@@ -18,7 +18,7 @@ prettier: $(PRETTIER) $(PRETTIER_FILES)
 
 css/popup.css: $(LESSC) popup/popup.less
 	[ -d css ] || mkdir -p css
-	$(LESSC) popup/popup.less css/popup.css
+	$(LESSC) popup/popup.less css/popup.dist.css
 
 js/background.dist.js: $(BROWSERIFY) background.js
 	[ -d js ] || mkdir -p js
