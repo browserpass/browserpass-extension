@@ -1,0 +1,209 @@
+@bg-color: #414141;
+@default-bg-color: #393939;
+@hover-bg-color: #363636;
+@text-color: #c4c4c4;
+@error-text-color: #f00;
+@dim-text-color: #808080;
+
+@input-bg-color: #4a4a4a;
+@active-input-bg-color: #4f4f4f;
+@input-text-color: #eee;
+
+@hint-bg-color: #d79921;
+@hint-color: #363636;
+
+@match-text-color: @hint-bg-color;
+
+@login-height: 53px;
+@max-logins-height: @login-height * 7;
+@login-part-padding: 6px;
+@login-part-height: @login-height - 2 * @login-part-padding;
+
+html,
+body {
+    font-family: sans;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+    min-width: 260px;
+    overflow-x: hidden;
+    white-space: nowrap;
+    background-color: @bg-color;
+    color: @text-color;
+    font-weight: 200;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.logins {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    height: inherit;
+    max-height: @max-logins-height;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    background-color: #626262;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 8px;
+    padding: 1px 4px;
+}
+
+.part {
+    box-sizing: border-box;
+    display: flex;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.part:last-child {
+    border-bottom: none;
+}
+
+.part > .badge:first-child {
+    margin-left: 0;
+}
+
+.part.error {
+    color: @error-text-color;
+    white-space: normal;
+    padding: 7px;
+}
+
+.part.notice {
+    white-space: normal;
+    padding: 7px;
+}
+
+.part.search {
+    padding: 6px 28px 6px 6px;
+    background-image: url("/popup/icon-search.svg");
+    background-position: top 6px right 6px;
+    background-repeat: no-repeat;
+    background-size: 18px;
+    background-color: @input-bg-color;
+}
+
+.part.search:focus-within {
+    background-color: @active-input-bg-color;
+}
+
+.part.search > .hint {
+    background-color: @hint-bg-color;
+    color: @hint-color;
+    line-height: 19px;
+}
+
+.part.search > .hint > .remove-hint {
+    background-image: url("/popup/icon-bs-delete.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    cursor: pointer;
+    height: 12px;
+    margin: 3px 0 3px 4px;
+    width: 16px;
+}
+
+.part.search > input[type="text"] {
+    background-color: transparent;
+    border: none;
+    outline: none;
+    width: 100%;
+    color: @input-text-color;
+}
+
+.part.search > input[type="text"]::placeholder {
+    color: @dim-text-color;
+}
+
+.logins:not(:hover):not(:focus-within) .part.login:first-child > .name {
+    background-color: @default-bg-color;
+}
+
+.part.login > .name:hover,
+.part.login > .name:focus,
+.part.login > .action:hover,
+.part.login > .action:focus,
+.part.login:focus > .name {
+    background-color: @hover-bg-color;
+    outline: none;
+}
+
+.part.login {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    height: @login-height;
+
+    &:hover,
+    &:focus {
+        outline: none;
+    }
+
+    .name {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: @login-part-height;
+        padding: @login-part-padding;
+
+        .line1 {
+            display: flex;
+            flex-direction: row;
+            font-size: 12px;
+
+            .recent {
+                background-image: url("/popup/icon-history.svg");
+                background-repeat: no-repeat;
+                background-size: contain;
+                margin-left: 8px;
+                width: 9.5px;
+                margin-top: 4px;
+            }
+        }
+
+        .line2 {
+            font-size: 18px;
+        }
+    }
+
+    .action {
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 19px;
+        width: 30px;
+        height: @login-part-height;
+        padding: @login-part-padding;
+
+        &.copy-password {
+            background-image: url("/popup/icon-key.svg");
+        }
+
+        &.copy-user {
+            background-image: url("/popup/icon-user.svg");
+        }
+
+        &.launch {
+            background-image: url("/popup/icon-launch.svg");
+            background-position-y: 16px;
+        }
+    }
+}
+
+.part.login em {
+    color: @match-text-color;
+    font-style: normal;
+}

@@ -401,7 +401,7 @@ async function receiveMessage(message, sender, sendResponse) {
             // no user-configured stores, so use the default store
             settings.stores.default = {
                 id: "default",
-                name: "default",
+                name: "pass",
                 path: response.data.defaultStore.path,
                 settings: response.data.defaultStore.settings
             };
