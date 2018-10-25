@@ -6,7 +6,7 @@ CLEAN_FILES := js
 PRETTIER_FILES := $(wildcard *.js popup/*.js *.less popup/*.less)
 
 .PHONY: all
-all: deps prettier css/popup.css js/background.dist.js js/popup.dist.js js/inject.dist.js
+all: deps prettier css/popup.dist.css js/background.dist.js js/popup.dist.js js/inject.dist.js
 
 .PHONY: deps
 deps:
@@ -16,7 +16,7 @@ deps:
 prettier: $(PRETTIER) $(PRETTIER_FILES)
 	$(PRETTIER) --write $(PRETTIER_FILES)
 
-css/popup.css: $(LESSC) popup/popup.less
+css/popup.dist.css: $(LESSC) popup/popup.less
 	[ -d css ] || mkdir -p css
 	$(LESSC) popup/popup.less css/popup.dist.css
 
