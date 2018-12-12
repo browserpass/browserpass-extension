@@ -124,8 +124,6 @@ async function fillFields(tab, login, fields) {
 
     // build fill request
     var fillRequest = {
-        allowForeign: false,
-        allowNoSecret: false,
         origin: new URL(tab.url).origin,
         login: login,
         fields: fields
