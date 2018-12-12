@@ -109,8 +109,10 @@
         }
 
         // fill secret field
-        if (find(PASSWORD_FIELDS, loginForm)) {
-            update(PASSWORD_FIELDS, request.login.fields.secret, loginForm);
+        if (
+            request.fields.includes("secret") &&
+            update(PASSWORD_FIELDS, request.login.fields.secret, loginForm)
+        ) {
             filledFields.push("secret");
         }
 
