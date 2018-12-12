@@ -345,10 +345,8 @@ async function handleMessage(settings, message, sendResponse) {
 
                 // dispatch initial fill request
                 var filledFields = await fillFields(targetTab, message.login, ["login", "secret"]);
-                if (!filledFields.length) {
-                    throw new Error("Unable to fill credentials");
-                }
 
+                // no need to check filledFields, because fillFields() already throws an error if empty
                 sendResponse({ status: "ok", filledFields: filledFields });
             } catch (e) {
                 try {
