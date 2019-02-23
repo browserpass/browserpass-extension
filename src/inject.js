@@ -74,29 +74,38 @@
      * @since 3.0.0
      *
      * @param object request Form fill request
-     * @return void
+     * @return object result of filling a form
      */
     function fillLogin(request) {
         var autoSubmit = false;
-        var filledFields = [];
+        var result = {
+            filledFields: [],
+            foreignFill: undefined
+        };
 
         // get the login form
         var loginForm = form();
 
         // don't attempt to fill non-secret forms unless non-secret filling is allowed
         if (!find(PASSWORD_FIELDS, loginForm) && !request.allowNoSecret) {
-            return filledFields;
+            return result;
         }
 
         // ensure the origin is the same, or ask the user for permissions to continue
         if (window.location.origin !== request.origin) {
+            if (!request.allowForeign) {
+                return result;
+            }
             var message =
                 "You have requested to fill login credentials into an embedded document from a " +
                 "different origin than the main document in this tab. Do you wish to proceed?\n\n" +
                 `Tab origin: ${request.origin}\n` +
                 `Embedded origin: ${window.location.origin}`;
-            if (!request.allowForeign || !confirm(message)) {
-                return filledFields;
+            if (!request.approvedForeign) {
+                result.foreignFill = confirm(message);
+                if (!result.foreignFill) {
+                    return result;
+                }
             }
         }
 
@@ -105,7 +114,7 @@
             request.fields.includes("login") &&
             update(USERNAME_FIELDS, request.login.fields.login, loginForm)
         ) {
-            filledFields.push("login");
+            result.filledFields.push("login");
         }
 
         // fill secret field
@@ -113,7 +122,7 @@
             request.fields.includes("secret") &&
             update(PASSWORD_FIELDS, request.login.fields.secret, loginForm)
         ) {
-            filledFields.push("secret");
+            result.filledFields.push("secret");
         }
 
         // check for multiple password fields in the login form
@@ -153,7 +162,7 @@
         }
 
         // finished filling things successfully
-        return filledFields;
+        return result;
     }
 
     /**
