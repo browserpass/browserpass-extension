@@ -6,25 +6,7 @@ var TldJS = require("tldjs");
 var sha1 = require("sha1");
 var Interface = require("./interface");
 
-// wrap with current tab & settings
-chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
-    try {
-        var response = await chrome.runtime.sendMessage({ action: "getSettings" });
-        if (response.status != "ok") {
-            throw new Error(response.message);
-        }
-        var settings = response.settings;
-
-        // Set additional settings only visible in the popup context,
-        // if necessary these need to be additionally passed to the background script
-        settings.tab = tabs[0];
-        settings.host = new URL(settings.tab.url).hostname;
-
-        run(settings);
-    } catch (e) {
-        handleError(e);
-    }
-});
+run();
 
 //----------------------------------- Function definitions ----------------------------------//
 
@@ -75,15 +57,20 @@ function pathToDomain(path) {
  *
  * @since 3.0.0
  *
- * @param object settings Settings object
  * @return void
  */
-async function run(settings) {
+async function run() {
     try {
-        // get list of logins
-        var response = await chrome.runtime.sendMessage({ action: "listFiles" });
+        var response = await chrome.runtime.sendMessage({ action: "getSettings" });
         if (response.status != "ok") {
-            throw new Error(e);
+            throw new Error(response.message);
+        }
+        var settings = response.settings;
+
+        // get list of logins
+        response = await chrome.runtime.sendMessage({ action: "listFiles" });
+        if (response.status != "ok") {
+            throw new Error(response.message);
         }
 
         var logins = [];
@@ -153,8 +140,7 @@ async function withLogin(action) {
         // hand off action to background script
         var response = await chrome.runtime.sendMessage({
             action: action,
-            login: this.login,
-            host: this.settings.host
+            login: this.login
         });
         if (response.status != "ok") {
             throw new Error(response.message);

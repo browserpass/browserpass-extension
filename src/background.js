@@ -72,7 +72,7 @@ function copyToClipboard(text) {
  * @param bool   remove   Remove this item from recent history
  * @return void
  */
-function saveRecent(settings, host, login, remove = false) {
+function saveRecent(settings, login, remove = false) {
     var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
 
     // save store timestamp
@@ -83,7 +83,7 @@ function saveRecent(settings, host, login, remove = false) {
         login.recent.count++;
     }
     login.recent.when = Date.now();
-    settings.recent[sha1(host + sha1(login.store.id + sha1(login.login)))] = login.recent;
+    settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))] = login.recent;
 
     // save to local storage
     localStorage.setItem("recent", JSON.stringify(settings.recent));
@@ -195,7 +195,7 @@ async function fillFields(tab, login, fields) {
  *
  * @return object Local settings from the extension
  */
-function getLocalSettings() {
+async function getLocalSettings() {
     var settings = Object.assign({}, defaultSettings);
     for (var key in settings) {
         var value = localStorage.getItem(key);
@@ -212,11 +212,21 @@ function getLocalSettings() {
             settings.stores[storeId].when = 0;
         }
     }
+
+    // Fill recent data
     settings.recent = localStorage.getItem("recent");
     if (settings.recent) {
         settings.recent = JSON.parse(settings.recent);
     } else {
         settings.recent = {};
+    }
+
+    // Fill current tab info
+    try {
+        settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+        settings.host = new URL(settings.tab.url).hostname;
+    } catch (e) {
+        throw new Error("Unable to retrieve current tab information");
     }
 
     return settings;
@@ -331,7 +341,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "copyPassword":
             try {
                 copyToClipboard(message.login.fields.secret);
-                saveRecent(settings, message.host, message.login);
+                saveRecent(settings, message.login);
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
@@ -343,7 +353,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "copyUsername":
             try {
                 copyToClipboard(message.login.fields.login);
-                saveRecent(settings, message.host, message.login);
+                saveRecent(settings, message.login);
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
@@ -355,7 +365,6 @@ async function handleMessage(settings, message, sendResponse) {
 
         case "launch":
             try {
-                var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
                 var url = message.login.fields.url || message.login.domain;
                 if (!url) {
                     throw new Error("No URL is defined for this entry");
@@ -363,17 +372,20 @@ async function handleMessage(settings, message, sendResponse) {
                 if (!url.match(/:\/\//)) {
                     url = "http://" + url;
                 }
-                if (authListeners[tab.id]) {
-                    chrome.tabs.onUpdated.removeListener(authListeners[tab.id]);
-                    delete authListeners[tab.id];
+                if (authListeners[settings.tab.id]) {
+                    chrome.tabs.onUpdated.removeListener(authListeners[settings.tab.id]);
+                    delete authListeners[settings.tab.id];
                 }
-                authListeners[tab.id] = handleModalAuth.bind({ url: url, login: message.login });
+                authListeners[settings.tab.id] = handleModalAuth.bind({
+                    url: url,
+                    login: message.login
+                });
                 chrome.webRequest.onAuthRequired.addListener(
-                    authListeners[tab.id],
-                    { urls: ["*://*/*"], tabId: tab.id },
+                    authListeners[settings.tab.id],
+                    { urls: ["*://*/*"], tabId: settings.tab.id },
                     ["blocking"]
                 );
-                chrome.tabs.update(tab.id, { url: url });
+                chrome.tabs.update(settings.tab.id, { url: url });
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
@@ -384,12 +396,12 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "fill":
             try {
-                // get tab info
-                var targetTab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-
                 // dispatch initial fill request
-                var filledFields = await fillFields(targetTab, message.login, ["login", "secret"]);
-                saveRecent(settings, message.host, message.login);
+                var filledFields = await fillFields(settings.tab, message.login, [
+                    "login",
+                    "secret"
+                ]);
+                saveRecent(settings, message.login);
 
                 // no need to check filledFields, because fillFields() already throws an error if empty
                 sendResponse({ status: "ok", filledFields: filledFields });
@@ -519,7 +531,7 @@ async function receiveMessage(message, sender, sendResponse) {
         return;
     }
 
-    var settings = getLocalSettings();
+    var settings = await getLocalSettings();
     try {
         var configureSettings = Object.assign(settings, { defaultStore: {} });
         var response = await chrome.runtime.sendNativeMessage(appID, {
