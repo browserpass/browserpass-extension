@@ -10,7 +10,8 @@ var appID = "com.github.browserpass.native";
 // default settings
 var defaultSettings = {
     gpgPath: null,
-    stores: {}
+    stores: {},
+    foreignFills: {}
 };
 
 var authListeners = {};
@@ -92,7 +93,7 @@ function saveRecent(settings, login, remove = false) {
 /**
  * Call injected form-fill code
  *
- * @param object  tab           Target tab
+ * @param object  settings      Settings object
  * @param object  fillRequest   Fill request details
  * @param boolean allFrames     Dispatch to all frames
  * @param boolean allowForeign  Allow foreign-origin iframes
@@ -100,7 +101,7 @@ function saveRecent(settings, login, remove = false) {
  * @return array list of filled fields
  */
 async function dispatchFill(
-    tab,
+    settings,
     fillRequest,
     allFrames = false,
     allowForeign = false,
@@ -108,36 +109,50 @@ async function dispatchFill(
 ) {
     fillRequest = Object.assign(deepCopy(fillRequest), {
         allowForeign: allowForeign,
-        allowNoSecret: allowNoSecret
+        allowNoSecret: allowNoSecret,
+        approvedForeign: settings.foreignFills[settings.host]
     });
 
-    var filledFields = await chrome.tabs.executeScript(tab.id, {
+    var perFrameFillResults = await chrome.tabs.executeScript(settings.tab.id, {
         allFrames: allFrames,
         code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
     });
 
-    // simplify the list of filled fields
-    filledFields = filledFields
-        .reduce((fields, addFields) => fields.concat(addFields), [])
-        .reduce(function(fields, field) {
-            if (!fields.includes(field)) {
-                fields.push(field);
+    // merge fill resutls in a single object
+    var fillResult = perFrameFillResults.reduce(
+        function(merged, frameResult) {
+            if (typeof frameResult.foreignFill !== "undefined") {
+                merged.foreignFill = frameResult.foreignFill;
             }
-            return fields;
-        }, []);
+            for (var field in frameResult.filledFields) {
+                if (!merged.filledFields.includes(field)) {
+                    merged.filledFields.push(field);
+                }
+            }
+            return merged;
+        },
+        { filledFields: [] }
+    );
 
-    return filledFields;
+    // if user answered a foreign-origin confirmation,
+    // store the answer in the settings
+    if (typeof fillResult.foreignFill !== "undefined") {
+        settings.foreignFills[settings.host] = fillResult.foreignFill;
+        saveSettings(settings);
+    }
+
+    return fillResult.filledFields;
 }
 
 /**
  * Fill form fields
  *
- * @param object tab    Target tab
- * @param object login  Login object
- * @param array  fields List of fields to fill
+ * @param object settings Settings object
+ * @param object login    Login object
+ * @param array  fields   List of fields to fill
  * @return array List of filled fields
  */
-async function fillFields(tab, login, fields) {
+async function fillFields(settings, login, fields) {
     // check that required fields are present
     for (var field of fields) {
         if (login.fields[field] === null) {
@@ -146,39 +161,43 @@ async function fillFields(tab, login, fields) {
     }
 
     // inject script
-    await chrome.tabs.executeScript(tab.id, {
+    await chrome.tabs.executeScript(settings.tab.id, {
         allFrames: true,
         file: "js/inject.dist.js"
     });
 
     // build fill request
     var fillRequest = {
-        origin: new URL(tab.url).origin,
+        origin: new URL(settings.tab.url).origin,
         login: login,
         fields: fields
     };
 
     // fill form via injected script
-    var filledFields = await dispatchFill(tab, fillRequest);
+    var filledFields = await dispatchFill(settings, fillRequest);
 
     // try again using same-origin frames if we couldn't fill a password field
     if (!filledFields.includes("secret")) {
-        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true));
+        filledFields = filledFields.concat(await dispatchFill(settings, fillRequest, true));
     }
 
     // try again using all available frames if we couldn't fill a password field
-    if (!filledFields.includes("secret")) {
-        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true, true));
+    if (!filledFields.includes("secret") && settings.foreignFills[settings.host] !== false) {
+        filledFields = filledFields.concat(await dispatchFill(settings, fillRequest, true, true));
     }
 
     // try again using same-origin frames, and don't require a password field
     if (!filledFields.length) {
-        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true, false, true));
+        filledFields = filledFields.concat(
+            await dispatchFill(settings, fillRequest, true, false, true)
+        );
     }
 
     // try again using all available frames, and don't require a password field
-    if (!filledFields.length) {
-        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true, true, true));
+    if (!filledFields.length && settings.foreignFills[settings.host] !== false) {
+        filledFields = filledFields.concat(
+            await dispatchFill(settings, fillRequest, true, true, true)
+        );
     }
 
     if (!filledFields.length) {
@@ -384,10 +403,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "fill":
             try {
                 // dispatch initial fill request
-                var filledFields = await fillFields(settings.tab, message.login, [
-                    "login",
-                    "secret"
-                ]);
+                var filledFields = await fillFields(settings, message.login, ["login", "secret"]);
                 saveRecent(settings, message.login);
 
                 // no need to check filledFields, because fillFields() already throws an error if empty
