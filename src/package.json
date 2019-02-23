@@ -15,16 +15,16 @@
         }
     ],
     "dependencies": {
-        "chrome-extension-async": "^3.3.0",
+        "chrome-extension-async": "^3.3.2",
         "fuzzysort": "^1.1.4",
         "mithril": "^1.1.0",
-        "moment": "^2.22.2",
+        "moment": "^2.24.0",
         "sha1": "^1.1.1",
         "tldjs": "^2.3.0"
     },
     "devDependencies": {
         "browserify": "^16.2.3",
-        "less": "^3.8.1",
-        "prettier": "^1.14.3"
+        "less": "^3.9.0",
+        "prettier": "^1.16.4"
     }
 }
