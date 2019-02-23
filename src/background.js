@@ -106,7 +106,7 @@ async function dispatchFill(
     allowForeign = false,
     allowNoSecret = false
 ) {
-    fillRequest = Object.assign({}, fillRequest, {
+    fillRequest = Object.assign(deepCopy(fillRequest), {
         allowForeign: allowForeign,
         allowNoSecret: allowNoSecret
     });
@@ -195,8 +195,8 @@ async function fillFields(tab, login, fields) {
  *
  * @return object Local settings from the extension
  */
-async function getLocalSettings() {
-    var settings = Object.assign({}, defaultSettings);
+function getLocalSettings() {
+    var settings = deepCopy(defaultSettings);
     for (var key in settings) {
         var value = localStorage.getItem(key);
         if (value !== null) {
@@ -204,32 +204,19 @@ async function getLocalSettings() {
         }
     }
 
-    for (var storeId in settings.stores) {
-        var when = localStorage.getItem("recent:" + storeId);
-        if (when) {
-            settings.stores[storeId].when = JSON.parse(when);
-        } else {
-            settings.stores[storeId].when = 0;
-        }
-    }
-
-    // Fill recent data
-    settings.recent = localStorage.getItem("recent");
-    if (settings.recent) {
-        settings.recent = JSON.parse(settings.recent);
-    } else {
-        settings.recent = {};
-    }
-
-    // Fill current tab info
-    try {
-        settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-        settings.host = new URL(settings.tab.url).hostname;
-    } catch (e) {
-        throw new Error("Unable to retrieve current tab information");
-    }
-
     return settings;
+}
+
+/**
+ * Deep copy an object
+ *
+ * @since 3.0.0
+ *
+ * @param object obj an object to copy
+ * @return object a new deep copy
+ */
+function deepCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
 }
 
 /**
@@ -531,15 +518,17 @@ async function receiveMessage(message, sender, sendResponse) {
         return;
     }
 
-    var settings = await getLocalSettings();
+    var settings = getLocalSettings();
     try {
-        var configureSettings = Object.assign(settings, { defaultStore: {} });
+        var configureSettings = Object.assign(deepCopy(settings), {
+            defaultStore: {}
+        });
         var response = await chrome.runtime.sendNativeMessage(appID, {
             settings: configureSettings,
             action: "configure"
         });
         settings.version = response.version;
-        if (settings.stores.length) {
+        if (Object.keys(settings.stores).length > 0) {
             // there are user-configured stores present
             for (var storeId in settings.stores) {
                 if (response.data.storeSettings.hasOwnProperty(storeId)) {
@@ -564,6 +553,31 @@ async function receiveMessage(message, sender, sendResponse) {
                 settings: response.data.defaultStore.settings
             };
         }
+
+        // Fill recent data
+        for (var storeId in settings.stores) {
+            var when = localStorage.getItem("recent:" + storeId);
+            if (when) {
+                settings.stores[storeId].when = JSON.parse(when);
+            } else {
+                settings.stores[storeId].when = 0;
+            }
+        }
+        settings.recent = localStorage.getItem("recent");
+        if (settings.recent) {
+            settings.recent = JSON.parse(settings.recent);
+        } else {
+            settings.recent = {};
+        }
+
+        // Fill current tab info
+        try {
+            settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+            settings.host = new URL(settings.tab.url).hostname;
+        } catch (e) {
+            throw new Error("Unable to retrieve current tab information");
+        }
+
         handleMessage(settings, message, sendResponse);
     } catch (e) {
         // handle error
@@ -581,6 +595,9 @@ async function receiveMessage(message, sender, sendResponse) {
  * @return void
  */
 function saveSettings(settings) {
+    // 'default' is our reserved name for the default store
+    delete settings.stores.default;
+
     for (var key in defaultSettings) {
         if (settings.hasOwnProperty(key)) {
             localStorage.setItem(key, JSON.stringify(settings[key]));
