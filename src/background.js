@@ -61,6 +61,105 @@ function copyToClipboard(text) {
 }
 
 /**
+ * Call injected form-fill code
+ *
+ * @param object  tab           Target tab
+ * @param object  fillRequest   Fill request details
+ * @param boolean allFrames     Dispatch to all frames
+ * @param boolean allowForeign  Allow foreign-origin iframes
+ * @param boolean allowNoSecret Allow forms that don't contain a password field
+ * @return array list of filled fields
+ */
+async function dispatchFill(
+    tab,
+    fillRequest,
+    allFrames = false,
+    allowForeign = false,
+    allowNoSecret = false
+) {
+    fillRequest = Object.assign({}, fillRequest, {
+        allowForeign: allowForeign,
+        allowNoSecret: allowNoSecret
+    });
+
+    var filledFields = await chrome.tabs.executeScript(tab.id, {
+        allFrames: allFrames,
+        code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
+    });
+
+    // simplify the list of filled fields
+    filledFields = filledFields
+        .reduce((fields, addFields) => fields.concat(addFields), [])
+        .reduce(function(fields, field) {
+            if (!fields.includes(field)) {
+                fields.push(field);
+            }
+            return fields;
+        }, []);
+
+    return filledFields;
+}
+
+/**
+ * Fill form fields
+ *
+ * @param object tab    Target tab
+ * @param object login  Login object
+ * @param array  fields List of fields to fill
+ * @return array List of filled fields
+ */
+async function fillFields(tab, login, fields) {
+    // check that required fields are present
+    for (var field of fields) {
+        if (login.fields[field] === null) {
+            throw new Error(`Required field is missing: ${field}`);
+        }
+    }
+
+    // inject script
+    await chrome.tabs.executeScript(tab.id, {
+        allFrames: true,
+        file: "js/inject.dist.js"
+    });
+
+    // build fill request
+    var fillRequest = {
+        origin: new URL(tab.url).origin,
+        login: login,
+        fields: fields
+    };
+
+    // fill form via injected script
+    var filledFields = await dispatchFill(tab, fillRequest);
+
+    // try again using same-origin frames if we couldn't fill a password field
+    if (!filledFields.includes("secret")) {
+        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true));
+    }
+
+    // try again using all available frames if we couldn't fill a password field
+    if (!filledFields.includes("secret")) {
+        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true, true));
+    }
+
+    // try again using same-origin frames, and don't require a password field
+    if (!filledFields.length) {
+        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true, false, true));
+    }
+
+    // try again using all available frames, and don't require a password field
+    if (!filledFields.length) {
+        filledFields = filledFields.concat(await dispatchFill(tab, fillRequest, true, true, true));
+    }
+
+    if (!filledFields.length) {
+        throw new Error(`No fillable forms available for fields: ${fields.join(", ")}`);
+    }
+
+    return filledFields;
+}
+
+/**
  * Get Local settings from the extension
  *
  * @since 3.0.0
@@ -239,29 +338,26 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "fill":
             try {
-                var tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-                await chrome.tabs.executeScript(tab.id, { file: "js/inject.dist.js" });
-                // check login fields
-                if (message.login.fields.login === null) {
-                    throw new Error("No login is available");
-                }
-                if (message.login.fields.secret === null) {
-                    throw new Error("No password is available");
-                }
-                var fillFields = JSON.stringify({
-                    login: message.login.fields.login,
-                    secret: message.login.fields.secret
-                });
-                // fill form via injected script
-                await chrome.tabs.executeScript(tab.id, {
-                    code: `window.browserpass.fillLogin(${fillFields});`
-                });
-                sendResponse({ status: "ok" });
+                // get tab info
+                var targetTab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+
+                // dispatch initial fill request
+                var filledFields = await fillFields(targetTab, message.login, ["login", "secret"]);
+
+                // no need to check filledFields, because fillFields() already throws an error if empty
+                sendResponse({ status: "ok", filledFields: filledFields });
             } catch (e) {
-                sendResponse({
-                    status: "error",
-                    message: "Unable to fill credentials: " + e.toString()
-                });
+                try {
+                    sendResponse({
+                        status: "error",
+                        message: e.toString()
+                    });
+                } catch (e) {
+                    // TODO An error here is typically a closed message port, due to a popup taking focus
+                    // away from the extension menu and the menu closing as a result. Need to investigate
+                    // whether triggering the extension menu from the background script is possible.
+                    console.log(e);
+                }
             }
             break;
         default:
@@ -335,7 +431,10 @@ async function parseFields(settings, login) {
 
         // assign to fields
         for (var key in login.fields) {
-            if (Array.isArray(login.fields[key]) && login.fields[key].indexOf(parts[0]) >= 0) {
+            if (
+                Array.isArray(login.fields[key]) &&
+                login.fields[key].indexOf(parts[0].toLowerCase()) >= 0
+            ) {
                 login.fields[key] = parts[1];
                 break;
             }

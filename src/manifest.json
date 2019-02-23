@@ -25,9 +25,7 @@
     "permissions": [
         "activeTab",
         "nativeMessaging",
-        "notifications"
-    ],
-    "optional_permissions": [
+        "notifications",
         "webRequest",
         "webRequestBlocking",
         "http://*/*",
