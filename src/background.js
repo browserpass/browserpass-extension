@@ -2,6 +2,7 @@
 "use strict";
 
 require("chrome-extension-async");
+var sha1 = require("sha1");
 
 // native application id
 var appID = "com.github.browserpass.native";
@@ -58,6 +59,34 @@ function copyToClipboard(text) {
         { once: true }
     );
     document.execCommand("copy");
+}
+
+/**
+ * Save login to recent list for current domain
+ *
+ * @since 3.0.0
+ *
+ * @param object settings Settings object
+ * @param string host     Hostname
+ * @param object login    Login object
+ * @param bool   remove   Remove this item from recent history
+ * @return void
+ */
+function saveRecent(settings, host, login, remove = false) {
+    var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
+
+    // save store timestamp
+    localStorage.setItem("recent:" + login.store.id, JSON.stringify(Date.now()));
+
+    // update login usage count & timestamp
+    if (Date.now() > login.recent.when + ignoreInterval) {
+        login.recent.count++;
+    }
+    login.recent.when = Date.now();
+    settings.recent[sha1(host + sha1(login.store.id + sha1(login.login)))] = login.recent;
+
+    // save to local storage
+    localStorage.setItem("recent", JSON.stringify(settings.recent));
 }
 
 /**
@@ -175,6 +204,21 @@ function getLocalSettings() {
         }
     }
 
+    for (var storeId in settings.stores) {
+        var when = localStorage.getItem("recent:" + storeId);
+        if (when) {
+            settings.stores[storeId].when = JSON.parse(when);
+        } else {
+            settings.stores[storeId].when = 0;
+        }
+    }
+    settings.recent = localStorage.getItem("recent");
+    if (settings.recent) {
+        settings.recent = JSON.parse(settings.recent);
+    } else {
+        settings.recent = {};
+    }
+
     return settings;
 }
 
@@ -287,6 +331,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "copyPassword":
             try {
                 copyToClipboard(message.login.fields.secret);
+                saveRecent(settings, message.host, message.login);
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
@@ -298,6 +343,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "copyUsername":
             try {
                 copyToClipboard(message.login.fields.login);
+                saveRecent(settings, message.host, message.login);
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
@@ -343,6 +389,7 @@ async function handleMessage(settings, message, sendResponse) {
 
                 // dispatch initial fill request
                 var filledFields = await fillFields(targetTab, message.login, ["login", "secret"]);
+                saveRecent(settings, message.host, message.login);
 
                 // no need to check filledFields, because fillFields() already throws an error if empty
                 sendResponse({ status: "ok", filledFields: filledFields });

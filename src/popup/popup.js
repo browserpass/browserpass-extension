@@ -14,22 +14,12 @@ chrome.tabs.query({ active: true, currentWindow: true }, async function(tabs) {
             throw new Error(response.message);
         }
         var settings = response.settings;
+
+        // Set additional settings only visible in the popup context,
+        // if necessary these need to be additionally passed to the background script
         settings.tab = tabs[0];
         settings.host = new URL(settings.tab.url).hostname;
-        for (var storeId in settings.stores) {
-            var when = localStorage.getItem("recent:" + storeId);
-            if (when) {
-                settings.stores[storeId].when = JSON.parse(when);
-            } else {
-                settings.stores[storeId].when = 0;
-            }
-        }
-        settings.recent = localStorage.getItem("recent");
-        if (settings.recent) {
-            settings.recent = JSON.parse(settings.recent);
-        } else {
-            settings.recent = {};
-        }
+
         run(settings);
     } catch (e) {
         handleError(e);
@@ -98,10 +88,6 @@ async function run(settings) {
 
         var logins = [];
         var index = 0;
-        var recent = localStorage.getItem("recent:" + settings.host);
-        if (recent) {
-            recent = JSON.parse(recent);
-        }
         for (var storeId in response.files) {
             for (var key in response.files[storeId]) {
                 // set login fields
@@ -136,33 +122,6 @@ async function run(settings) {
 }
 
 /**
- * Save login to recent list for current domain
- *
- * @since 3.0.0
- *
- * @param object settings Settings object
- * @param object login    Login object
- * @param bool   remove   Remove this item from recent history
- * @return void
- */
-function saveRecent(settings, login, remove = false) {
-    var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
-
-    // save store timestamp
-    localStorage.setItem("recent:" + login.store.id, JSON.stringify(Date.now()));
-
-    // update login usage count & timestamp
-    if (Date.now() > login.recent.when + ignoreInterval) {
-        login.recent.count++;
-    }
-    login.recent.when = Date.now();
-    settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))] = login.recent;
-
-    // save to local storage
-    localStorage.setItem("recent", JSON.stringify(settings.recent));
-}
-
-/**
  * Do a login action
  *
  * @since 3.0.0
@@ -194,18 +153,12 @@ async function withLogin(action) {
         // hand off action to background script
         var response = await chrome.runtime.sendMessage({
             action: action,
-            login: this.login
+            login: this.login,
+            host: this.settings.host
         });
         if (response.status != "ok") {
             throw new Error(response.message);
         } else {
-            switch (action) {
-                // fall through to update recent
-                case "fill":
-                case "copyPassword":
-                case "copyUsername":
-                    saveRecent(this.settings, this.login);
-            }
             window.close();
         }
     } catch (e) {
