@@ -73,24 +73,60 @@
      *
      * @since 3.0.0
      *
-     * @param object login      Login fields
-     * @param bool   autoSubmit Whether to autosubmit the login form
+     * @param object request Form fill request
      * @return void
      */
-    function fillLogin(login, autoSubmit = false) {
+    function fillLogin(request) {
+        var autoSubmit = false;
+        var filledFields = [];
+
+        // get the login form
         var loginForm = form();
 
-        update(USERNAME_FIELDS, login.login, loginForm);
-        update(PASSWORD_FIELDS, login.secret, loginForm);
+        // don't attempt to fill non-secret forms unless non-secret filling is allowed
+        if (!find(PASSWORD_FIELDS, loginForm) && !request.allowNoSecret) {
+            return filledFields;
+        }
 
+        // ensure the origin is the same, or ask the user for permissions to continue
+        if (window.location.origin !== request.origin) {
+            var message =
+                "You have requested to fill login credentials into an embedded document from a " +
+                "different origin than the main document in this tab. Do you wish to proceed?\n\n" +
+                `Tab origin: ${request.origin}\n` +
+                `Embedded origin: ${window.location.origin}`;
+            if (!request.allowForeign || !confirm(message)) {
+                return filledFields;
+            }
+        }
+
+        // fill login field
+        if (
+            request.fields.includes("login") &&
+            update(USERNAME_FIELDS, request.login.fields.login, loginForm)
+        ) {
+            filledFields.push("login");
+        }
+
+        // fill secret field
+        if (
+            request.fields.includes("secret") &&
+            update(PASSWORD_FIELDS, request.login.fields.secret, loginForm)
+        ) {
+            filledFields.push("secret");
+        }
+
+        // check for multiple password fields in the login form
         var password_inputs = queryAllVisible(document, PASSWORD_FIELDS, loginForm);
         if (password_inputs.length > 1) {
             // There is likely a field asking for OTP code, so do not submit form just yet
             password_inputs[1].select();
         } else {
             window.requestAnimationFrame(function() {
-                // Try to submit the form, or focus on the submit button (based on user settings)
+                // try to locate the submit button
                 var submit = find(SUBMIT_FIELDS, loginForm);
+
+                // Try to submit the form, or focus on the submit button (based on user settings)
                 if (submit) {
                     if (autoSubmit) {
                         submit.click();
@@ -115,6 +151,9 @@
                 }
             });
         }
+
+        // finished filling things successfully
+        return filledFields;
     }
 
     /**
