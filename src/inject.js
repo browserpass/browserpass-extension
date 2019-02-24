@@ -93,7 +93,7 @@
 
         // ensure the origin is the same, or ask the user for permissions to continue
         if (window.location.origin !== request.origin) {
-            if (!request.allowForeign) {
+            if (request.foreignFills[window.location.origin] === false) {
                 return result;
             }
             var message =
@@ -101,7 +101,8 @@
                 "different origin than the main document in this tab. Do you wish to proceed?\n\n" +
                 `Tab origin: ${request.origin}\n` +
                 `Embedded origin: ${window.location.origin}`;
-            if (!request.approvedForeign) {
+            if (request.foreignFills[window.location.origin] !== true) {
+                result.foreignOrigin = window.location.origin;
                 result.foreignFill = confirm(message);
                 if (!result.foreignFill) {
                     return result;
