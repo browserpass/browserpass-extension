@@ -93,7 +93,7 @@
 
         // ensure the origin is the same, or ask the user for permissions to continue
         if (window.location.origin !== request.origin) {
-            if (request.foreignFills[window.location.origin] === false) {
+            if (!request.allowForeign || request.foreignFills[window.location.origin] === false) {
                 return result;
             }
             var message =
