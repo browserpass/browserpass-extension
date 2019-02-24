@@ -110,7 +110,7 @@ async function dispatchFill(
     fillRequest = Object.assign(deepCopy(fillRequest), {
         allowForeign: allowForeign,
         allowNoSecret: allowNoSecret,
-        approvedForeign: settings.foreignFills[settings.host]
+        foreignFills: settings.foreignFills[settings.host] || {}
     });
 
     var perFrameFillResults = await chrome.tabs.executeScript(settings.tab.id, {
@@ -118,30 +118,28 @@ async function dispatchFill(
         code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
     });
 
-    // merge fill resutls in a single object
-    var fillResult = perFrameFillResults.reduce(
-        function(merged, frameResult) {
-            if (typeof frameResult.foreignFill !== "undefined") {
-                merged.foreignFill = frameResult.foreignFill;
-            }
-            for (var field in frameResult.filledFields) {
-                if (!merged.filledFields.includes(field)) {
-                    merged.filledFields.push(field);
-                }
-            }
-            return merged;
-        },
-        { filledFields: [] }
-    );
+    // merge filled fields into a single array
+    var filledFields = perFrameFillResults
+        .reduce((merged, frameResult) => merged.concat(frameResult.filledFields), [])
+        .filter((val, i, merged) => merged.indexOf(val) === i);
 
     // if user answered a foreign-origin confirmation,
-    // store the answer in the settings
-    if (typeof fillResult.foreignFill !== "undefined") {
-        settings.foreignFills[settings.host] = fillResult.foreignFill;
+    // store the answers in the settings
+    var needSaveSettings = false;
+    for (var frame of perFrameFillResults) {
+        if (typeof frame.foreignFill !== "undefined") {
+            if (typeof settings.foreignFills[settings.host] === "undefined") {
+                settings.foreignFills[settings.host] = {};
+            }
+            settings.foreignFills[settings.host][frame.foreignOrigin] = frame.foreignFill;
+            needSaveSettings = true;
+        }
+    }
+    if (needSaveSettings) {
         saveSettings(settings);
     }
 
-    return fillResult.filledFields;
+    return filledFields;
 }
 
 /**
