@@ -67,6 +67,10 @@ async function run() {
         }
         var settings = response.settings;
 
+        if (typeof settings.host === "undefined") {
+            throw new Error("Unable to retrieve current tab information");
+        }
+
         // get list of logins
         response = await chrome.runtime.sendMessage({ action: "listFiles" });
         if (response.status != "ok") {

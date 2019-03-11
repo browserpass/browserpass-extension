@@ -1,0 +1,104 @@
+html,
+body {
+    box-sizing: border-box;
+    overflow: hidden;
+    margin: 0;
+}
+
+body {
+    margin: 10px 20px 20px;
+}
+
+h3 {
+    margin-top: 20px;
+}
+
+h3:first-child {
+    margin-top: 0;
+}
+
+.notice {
+    margin-top: -10px;
+    color: gray;
+    font-size: 10px;
+}
+
+.option {
+    display: flex;
+    height: 16px;
+    line-height: 16px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.option input[type="checkbox"] {
+    height: 12px;
+    margin: 2px 6px 2px 0;
+    padding: 0;
+}
+
+.option.custom-store input[type="text"] {
+    background-color: white;
+    color: black;
+    border: none;
+    border-bottom: 1px solid #aaa;
+    height: 16px;
+    line-height: 16px;
+    margin: -4px 0 0 0;
+    overflow: hidden;
+    padding: 0;
+    width: 25%;
+}
+
+.option.custom-store input[type="text"].path {
+    margin-left: 6px;
+    width: calc(100% - 25% - 48px);
+}
+
+.option.custom-store a.remove {
+    color: #f00;
+    display: block;
+    height: 16px;
+    line-height: 16px;
+    margin: 0 0 0 6px;
+    padding: 0;
+    text-decoration: none;
+    width: 16px;
+    cursor: pointer;
+}
+
+.add-store {
+    cursor: pointer;
+    display: block;
+    margin-top: 8px;
+    margin-bottom: 30px;
+}
+
+.error {
+    margin-bottom: 30px;
+    color: red;
+}
+
+.save {
+    cursor: pointer;
+    display: block;
+}
+
+@-moz-document url-prefix() {
+    body {
+        background: #fff;
+        border: 1px solid #000;
+        font-family: sans;
+        margin: 2px;
+        padding: 12px;
+    }
+
+    .option.custom-store input[type="text"] {
+        background: #fff;
+        margin: 2px;
+    }
+
+    .option.custom-store a.remove {
+        font-size: 12px;
+    }
+}

@@ -125,18 +125,18 @@ async function dispatchFill(
 
     // if user answered a foreign-origin confirmation,
     // store the answers in the settings
-    var needSaveSettings = false;
+    var foreignFillsChanged = false;
     for (var frame of perFrameFillResults) {
         if (typeof frame.foreignFill !== "undefined") {
             if (typeof settings.foreignFills[settings.host] === "undefined") {
                 settings.foreignFills[settings.host] = {};
             }
             settings.foreignFills[settings.host][frame.foreignOrigin] = frame.foreignFill;
-            needSaveSettings = true;
+            foreignFillsChanged = true;
         }
     }
-    if (needSaveSettings) {
-        saveSettings(settings);
+    if (foreignFillsChanged) {
+        await saveSettings(settings);
     }
 
     return filledFields;
@@ -328,12 +328,22 @@ async function handleMessage(settings, message, sendResponse) {
             });
             break;
         case "saveSettings":
-            saveSettings(message.settings);
-            sendResponse({ status: "ok" });
+            try {
+                await saveSettings(message.settings);
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to save settings" + e.toString()
+                });
+            }
             break;
         case "listFiles":
             try {
                 var response = await hostAction(settings, "list");
+                if (response.status != "ok") {
+                    throw new Error(JSON.stringify(response)); // TODO handle host error
+                }
                 sendResponse({ status: "ok", files: response.data.files });
             } catch (e) {
                 sendResponse({
@@ -537,10 +547,10 @@ async function receiveMessage(message, sender, sendResponse) {
         var configureSettings = Object.assign(deepCopy(settings), {
             defaultStore: {}
         });
-        var response = await chrome.runtime.sendNativeMessage(appID, {
-            settings: configureSettings,
-            action: "configure"
-        });
+        var response = await hostAction(configureSettings, "configure");
+        if (response.status != "ok") {
+            throw new Error(JSON.stringify(response)); // TODO handle host error
+        }
         settings.version = response.version;
         if (Object.keys(settings.stores).length > 0) {
             // there are user-configured stores present
@@ -588,9 +598,7 @@ async function receiveMessage(message, sender, sendResponse) {
         try {
             settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
             settings.host = new URL(settings.tab.url).hostname;
-        } catch (e) {
-            throw new Error("Unable to retrieve current tab information");
-        }
+        } catch (e) {}
 
         handleMessage(settings, message, sendResponse);
     } catch (e) {
@@ -601,16 +609,21 @@ async function receiveMessage(message, sender, sendResponse) {
 }
 
 /**
- * Save settings
+ * Save settings if they are valid
  *
  * @since 3.0.0
  *
  * @param object Final settings object
  * @return void
  */
-function saveSettings(settings) {
+async function saveSettings(settings) {
     // 'default' is our reserved name for the default store
     delete settings.stores.default;
+
+    var response = await hostAction(settings, "configure");
+    if (response.status != "ok") {
+        throw new Error(JSON.stringify(response)); // TODO handle host error
+    }
 
     for (var key in defaultSettings) {
         if (settings.hasOwnProperty(key)) {
