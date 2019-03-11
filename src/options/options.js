@@ -2,8 +2,6 @@
 "use strict";
 
 require("chrome-extension-async");
-var TldJS = require("tldjs");
-var sha1 = require("sha1");
 var Interface = require("./interface");
 
 run();
@@ -30,7 +28,11 @@ function handleError(error, type = "error") {
 }
 
 /**
- * TODO TODO
+ * Save settings
+ *
+ * @since 3.0.0
+ *
+ * @param object settings Settings object
  */
 async function saveSettings(settings) {
     var response = await chrome.runtime.sendMessage({

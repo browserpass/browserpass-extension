@@ -1,16 +1,14 @@
 module.exports = Interface;
 
 var m = require("mithril");
-var FuzzySort = require("fuzzysort");
-var Moment = require("moment");
 
 /**
- * Popup main interface
+ * Options main interface
  *
  * @since 3.0.0
  *
  * @param object settings Settings object
- * @param array  logins   Array of available logins
+ * @param function saveSettings Function to save settings
  * @return void
  */
 function Interface(settings, saveSettings) {
@@ -66,6 +64,7 @@ function view(ctl, params) {
             {
                 onclick: () => {
                     addEmptyStore(this.settings.stores);
+                    this.saveEnabled = true;
                 }
             },
             "Add store"
@@ -98,6 +97,15 @@ function view(ctl, params) {
     return nodes;
 }
 
+/**
+ * Generates vnode for a checkbox setting
+ *
+ * @since 3.0.0
+ *
+ * @param string key    Settings key
+ * @param string title  Label for the checkbox
+ * @return Vnode
+ */
 function createCheckbox(key, title) {
     return m("div.option", { class: key }, [
         m("label", [
@@ -114,6 +122,14 @@ function createCheckbox(key, title) {
     ]);
 }
 
+/**
+ * Generates vnode for a custom store configuration
+ *
+ * @since 3.0.0
+ *
+ * @param string storeId    Store ID
+ * @return Vnode
+ */
 function createCustomStore(storeId) {
     let store = this.settings.stores[storeId];
 
@@ -150,12 +166,27 @@ function createCustomStore(storeId) {
     ]);
 }
 
+/**
+ * Generates new store ID
+ *
+ * @since 3.0.0
+ *
+ * @return string new store ID
+ */
 function newId() {
     return Math.random()
         .toString(36)
         .substr(2, 9);
 }
 
+/**
+ * Generates a new empty store
+ *
+ * @since 3.0.0
+ *
+ * @param []object stores   List of stores to add a new store to
+ * @return void
+ */
 function addEmptyStore(stores) {
     let store = { id: newId(), name: "", path: "" };
     stores[store.id] = store;
