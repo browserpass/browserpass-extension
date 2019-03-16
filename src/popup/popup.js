@@ -141,10 +141,14 @@ async function withLogin(action) {
                 break;
         }
 
+        // Firefox requires data to be serializable,
+        // this removes everything offending such as functions
+        const login = JSON.parse(JSON.stringify(this.login));
+
         // hand off action to background script
         var response = await chrome.runtime.sendMessage({
             action: action,
-            login: this.login
+            login: login
         });
         if (response.status != "ok") {
             throw new Error(response.message);
