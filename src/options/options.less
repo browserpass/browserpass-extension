@@ -10,7 +10,7 @@ body {
 }
 
 h3 {
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 h3:first-child {
@@ -19,16 +19,18 @@ h3:first-child {
 
 .notice {
     margin-top: -10px;
+    margin-bottom: 10px;
     color: gray;
     font-size: 10px;
 }
 
 .option {
     display: flex;
+    align-items: center;
     height: 16px;
     line-height: 16px;
-    margin-bottom: 10px;
-    margin-top: 10px;
+    margin-bottom: 5px;
+    margin-top: 5px;
 }
 
 .option input[type="checkbox"] {
@@ -37,13 +39,28 @@ h3:first-child {
     padding: 0;
 }
 
+.option.gpgPath input[type="text"] {
+    background-color: white;
+    color: black;
+    border: none;
+    border-bottom: 1px solid #aaa;
+    border-radius: 0;
+    min-height: 0px;
+    height: 21px;
+    overflow: hidden;
+    padding: 0;
+    width: 125px;
+    margin-left: 5px;
+}
+
 .option.custom-store input[type="text"] {
     background-color: white;
     color: black;
     border: none;
     border-bottom: 1px solid #aaa;
-    height: 16px;
-    line-height: 16px;
+    border-radius: 0;
+    min-height: 0px;
+    height: 21px;
     margin: -4px 0 0 0;
     overflow: hidden;
     padding: 0;
