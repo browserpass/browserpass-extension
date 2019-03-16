@@ -9,6 +9,7 @@ var appID = "com.github.browserpass.native";
 
 // default settings
 var defaultSettings = {
+    autoSubmit: false,
     gpgPath: null,
     stores: {},
     foreignFills: {}
@@ -168,7 +169,8 @@ async function fillFields(settings, login, fields) {
     var fillRequest = {
         origin: new URL(settings.tab.url).origin,
         login: login,
-        fields: fields
+        fields: fields,
+        autoSubmit: getSetting("autoSubmit", login, settings)
     };
 
     // fill form via injected script
@@ -222,6 +224,25 @@ function getLocalSettings() {
     }
 
     return settings;
+}
+
+/**
+ * Get most relevant setting value
+ *
+ * @param string key      Setting key
+ * @param object login    Login object
+ * @param object settings Settings object
+ * @return object Setting value
+ */
+function getSetting(key, login, settings) {
+    if (typeof login.settings[key] !== "undefined") {
+        return login.settings[key];
+    }
+    if (typeof settings.stores[login.store.id].settings[key] !== "undefined") {
+        return settings.stores[login.store.id].settings[key];
+    }
+
+    return settings[key];
 }
 
 /**
@@ -488,6 +509,9 @@ async function parseFields(settings, login) {
         login: ["login", "username", "user", "email"],
         url: ["url", "uri", "website", "site", "link", "launch"]
     };
+    login.settings = {
+        autoSubmit: { name: "autosubmit", type: "bool" }
+    };
     var lines = login.raw.split(/[\r\n]+/).filter(line => line.trim().length > 0);
     lines.forEach(function(line) {
         // split key / value
@@ -509,6 +533,22 @@ async function parseFields(settings, login) {
                 break;
             }
         }
+
+        // assign to settings
+        for (var key in login.settings) {
+            if (
+                typeof login.settings[key].type !== "undefined" &&
+                login.settings[key].name.indexOf(parts[0].toLowerCase()) >= 0
+            ) {
+                if (login.settings[key].type === "bool") {
+                    login.settings[key] = ["true", "yes"].includes(parts[1].toLowerCase());
+                } else {
+                    login.settings[key] = parts[1];
+                }
+
+                break;
+            }
+        }
     });
 
     // clean up unassigned fields
@@ -519,8 +559,13 @@ async function parseFields(settings, login) {
             } else if (key == "login") {
                 login.fields[key] = login.login.match(/([^\/]+)$/)[1];
             } else {
-                login.fields[key] = null;
+                delete login.fields[key];
             }
+        }
+    }
+    for (var key in login.settings) {
+        if (typeof login.settings[key].type !== "undefined") {
+            delete login.settings[key];
         }
     }
 }
@@ -573,9 +618,18 @@ async function receiveMessage(message, sender, sendResponse) {
             settings.stores.default = {
                 id: "default",
                 name: "pass",
-                path: response.data.defaultStore.path,
-                settings: response.data.defaultStore.settings
+                path: response.data.defaultStore.path
             };
+            var fileSettings = JSON.parse(response.data.defaultStore.settings);
+            if (typeof settings.stores.default.settings !== "object") {
+                settings.stores.default.settings = {};
+            }
+            var storeSettings = settings.stores.default.settings;
+            for (var settingKey in fileSettings) {
+                if (!storeSettings.hasOwnProperty(settingKey)) {
+                    storeSettings[settingKey] = fileSettings[settingKey];
+                }
+            }
         }
 
         // Fill recent data

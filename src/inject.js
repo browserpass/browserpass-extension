@@ -78,7 +78,6 @@
      * @return object result of filling a form
      */
     function fillLogin(request) {
-        var autoSubmit = false;
         var result = {
             filledFields: [],
             foreignFill: undefined
@@ -139,14 +138,14 @@
 
                 // Try to submit the form, or focus on the submit button (based on user settings)
                 if (submit) {
-                    if (autoSubmit) {
+                    if (request.autoSubmit) {
                         submit.click();
                     } else {
                         submit.focus();
                     }
                 } else {
                     // There is no submit button. Try to submit the form itself.
-                    if (autoSubmit && loginForm) {
+                    if (request.autoSubmit && loginForm) {
                         loginForm.submit();
                     }
                     // We need to keep focus somewhere within the form, so that Enter hopefully submits the form.
