@@ -24,7 +24,7 @@ function Interface(settings, logins) {
     this.settings = settings;
     this.logins = logins;
     this.results = [];
-    this.currentDomainOnly = !settings.tab.url.match(/^chrome:\/\//);
+    this.currentDomainOnly = !settings.tab.url.match(/^(chrome|about):/);
     this.searchPart = new SearchInterface(this);
 
     // initialise with empty search
