@@ -50,6 +50,7 @@ function view(ctl, params) {
     var nodes = [];
     nodes.push(m("h3", "Basic settings"));
     nodes.push(createCheckbox.call(this, "autoSubmit", "Automatically submit forms after filling"));
+    nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary"));
 
     nodes.push(m("h3", "Custom store locations"));
     nodes.push(
@@ -95,6 +96,31 @@ function view(ctl, params) {
         )
     );
     return nodes;
+}
+
+/**
+ * Generates vnode for a input setting
+ *
+ * @since 3.0.0
+ *
+ * @param string key    Settings key
+ * @param string title  Settings title
+ * @return Vnode
+ */
+function createInput(key, title) {
+    return m("div.option", { class: key }, [
+        m("label", [
+            title,
+            m("input[type=text]", {
+                value: this.settings[key],
+                placeholder: "/path/to/gpg",
+                onchange: e => {
+                    this.settings[key] = e.target.value;
+                    this.saveEnabled = true;
+                }
+            })
+        ])
+    ]);
 }
 
 /**
