@@ -40,6 +40,10 @@ js/inject.dist.js: $(BROWSERIFY) inject.js
 	[ -d js ] || mkdir -p js
 	$(BROWSERIFY) -o js/inject.dist.js inject.js
 
+	# Firefox requires the last command to evaluate to something serializable
+	# https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/executeScript#Return_value
+	echo ";undefined" >> js/inject.dist.js
+
 .PHONY: clean
 clean:
 	rm -rf $(CLEAN_FILES)
