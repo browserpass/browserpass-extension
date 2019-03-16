@@ -333,11 +333,20 @@ async function handleMessage(settings, message, sendResponse) {
     // check that action is present
     if (typeof message !== "object" || !message.hasOwnProperty("action")) {
         sendResponse({ status: "error", message: "Action is missing" });
+        return;
     }
 
     // fetch file & parse fields if a login entry is present
-    if (typeof message.login !== "undefined") {
-        await parseFields(settings, message.login);
+    try {
+        if (typeof message.login !== "undefined") {
+            await parseFields(settings, message.login);
+        }
+    } catch (e) {
+        sendResponse({
+            status: "error",
+            message: "Unable to fetch and parse login fields: " + e.toString()
+        });
+        return;
     }
 
     // route action
