@@ -1,10 +1,9 @@
 {
-    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvlVUvevBvdeIFpvK5Xjcbd/cV8AsMNLg0Y7BmUetSTagjts949Tp12mNmWmIEEaE9Zwmfjl1ownWiclGhsoPSf6x7nP/i0j8yROv6TYibXLhZet9y4vnUMgtCIkb3O5RnuOl0Y+V3XUADwxotmgT1laPUThymJoYnWPv+lwDkYiEopX2Aq2amzRj8aMogNBUbAIkCMxfa9WK3Vm0QTAUdV4ii9WqzbgjHVruQpiFVq99W2U9ddsWNZjOG/36sFREuHw+reulQgblp9FZdaN1Q9X5cGcT5bncQIRB6K3wZYa805gFENc93Wslmzu6aUSEKqqPymlI5ikedaPlXPmlqwIDAQAB",
     "manifest_version": 2,
     "name": "Browserpass",
     "description": "Browser extension for zx2c4's pass (password manager)",
     "version": "3.0.0",
-    "author": ["Maxim Baz <browserpass@maximbaz.com>", "Steve Gilberd <steve@erayd.net>"],
+    "author": "Maxim Baz <browserpass@maximbaz.com>, Steve Gilberd <steve@erayd.net>",
     "homepage_url": "https://github.com/browserpass/browserpass-extension",
     "background": {
         "persistent": true,
@@ -19,10 +18,10 @@
     },
     "options_ui": {
         "page": "options/options.html",
-        "chrome_style": true,
         "open_in_tab": false
     },
     "permissions": [
+        "clipboardWrite",
         "activeTab",
         "nativeMessaging",
         "notifications",
@@ -31,6 +30,12 @@
         "http://*/*",
         "https://*/*"
     ],
+    "applications": {
+        "gecko": {
+            "id": "browserpass@maximbaz.com",
+            "strict_min_version": "50.0"
+        }
+    },
     "commands": {
         "_execute_browser_action": {
             "suggested_key": {
