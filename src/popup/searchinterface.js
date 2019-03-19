@@ -105,6 +105,14 @@ function view(ctl, params) {
                                 );
                             }
                             break;
+                        case "KeyG":
+                            if (e.ctrlKey && e.target.selectionStart == e.target.selectionEnd) {
+                                e.preventDefault();
+                                self.popup.results[0].doAction(
+                                    e.shiftKey ? "launchInNewTab" : "launch"
+                                );
+                            }
+                            break;
                     }
                 }
             })

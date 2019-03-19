@@ -130,6 +130,9 @@ async function withLogin(action) {
             case "launch":
                 handleError("Launching URL...", "notice");
                 break;
+            case "launchInNewTab":
+                handleError("Launching URL in a new tab...", "notice");
+                break;
             case "copyPassword":
                 handleError("Copying password to clipboard...", "notice");
                 break;
