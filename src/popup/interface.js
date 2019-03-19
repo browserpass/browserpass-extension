@@ -355,7 +355,9 @@ function keyHandler(e) {
             }
             break;
         case "KeyG":
-            this.doAction("launch");
+            if (e.ctrlKey) {
+                this.doAction(e.shiftKey ? "launchInNewTab" : "launch");
+            }
             break;
     }
 }
