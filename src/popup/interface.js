@@ -154,8 +154,8 @@ function search(s) {
         );
         candidates = recent.concat(remainingInCurrentDomain);
     }
-    candidates.sort(function(a, b) {
-        // sort most recent first
+    candidates.sort((a, b) => {
+        // show most recent first
         if (a === mostRecent) {
             return -1;
         }
@@ -163,10 +163,19 @@ function search(s) {
             return 1;
         }
 
-        // sort by count
+        // sort by frequency
         var countDiff = b.recent.count - a.recent.count;
         if (countDiff) {
             return countDiff;
+        }
+
+        // sort by specificity, only if filtering for one domain
+        if (this.currentDomainOnly) {
+            var domainLevelsDiff =
+                (b.login.match(/\./g) || []).length - (a.login.match(/\./g) || []).length;
+            if (domainLevelsDiff) {
+                return domainLevelsDiff;
+            }
         }
 
         // sort alphabetically
