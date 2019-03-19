@@ -1,6 +1,11 @@
 /chromium
 /firefox
+/dist
+
 /src/node_modules
 /src/css
 /src/js
 /src/*.log
+
+*.pem
+*.crx

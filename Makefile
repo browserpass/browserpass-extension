@@ -1,4 +1,11 @@
-CLEAN_FILES := chromium firefox
+VERSION ?= undefined
+
+CLEAN_FILES := chromium firefox dist
+CHROME := $(shell which chromium 2>/dev/null || which chromium-browser 2>/dev/null || which chrome 2>/dev/null || which google-chrome 2>/dev/null || which google-chrome-stable 2>/dev/null)
+PEM := $(shell find . -maxdepth 1 -name "*.pem")
+
+#######################
+# For local development
 
 .PHONY: all
 all: extension chromium firefox
@@ -46,7 +53,33 @@ firefox/manifest.json : src/manifest-firefox.json
 	[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	cp $< $@
 
+#######################
+# For official releases
+
 .PHONY: clean
 clean:
 	rm -rf $(CLEAN_FILES)
 	$(MAKE) -C src clean
+
+.PHONY: crx
+crx:
+ifneq ($(PEM),)
+	"$(CHROME)" --disable-gpu --pack-extension=./chromium --pack-extension-key=$(PEM)
+else
+	"$(CHROME)" --disable-gpu --pack-extension=./chromium
+	rm chromium.pem
+endif
+	mv chromium.crx browserpass.crx
+
+.PHONY: dist
+dist: clean extension chromium firefox crx
+	mkdir -p dist
+
+	git archive -o dist/$(VERSION).tar.gz --format tar.gz --prefix=browserpass-extension-$(VERSION)/ $(VERSION)
+	mv browserpass.crx dist/
+
+	for file in dist/*; do \
+	    gpg --detach-sign "$$file"; \
+	done
+
+	rm -f dist/$(VERSION).tar.gz
