@@ -408,6 +408,7 @@ async function handleMessage(settings, message, sendResponse) {
             break;
 
         case "launch":
+        case "launchInNewTab":
             try {
                 var url = message.login.fields.url || message.login.domain;
                 if (!url) {
@@ -416,20 +417,25 @@ async function handleMessage(settings, message, sendResponse) {
                 if (!url.match(/:\/\//)) {
                     url = "http://" + url;
                 }
-                if (authListeners[settings.tab.id]) {
-                    chrome.tabs.onUpdated.removeListener(authListeners[settings.tab.id]);
-                    delete authListeners[settings.tab.id];
+
+                const tab =
+                    message.action === "launch"
+                        ? await chrome.tabs.update(settings.tab.id, { url: url })
+                        : await chrome.tabs.create({ url: url });
+
+                if (authListeners[tab.id]) {
+                    chrome.tabs.onUpdated.removeListener(authListeners[tab.id]);
+                    delete authListeners[tab.id];
                 }
-                authListeners[settings.tab.id] = handleModalAuth.bind({
+                authListeners[tab.id] = handleModalAuth.bind({
                     url: url,
                     login: message.login
                 });
                 chrome.webRequest.onAuthRequired.addListener(
-                    authListeners[settings.tab.id],
-                    { urls: ["*://*/*"], tabId: settings.tab.id },
+                    authListeners[tab.id],
+                    { urls: ["*://*/*"], tabId: tab.id },
                     ["blocking"]
                 );
-                chrome.tabs.update(settings.tab.id, { url: url });
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
@@ -525,7 +531,7 @@ async function parseFields(settings, login) {
     lines.forEach(function(line) {
         // split key / value
         var parts = line
-            .split(":")
+            .split(/:(.*)?/, 2)
             .map(value => value.trim())
             .filter(value => value.length);
         if (parts.length != 2) {
