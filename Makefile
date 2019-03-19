@@ -1,4 +1,4 @@
-VERSION ?= undefined
+VERSION ?= $(shell cat .version)
 
 CLEAN_FILES := chromium firefox dist
 CHROME := $(shell which chromium 2>/dev/null || which chromium-browser 2>/dev/null || which chrome 2>/dev/null || which google-chrome 2>/dev/null || which google-chrome-stable 2>/dev/null)
