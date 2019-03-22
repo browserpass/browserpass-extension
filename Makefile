@@ -76,6 +76,10 @@ dist: clean extension chromium firefox crx
 	mkdir -p dist
 
 	git archive -o dist/$(VERSION).tar.gz --format tar.gz --prefix=browserpass-extension-$(VERSION)/ $(VERSION)
+
+	(cd chromium && zip -FSr ../dist/chromium.zip *)
+	(cd firefox  && zip -FSr ../dist/firefox.zip  *)
+
 	mv browserpass.crx dist/
 
 	for file in dist/*; do \
