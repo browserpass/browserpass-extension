@@ -163,13 +163,15 @@ Using `Custom store locations` setting in the browser extension options you are 
 
 The list of available options:
 
--   Automatically submit forms after filling (aka `autoSubmit`): make Browserpass automatically submit the login form for you
--   Custom gpg binary (aka `gpgPath`): path to a custom `gpg` binary to use
--   Custom store locations: list of password stores to use
+| Name                                                        | Description                                                  |
+| ----------------------------------------------------------- | ------------------------------------------------------------ |
+| Automatically submit forms after filling (aka `autoSubmit`) | make Browserpass automatically submit the login form for you |
+| Custom gpg binary (aka `gpgPath`)                           | path to a custom `gpg` binary to use                         |
+| Custom store locations                                      | list of password stores to use                               |
 
 Browserpass allows configuring certain settings in different places places using the following priority, highest first:
 
-1. Options defined in specific `*.gpg` files:
+1. Options defined in specific `*.gpg` files, only apply to these password entries:
     - `autoSubmit`
 1. Options defined in browser extension options:
     - Automatically submit forms after filling (aka `autoSubmit`)
