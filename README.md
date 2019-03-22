@@ -23,10 +23,10 @@ In order to use browserpass you must also install a [companion native messaging 
 -   [Security](#security)
 -   [Privacy](#privacy)
 -   [FAQ](#faq)
-    -   [Why OTP is not supported?](#why-otp-is-not-supported?)
+    -   [Why OTP is not supported?](#why-otp-is-not-supported)
     -   [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains)
     -   [Hints for macOS users](#hints-for-macos-users)
-    -   [Hints for NixOS / Nix users](#hints-for-nixos---nix-users)
+    -   [Hints for NixOS / Nix users](#hints-for-nixos--nix-users)
 -   [Contributing](#contributing)
 
 ## Requirements
