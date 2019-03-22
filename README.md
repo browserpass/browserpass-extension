@@ -2,7 +2,7 @@
 
 Browserpass is a browser extension for [zx2c4's pass](https://www.passwordstore.org/), a UNIX based password store manager. It allows you to auto-fill or copy to clipboard credentials for the current domain, protecting you from phishing attacks.
 
-In order to use browserpass you must also install a [companion native messaging host](https://github.com/browserpass/browserpass-native), which provides an interface to your password store.
+In order to use Browserpass you must also install a [companion native messaging host](https://github.com/browserpass/browserpass-native), which provides an interface to your password store.
 
 ![demo](https://user-images.githubusercontent.com/1177900/54850099-79227080-4ce6-11e9-9c94-d05ede9ee246.gif)
 
@@ -134,7 +134,7 @@ When you first open Browserpass popup, you will see a badge with the current dom
 
 This means that phishing attack prevention is enabled, and Browserpass is only showing you entries from your password store that match this domain.
 
-In order for Browserpass to correctly determine matching entries, it is expected that your password store follows naming conventions (see [Organizing password store](#organizing-password-store)), in particular your file or folder name must contain TLD, i.e. not `github.gpg`, but `github.com.gpg`. If an attacker directed you to `https://github.co/login` (notice `.co`), browserpass will **not** present `github.com` entry in the popup. However if you intentionally want to re-use the same credentials on multiple domains (e.g. `amazon.com` and `amazon.co.uk`), see [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains).
+In order for Browserpass to correctly determine matching entries, it is expected that your password store follows naming conventions (see [Organizing password store](#organizing-password-store)), in particular your file or folder name must contain TLD, i.e. not `github.gpg`, but `github.com.gpg`. If an attacker directed you to `https://github.co/login` (notice `.co`), Browserpass will **not** present `github.com` entry in the popup. However if you intentionally want to re-use the same credentials on multiple domains (e.g. `amazon.com` and `amazon.co.uk`), see [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains).
 
 Browserpass will display entries for the current domain, as well as all parent entries, but not entries from different subdomains. Suppose you are currently on `https://v3.app.example.com`, Browserpass will present all the following entries in popup (if they exist): `v3.app.example.com`, `app.example.com`, `example.com`; but it will not present entries like `v2.app.example.com` or `wiki.example.com`.
 
@@ -197,7 +197,7 @@ Browserpass does not send any telemetry data, all metadata it collects to perfor
 
 ### How to use the same username and password pair on multiple domains
 
-There are several ways to tell browserpass to use the same pair of credentials on multiple domains, for example how to re-use an existing password entry `amazon.com.gpg` on a `https://amazon.co.uk` website without duplicating your credentials in multiple password files.
+There are several ways to tell Browserpass to use the same pair of credentials on multiple domains, for example how to re-use an existing password entry `amazon.com.gpg` on a `https://amazon.co.uk` website without duplicating your credentials in multiple password files.
 
 The first option is just to manually find the desired credentials and use them in Browserpass, in other words if you have credentials for `amazon.com`, but you are currently on `https://amazon.co.uk`, open Browserpass, hit <kbd>Backspace</kbd> to search the entire password store, find `amazon.com` and hit <kbd>Enter</kbd> to login. Next time you will open Browserpass on `https://amazon.co.uk`, the popup will already contain the `amazon.com` entry, because it was previously used on this website (for details see [Password matching and sorting](#password-matching-and-sorting) section).
 
