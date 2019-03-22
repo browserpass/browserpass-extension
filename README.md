@@ -117,14 +117,14 @@ Note: If the cursor is located in the search input field, every shortcut that wo
 
 | Shortcult                                            | Action                                        |
 | ---------------------------------------------------- | --------------------------------------------- |
-| <kbd>Ctrl+Shift+L</kbd>                              | open Browserpass popup                        |
-| <kbd>Enter</kbd>                                     | submit form with these credentials ()         |
-| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | navigate popup list                           |
-| <kbd>Ctrl+C</kbd>                                    | copy password to clipboard                    |
-| <kbd>Ctrl+Shift+C</kbd>                              | copy username to clipboard                    |
-| <kbd>Ctrl+G</kbd>                                    | open URL in the current tab                   |
-| <kbd>Ctrl+Shift+G</kbd>                              | open URL in the new tab                       |
-| <kbd>Backspace</kbd>                                 | search passwords in the entire password store |
+| <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                        |
+| <kbd>Enter</kbd>                                     | Submit form with these credentials ()         |
+| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Navigate popup list                           |
+| <kbd>Ctrl+C</kbd>                                    | Copy password to clipboard                    |
+| <kbd>Ctrl+Shift+C</kbd>                              | Copy username to clipboard                    |
+| <kbd>Ctrl+G</kbd>                                    | Open URL in the current tab                   |
+| <kbd>Ctrl+Shift+G</kbd>                              | Open URL in the new tab                       |
+| <kbd>Backspace</kbd>                                 | Search passwords in the entire password store |
 
 ### Password matching and sorting
 
@@ -165,9 +165,9 @@ The list of available options:
 
 | Name                                                        | Description                                                  |
 | ----------------------------------------------------------- | ------------------------------------------------------------ |
-| Automatically submit forms after filling (aka `autoSubmit`) | make Browserpass automatically submit the login form for you |
-| Custom gpg binary (aka `gpgPath`)                           | path to a custom `gpg` binary to use                         |
-| Custom store locations                                      | list of password stores to use                               |
+| Automatically submit forms after filling (aka `autoSubmit`) | Make Browserpass automatically submit the login form for you |
+| Custom gpg binary (aka `gpgPath`)                           | Path to a custom `gpg` binary to use                         |
+| Custom store locations                                      | List of password stores to use                               |
 
 Browserpass allows configuring certain settings in different places places using the following priority, highest first:
 
