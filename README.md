@@ -115,14 +115,16 @@ If you want to intentionally disable phishing attacks protection and search cred
 
 Note: If the cursor is located in the search input field, every shortcut that works on the selected entry will be applied on the first entry in the popup list.
 
--   <kbd>Ctrl+Shift+L</kbd>: open Browserpass popup
--   <kbd>Enter</kbd>: submit form with these credentials ()
--   <kbd>Up / Down / Left / Right</kbd> or <kbd>Tab / Shift+Tab</kbd>: navigate popup list
--   <kbd>Ctrl+C</kbd>: copy password to clipboard
--   <kbd>Ctrl+Shift+C</kbd>: copy username to clipboard
--   <kbd>Ctrl+G</kbd>: open URL in the current tab
--   <kbd>Ctrl+Shift+G</kbd>: open URL in the new tab
--   <kbd>Backspace</kbd>: search passwords in the entire password store
+| Shortcult                                            | Action                                        |
+| ---------------------------------------------------- | --------------------------------------------- |
+| <kbd>Ctrl+Shift+L</kbd>                              | open Browserpass popup                        |
+| <kbd>Enter</kbd>                                     | submit form with these credentials ()         |
+| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | navigate popup list                           |
+| <kbd>Ctrl+C</kbd>                                    | copy password to clipboard                    |
+| <kbd>Ctrl+Shift+C</kbd>                              | copy username to clipboard                    |
+| <kbd>Ctrl+G</kbd>                                    | open URL in the current tab                   |
+| <kbd>Ctrl+Shift+G</kbd>                              | open URL in the new tab                       |
+| <kbd>Backspace</kbd>                                 | search passwords in the entire password store |
 
 ### Password matching and sorting
 
