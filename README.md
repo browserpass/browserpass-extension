@@ -209,16 +209,47 @@ If you simply want to re-use the same credentials on multiple subdomains of the 
 
 ### Why OTP is not supported?
 
-TODO
+Tools like `pass-otp` make it possible to use `pass` for generating OTP codes, however keeping both passwords and OTP URI in the same location diminishes the major benefit that OTP is supposed to provide: two factor authentication. The purpose of multi-factor authentication is to protect your account even when attackers gain access to your password store, but if your OTP is stored in the same place, all auth factors will be compromised at once. In particular, Browserpass has access to the entire contents of your password entries, so if it is ever compromised, all your accounts will be at risk, even though you signed up for 2FA.
 
-### Hints for macOS users
+Browserpass is opinionated, it does not promote `pass-otp` and intentionally does not support generating OTP codes from OTP URIs in password entiries, even though there are other password managers thatprovide such functionality.
 
-TODO
+There are valid scenarios for using `pass-otp` (e.g. it gives protection against intercepting your password during transmission), but users are strongly advised to very carefully consider if `pass-otp` fits their needs and come up with their own ways of accessing OTP codes that conforms to their security requirements (for example by using dmenu/rofi scripts). For the majority of people `pass-otp` is not recommended, using any phone app like Authy will be a much better and more secure alternative, because this way attackers would have to not only break into your password store, but they would _also_ have to break into your phone.
 
-### Hints for NixOS / Nix users
+## Building the extension
 
-TODO
+### Build locally
+
+Make sure you have the latest stable Yarn installed.
+
+The following `make` goals are available (check Makefile for more details):
+
+| Command              | Description                                                                             |
+| -------------------- | --------------------------------------------------------------------------------------- |
+| `make` or `make all` | Compile the extension source code, prepare unpacked extensions for Chromium and Firefox |
+| `make extension`     | Compile the extension source code                                                       |
+| `make chromium`      | Compile the extension source code, prepare unpacked extension for Chromium              |
+| `make firefox`       | Compile the extension source code, prepare unpacked extension for Firefox               |
+| `make crx`           | Compile the extension source code, prepare packed extension for Chromium                |
+
+### Load an unpacked extension
+
+-   For Chromium:
+    -   Go to `chrome://extensions`
+    -   Enable `Developer mode`
+    -   Click `Load unpacked extension`
+    -   Select `browserpass-extension/chromium` directory
+-   For Firefox:
+    -   Go to `about:debugging#addons`
+    -   Click `Load temporary add-on`
+    -   Select `browserpass-extension/firefox` directory
 
 ## Contributing
 
-TODO
+1. Fork [the repo](https://github.com/browserpass/browserpass-extension)
+2. Create your feature branch
+    - `git checkout -b my-new-feature`
+3. Commit your changes
+    - `git commit -am 'Add some feature'`
+4. Push to the branch
+    - `git push origin my-new-feature`
+5. Create new Pull Request
