@@ -2,6 +2,7 @@
 "use strict";
 
 require("chrome-extension-async");
+var TldJS = require("tldjs");
 var sha1 = require("sha1");
 
 // native application id
@@ -17,8 +18,12 @@ var defaultSettings = {
 
 var authListeners = {};
 
+chrome.browserAction.setBadgeBackgroundColor({
+    color: "#666"
+});
+
 // watch for tab updates
-chrome.tabs.onUpdated.addListener(function(tabId, info) {
+chrome.tabs.onUpdated.addListener((tabId, info) => {
     // ignore non-complete status
     if (info.status !== "complete") {
         return;
@@ -29,6 +34,9 @@ chrome.tabs.onUpdated.addListener(function(tabId, info) {
         chrome.webRequest.onAuthRequired.removeListener(authListeners[tabId]);
         delete authListeners[tabId];
     }
+
+    // show number of matching passwords in a badge
+    updateMatchingPasswordsCount(tabId);
 });
 
 // handle incoming messages
@@ -42,6 +50,79 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 chrome.runtime.onInstalled.addListener(onExtensionInstalled);
 
 //----------------------------------- Function definitions ----------------------------------//
+
+/**
+ * Get the deepest available domain component of a path
+ *
+ * @since 3.0.0
+ *
+ * @param string path Path to parse
+ * @return string|null Extracted domain
+ */
+function pathToDomain(path) {
+    var parts = path.split(/\//).reverse();
+    for (var key in parts) {
+        if (parts[key].indexOf("@") >= 0) {
+            continue;
+        }
+        var t = TldJS.parse(parts[key]);
+        if (t.isValid && t.domain !== null) {
+            return t.hostname;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * Set badge text with the number of matching password entries
+ *
+ * @since 3.0.0
+ *
+ * @param int tabId Tab id
+ */
+async function updateMatchingPasswordsCount(tabId) {
+    try {
+        const settings = await getFullSettings();
+        var response = await hostAction(settings, "list");
+        if (response.status != "ok") {
+            throw new Error(JSON.stringify(response));
+        }
+
+        // Get tab info
+        let currentDomain = undefined;
+        try {
+            const tab = await chrome.tabs.get(tabId);
+            currentDomain = new URL(tab.url).hostname;
+        } catch (e) {
+            throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
+        }
+
+        let matchedPasswordsCount = 0;
+        for (var storeId in response.data.files) {
+            for (var key in response.data.files[storeId]) {
+                const login = response.data.files[storeId][key].replace(/\.gpg$/i, "");
+                const domain = pathToDomain(storeId + "/" + login);
+                const inCurrentDomain =
+                    currentDomain === domain || currentDomain.endsWith("." + domain);
+                const recent = settings.recent[sha1(currentDomain + sha1(storeId + sha1(login)))];
+                if (recent || inCurrentDomain) {
+                    matchedPasswordsCount++;
+                }
+            }
+        }
+
+        if (matchedPasswordsCount) {
+            // Set badge for the current tab
+            chrome.browserAction.setBadgeText({
+                text: "" + matchedPasswordsCount,
+                tabId: tabId
+            });
+        }
+    } catch (e) {
+        console.log(e);
+    }
+}
 
 /**
  * Copy text to clipboard
@@ -89,6 +170,11 @@ function saveRecent(settings, login, remove = false) {
 
     // save to local storage
     localStorage.setItem("recent", JSON.stringify(settings.recent));
+
+    // a new entry was added to the popup matching list, need to refresh the count
+    if (!login.inCurrentDomain && login.recent.count === 1) {
+        updateMatchingPasswordsCount(settings.tab.id);
+    }
 }
 
 /**
@@ -222,6 +308,83 @@ function getLocalSettings() {
             settings[key] = JSON.parse(value);
         }
     }
+
+    return settings;
+}
+
+/**
+ * Get full settings from the extension and host application
+ *
+ * @since 3.0.0
+ *
+ * @return object Full settings object
+ */
+async function getFullSettings() {
+    var settings = getLocalSettings();
+    var configureSettings = Object.assign(deepCopy(settings), {
+        defaultStore: {}
+    });
+    var response = await hostAction(configureSettings, "configure");
+    if (response.status != "ok") {
+        throw new Error(JSON.stringify(response)); // TODO handle host error
+    }
+    settings.version = response.version;
+    if (Object.keys(settings.stores).length > 0) {
+        // there are user-configured stores present
+        for (var storeId in settings.stores) {
+            if (response.data.storeSettings.hasOwnProperty(storeId)) {
+                var fileSettings = JSON.parse(response.data.storeSettings[storeId]);
+                if (typeof settings.stores[storeId].settings !== "object") {
+                    settings.stores[storeId].settings = {};
+                }
+                var storeSettings = settings.stores[storeId].settings;
+                for (var settingKey in fileSettings) {
+                    if (!storeSettings.hasOwnProperty(settingKey)) {
+                        storeSettings[settingKey] = fileSettings[settingKey];
+                    }
+                }
+            }
+        }
+    } else {
+        // no user-configured stores, so use the default store
+        settings.stores.default = {
+            id: "default",
+            name: "pass",
+            path: response.data.defaultStore.path
+        };
+        var fileSettings = JSON.parse(response.data.defaultStore.settings);
+        if (typeof settings.stores.default.settings !== "object") {
+            settings.stores.default.settings = {};
+        }
+        var storeSettings = settings.stores.default.settings;
+        for (var settingKey in fileSettings) {
+            if (!storeSettings.hasOwnProperty(settingKey)) {
+                storeSettings[settingKey] = fileSettings[settingKey];
+            }
+        }
+    }
+
+    // Fill recent data
+    for (var storeId in settings.stores) {
+        var when = localStorage.getItem("recent:" + storeId);
+        if (when) {
+            settings.stores[storeId].when = JSON.parse(when);
+        } else {
+            settings.stores[storeId].when = 0;
+        }
+    }
+    settings.recent = localStorage.getItem("recent");
+    if (settings.recent) {
+        settings.recent = JSON.parse(settings.recent);
+    } else {
+        settings.recent = {};
+    }
+
+    // Fill current tab info
+    try {
+        settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+        settings.host = new URL(settings.tab.url).hostname;
+    } catch (e) {}
 
     return settings;
 }
@@ -602,73 +765,8 @@ async function receiveMessage(message, sender, sendResponse) {
         return;
     }
 
-    var settings = getLocalSettings();
     try {
-        var configureSettings = Object.assign(deepCopy(settings), {
-            defaultStore: {}
-        });
-        var response = await hostAction(configureSettings, "configure");
-        if (response.status != "ok") {
-            throw new Error(JSON.stringify(response)); // TODO handle host error
-        }
-        settings.version = response.version;
-        if (Object.keys(settings.stores).length > 0) {
-            // there are user-configured stores present
-            for (var storeId in settings.stores) {
-                if (response.data.storeSettings.hasOwnProperty(storeId)) {
-                    var fileSettings = JSON.parse(response.data.storeSettings[storeId]);
-                    if (typeof settings.stores[storeId].settings !== "object") {
-                        settings.stores[storeId].settings = {};
-                    }
-                    var storeSettings = settings.stores[storeId].settings;
-                    for (var settingKey in fileSettings) {
-                        if (!storeSettings.hasOwnProperty(settingKey)) {
-                            storeSettings[settingKey] = fileSettings[settingKey];
-                        }
-                    }
-                }
-            }
-        } else {
-            // no user-configured stores, so use the default store
-            settings.stores.default = {
-                id: "default",
-                name: "pass",
-                path: response.data.defaultStore.path
-            };
-            var fileSettings = JSON.parse(response.data.defaultStore.settings);
-            if (typeof settings.stores.default.settings !== "object") {
-                settings.stores.default.settings = {};
-            }
-            var storeSettings = settings.stores.default.settings;
-            for (var settingKey in fileSettings) {
-                if (!storeSettings.hasOwnProperty(settingKey)) {
-                    storeSettings[settingKey] = fileSettings[settingKey];
-                }
-            }
-        }
-
-        // Fill recent data
-        for (var storeId in settings.stores) {
-            var when = localStorage.getItem("recent:" + storeId);
-            if (when) {
-                settings.stores[storeId].when = JSON.parse(when);
-            } else {
-                settings.stores[storeId].when = 0;
-            }
-        }
-        settings.recent = localStorage.getItem("recent");
-        if (settings.recent) {
-            settings.recent = JSON.parse(settings.recent);
-        } else {
-            settings.recent = {};
-        }
-
-        // Fill current tab info
-        try {
-            settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-            settings.host = new URL(settings.tab.url).hostname;
-        } catch (e) {}
-
+        const settings = await getFullSettings();
         handleMessage(settings, message, sendResponse);
     } catch (e) {
         // handle error

@@ -23,8 +23,9 @@
         "open_in_tab": false
     },
     "permissions": [
-        "clipboardWrite",
         "activeTab",
+        "tabs",
+        "clipboardWrite",
         "nativeMessaging",
         "notifications",
         "webRequest",
