@@ -144,10 +144,7 @@
                         submit.focus();
                     }
                 } else {
-                    // There is no submit button. Try to submit the form itself.
-                    if (request.autoSubmit && loginForm) {
-                        loginForm.submit();
-                    }
+                    // There is no submit button.
                     // We need to keep focus somewhere within the form, so that Enter hopefully submits the form.
                     var password = find(PASSWORD_FIELDS, loginForm);
                     if (password) {
