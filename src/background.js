@@ -18,16 +18,16 @@ var defaultSettings = {
 var authListeners = {};
 
 // watch for tab updates
-chrome.tabs.onUpdated.addListener(function(tab, info) {
+chrome.tabs.onUpdated.addListener(function(tabId, info) {
     // ignore non-complete status
     if (info.status !== "complete") {
         return;
     }
 
     // unregister any auth listeners for this tab
-    if (authListeners[tab.id]) {
-        chrome.tabs.onAuthRequired.removeListener(authListeners[tab.id]);
-        delete authListeners[tab.id];
+    if (authListeners[tabId]) {
+        chrome.webRequest.onAuthRequired.removeListener(authListeners[tabId]);
+        delete authListeners[tabId];
     }
 });
 
