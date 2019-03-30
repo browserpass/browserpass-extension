@@ -132,31 +132,29 @@
             // There is likely a field asking for OTP code, so do not submit form just yet
             password_inputs[1].select();
         } else {
-            window.requestAnimationFrame(function() {
-                // try to locate the submit button
-                var submit = find(SUBMIT_FIELDS, loginForm);
+            // try to locate the submit button
+            var submit = find(SUBMIT_FIELDS, loginForm);
 
-                // Try to submit the form, or focus on the submit button (based on user settings)
-                if (submit) {
-                    if (request.autoSubmit) {
-                        submit.click();
-                    } else {
-                        submit.focus();
-                    }
+            // Try to submit the form, or focus on the submit button (based on user settings)
+            if (submit) {
+                if (request.autoSubmit) {
+                    submit.click();
                 } else {
-                    // There is no submit button.
-                    // We need to keep focus somewhere within the form, so that Enter hopefully submits the form.
-                    var password = find(PASSWORD_FIELDS, loginForm);
-                    if (password) {
-                        password.focus();
-                    } else {
-                        var username = find(USERNAME_FIELDS, loginForm);
-                        if (username) {
-                            username.focus();
-                        }
+                    submit.focus();
+                }
+            } else {
+                // There is no submit button.
+                // We need to keep focus somewhere within the form, so that Enter hopefully submits the form.
+                var password = find(PASSWORD_FIELDS, loginForm);
+                if (password) {
+                    password.focus();
+                } else {
+                    var username = find(USERNAME_FIELDS, loginForm);
+                    if (username) {
+                        username.focus();
                     }
                 }
-            });
+            }
         }
 
         // finished filling things successfully
