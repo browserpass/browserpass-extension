@@ -13,7 +13,8 @@ var defaultSettings = {
     autoSubmit: false,
     gpgPath: null,
     stores: {},
-    foreignFills: {}
+    foreignFills: {},
+    username: null
 };
 
 var authListeners = {};
@@ -735,7 +736,8 @@ async function parseFields(settings, login) {
             if (key == "secret" && lines.length) {
                 login.fields.secret = lines[0];
             } else if (key == "login") {
-                login.fields[key] = login.login.match(/([^\/]+)$/)[1];
+                const defaultUsername = getSetting("username", login, settings);
+                login.fields[key] = defaultUsername || login.login.match(/([^\/]+)$/)[1];
             } else {
                 delete login.fields[key];
             }

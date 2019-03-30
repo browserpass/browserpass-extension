@@ -92,7 +92,7 @@ Browserpass was designed with an assumption that certain conventions are being f
 
 1. Password must be defined on a line starting from `password:`, `pass:` or `secret:` (case-insensitive), and if all of these are absent, the first line in the password entry file is considered to be a password.
 
-1. Username must be defined on a line starting from `login:`, `username:`, `user:` or `email:` (case-insensitive), and if all of these are absent, the file name is considered to be a username.
+1. Username must be defined on a line starting from `login:`, `username:`, `user:` or `email:` (case-insensitive), and if all of these are absent, default username as configured in browser extension or in `.browserpass.json` of specific password store, and finally if everything is absent the file name is considered to be a username.
 
 1. URL ([only](#password-matching-and-sorting) used for [basic HTTP auth](#basic-http-authentication)!) must be defined on a line starting from `url:`, `uri:`, `website:`, `site:`, `link:` or `launch:` (case-insensitive).
 
@@ -166,6 +166,7 @@ The list of available options:
 | Name                                                        | Description                                                  |
 | ----------------------------------------------------------- | ------------------------------------------------------------ |
 | Automatically submit forms after filling (aka `autoSubmit`) | Make Browserpass automatically submit the login form for you |
+| Default username (aka `username`)                           | Username to use when it's not defined in password entry      |
 | Custom gpg binary (aka `gpgPath`)                           | Path to a custom `gpg` binary to use                         |
 | Custom store locations                                      | List of password stores to use                               |
 
@@ -173,13 +174,15 @@ Browserpass allows configuring certain settings in different places places using
 
 1. Options defined in specific `*.gpg` files, only apply to these password entries:
     - `autoSubmit`
-1. Options defined in browser extension options:
-    - Automatically submit forms after filling (aka `autoSubmit`)
-    - Custom gpg binary (aka `gpgPath`)
-    - Custom store locations
 1. Options defined in `.browserpass.json` file located in the root of a password store:
     - `autoSubmit`
     - `gpgPath`
+    - `username`
+1. Options defined in browser extension options:
+    - Automatically submit forms after filling (aka `autoSubmit`)
+    - Default username (aka `username`)
+    - Custom gpg binary (aka `gpgPath`)
+    - Custom store locations
 
 ## Security
 
