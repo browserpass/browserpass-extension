@@ -728,7 +728,7 @@ function onExtensionInstalled(details) {
         chrome.notifications.create(id, {
             title: title,
             message: message,
-            iconUrl: "icon-lock.png",
+            iconUrl: "icon.png",
             type: "basic"
         });
     };
