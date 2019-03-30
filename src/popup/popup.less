@@ -19,10 +19,25 @@
 @login-part-padding: 6px;
 @login-part-height: @login-height - 2 * @login-part-padding;
 
+@font-face {
+    font-family: "Open Sans";
+    font-style: normal;
+    font-weight: 400;
+    src: local("Open Sans"), url("/fonts/OpenSans-Regular.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Open Sans";
+    font-style: normal;
+    font-weight: 300;
+    src: local("Open Sans Light"), url("/fonts/OpenSans-Light.ttf") format("truetype");
+}
+
 html,
 body {
-    font-family: sans;
+    font-family: "Open Sans";
     font-size: 14px;
+    font-weight: 300;
     margin: 0;
     padding: 0;
     min-width: 260px;
@@ -30,7 +45,6 @@ body {
     white-space: nowrap;
     background-color: @bg-color;
     color: @text-color;
-    font-weight: 300;
 }
 
 html::-webkit-scrollbar,
@@ -123,6 +137,7 @@ body {
     outline: none;
     width: 100%;
     color: @input-text-color;
+    font-family: "Open Sans";
 }
 
 .part.search > input[type="text"]::placeholder {
