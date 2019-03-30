@@ -50,7 +50,8 @@ function view(ctl, params) {
     var nodes = [];
     nodes.push(m("h3", "Basic settings"));
     nodes.push(createCheckbox.call(this, "autoSubmit", "Automatically submit forms after filling"));
-    nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary"));
+    nodes.push(createInput.call(this, "username", "Default username", "john.smith"));
+    nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary", "/path/to/gpg"));
 
     nodes.push(m("h3", "Custom store locations"));
     nodes.push(
@@ -105,15 +106,16 @@ function view(ctl, params) {
  *
  * @param string key    Settings key
  * @param string title  Settings title
+ * @param string placeholder  Settings placeholder
  * @return Vnode
  */
-function createInput(key, title) {
+function createInput(key, title, placeholder) {
     return m("div.option", { class: key }, [
         m("label", [
             title,
             m("input[type=text]", {
                 value: this.settings[key],
-                placeholder: "/path/to/gpg",
+                placeholder: placeholder,
                 onchange: e => {
                     this.settings[key] = e.target.value;
                     this.saveEnabled = true;
