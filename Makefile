@@ -17,6 +17,7 @@ extension:
 EXTENSION_FILES := \
 	src/*.css \
 	src/*.png \
+	src/fonts/* \
 	src/popup/*.html \
 	src/popup/*.svg \
 	src/options/*.html
