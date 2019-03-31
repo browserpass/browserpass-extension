@@ -81,6 +81,7 @@ function pathToDomain(path) {
  * @since 3.0.0
  *
  * @param int tabId Tab id
+ * @return void
  */
 async function updateMatchingPasswordsCount(tabId) {
     try {
@@ -179,7 +180,7 @@ function saveRecent(settings, login, remove = false) {
 }
 
 /**
- * Call injected form-fill code
+ * Call injected code to fill the form
  *
  * @param object  settings      Settings object
  * @param object  fillRequest   Fill request details
@@ -188,13 +189,7 @@ function saveRecent(settings, login, remove = false) {
  * @param boolean allowNoSecret Allow forms that don't contain a password field
  * @return array list of filled fields
  */
-async function dispatchFill(
-    settings,
-    fillRequest,
-    allFrames = false,
-    allowForeign = false,
-    allowNoSecret = false
-) {
+async function dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret) {
     fillRequest = Object.assign(deepCopy(fillRequest), {
         allowForeign: allowForeign,
         allowNoSecret: allowNoSecret,
@@ -231,6 +226,27 @@ async function dispatchFill(
 }
 
 /**
+ * Call injected code to focus or submit the form
+ *
+ * @param object  settings               Settings object
+ * @param object  focusOrSubmitRequest   Focus or submit request details
+ * @param boolean allFrames              Dispatch to all frames
+ * @param boolean allowForeign           Allow foreign-origin iframes
+ * @return void
+ */
+async function dispatchFocusOrSubmit(settings, focusOrSubmitRequest, allFrames, allowForeign) {
+    focusOrSubmitRequest = Object.assign(deepCopy(focusOrSubmitRequest), {
+        allowForeign: allowForeign,
+        foreignFills: settings.foreignFills[settings.host] || {}
+    });
+
+    await chrome.tabs.executeScript(settings.tab.id, {
+        allFrames: allFrames,
+        code: `window.browserpass.focusOrSubmit(${JSON.stringify(focusOrSubmitRequest)});`
+    });
+}
+
+/**
  * Fill form fields
  *
  * @param object settings Settings object
@@ -256,40 +272,66 @@ async function fillFields(settings, login, fields) {
     var fillRequest = {
         origin: new URL(settings.tab.url).origin,
         login: login,
-        fields: fields,
-        autoSubmit: getSetting("autoSubmit", login, settings)
+        fields: fields
     };
 
     // fill form via injected script
-    var filledFields = await dispatchFill(settings, fillRequest);
+    let allFrames = false;
+    let allowForeign = false;
+    let allowNoSecret = false;
+    let filledFields = await dispatchFill(
+        settings,
+        fillRequest,
+        allFrames,
+        allowForeign,
+        allowNoSecret
+    );
 
     // try again using same-origin frames if we couldn't fill a password field
     if (!filledFields.includes("secret")) {
-        filledFields = filledFields.concat(await dispatchFill(settings, fillRequest, true));
+        allFrames = true;
+        filledFields = filledFields.concat(
+            await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
+        );
     }
 
     // try again using all available frames if we couldn't fill a password field
     if (!filledFields.includes("secret") && settings.foreignFills[settings.host] !== false) {
-        filledFields = filledFields.concat(await dispatchFill(settings, fillRequest, true, true));
+        allowForeign = true;
+        filledFields = filledFields.concat(
+            await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
+        );
     }
 
     // try again using same-origin frames, and don't require a password field
     if (!filledFields.length) {
+        allowForeign = false;
+        allowNoSecret = true;
         filledFields = filledFields.concat(
-            await dispatchFill(settings, fillRequest, true, false, true)
+            await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
         );
     }
 
     // try again using all available frames, and don't require a password field
     if (!filledFields.length && settings.foreignFills[settings.host] !== false) {
+        allowForeign = true;
         filledFields = filledFields.concat(
-            await dispatchFill(settings, fillRequest, true, true, true)
+            await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
         );
     }
 
     if (!filledFields.length) {
         throw new Error(`No fillable forms available for fields: ${fields.join(", ")}`);
     }
+
+    // build focus or submit request
+    let focusOrSubmitRequest = {
+        origin: new URL(settings.tab.url).origin,
+        autoSubmit: getSetting("autoSubmit", login, settings)
+    };
+
+    // try to focus or submit form with the settings that were used to fill it
+    await dispatchFocusOrSubmit(settings, focusOrSubmitRequest, allFrames, allowForeign);
 
     return filledFields;
 }
