@@ -126,6 +126,29 @@
             result.filledFields.push("secret");
         }
 
+        // finished filling things successfully
+        return result;
+    }
+
+    /**
+     * Focus submit button, and maybe click on it (based on user settings)
+     *
+     * @since 3.0.0
+     *
+     * @param object request Form fill request
+     * @return void
+     */
+    function focusOrSubmit(request) {
+        // get the login form
+        var loginForm = form();
+
+        // ensure the origin is the same or allowed
+        if (window.location.origin !== request.origin) {
+            if (!request.allowForeign || request.foreignFills[window.location.origin] === false) {
+                return;
+            }
+        }
+
         // check for multiple password fields in the login form
         var password_inputs = queryAllVisible(document, PASSWORD_FIELDS, loginForm);
         if (password_inputs.length > 1) {
@@ -156,9 +179,6 @@
                 }
             }
         }
-
-        // finished filling things successfully
-        return result;
     }
 
     /**
@@ -333,6 +353,7 @@
 
     // set window object
     window.browserpass = {
-        fillLogin: fillLogin
+        fillLogin: fillLogin,
+        focusOrSubmit: focusOrSubmit
     };
 })();
