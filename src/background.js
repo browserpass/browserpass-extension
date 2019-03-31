@@ -232,7 +232,7 @@ async function dispatchFill(settings, fillRequest, allFrames, allowForeign, allo
  * @param object  focusOrSubmitRequest   Focus or submit request details
  * @param boolean allFrames              Dispatch to all frames
  * @param boolean allowForeign           Allow foreign-origin iframes
- * @return array list of filled fields
+ * @return void
  */
 async function dispatchFocusOrSubmit(settings, focusOrSubmitRequest, allFrames, allowForeign) {
     focusOrSubmitRequest = Object.assign(deepCopy(focusOrSubmitRequest), {
