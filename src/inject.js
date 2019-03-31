@@ -136,9 +136,13 @@
      * @since 3.0.0
      *
      * @param object request Form fill request
-     * @return void
+     * @return object result of focusing or submitting a form
      */
     function focusOrSubmit(request) {
+        var result = {
+            needPressEnter: false
+        };
+
         // get the login form
         var loginForm = form();
 
@@ -167,6 +171,10 @@
                 }
             } else {
                 // There is no submit button.
+                if (request.autoSubmit) {
+                    // signal background script that we want it to press Enter for us
+                    result.needPressEnter = true;
+                }
                 // We need to keep focus somewhere within the form, so that Enter hopefully submits the form.
                 var password = find(PASSWORD_FIELDS, loginForm);
                 if (password) {
@@ -179,6 +187,8 @@
                 }
             }
         }
+
+        return result;
     }
 
     /**
