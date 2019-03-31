@@ -183,33 +183,33 @@ function saveRecent(settings, login, remove = false) {
  * Call injected code to fill the form
  *
  * @param object  settings      Settings object
- * @param object  fillRequest   Fill request details
+ * @param object  request       Request details
  * @param boolean allFrames     Dispatch to all frames
  * @param boolean allowForeign  Allow foreign-origin iframes
  * @param boolean allowNoSecret Allow forms that don't contain a password field
  * @return array list of filled fields
  */
-async function dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret) {
-    fillRequest = Object.assign(deepCopy(fillRequest), {
+async function dispatchFill(settings, request, allFrames, allowForeign, allowNoSecret) {
+    request = Object.assign(deepCopy(request), {
         allowForeign: allowForeign,
         allowNoSecret: allowNoSecret,
         foreignFills: settings.foreignFills[settings.host] || {}
     });
 
-    var perFrameFillResults = await chrome.tabs.executeScript(settings.tab.id, {
+    let perFrameResults = await chrome.tabs.executeScript(settings.tab.id, {
         allFrames: allFrames,
-        code: `window.browserpass.fillLogin(${JSON.stringify(fillRequest)});`
+        code: `window.browserpass.fillLogin(${JSON.stringify(request)});`
     });
 
     // merge filled fields into a single array
-    var filledFields = perFrameFillResults
+    let filledFields = perFrameResults
         .reduce((merged, frameResult) => merged.concat(frameResult.filledFields), [])
         .filter((val, i, merged) => merged.indexOf(val) === i);
 
     // if user answered a foreign-origin confirmation,
     // store the answers in the settings
-    var foreignFillsChanged = false;
-    for (var frame of perFrameFillResults) {
+    let foreignFillsChanged = false;
+    for (let frame of perFrameResults) {
         if (typeof frame.foreignFill !== "undefined") {
             if (typeof settings.foreignFills[settings.host] === "undefined") {
                 settings.foreignFills[settings.host] = {};
@@ -228,21 +228,21 @@ async function dispatchFill(settings, fillRequest, allFrames, allowForeign, allo
 /**
  * Call injected code to focus or submit the form
  *
- * @param object  settings               Settings object
- * @param object  focusOrSubmitRequest   Focus or submit request details
- * @param boolean allFrames              Dispatch to all frames
- * @param boolean allowForeign           Allow foreign-origin iframes
+ * @param object  settings      Settings object
+ * @param object  request       Request details
+ * @param boolean allFrames     Dispatch to all frames
+ * @param boolean allowForeign  Allow foreign-origin iframes
  * @return void
  */
-async function dispatchFocusOrSubmit(settings, focusOrSubmitRequest, allFrames, allowForeign) {
-    focusOrSubmitRequest = Object.assign(deepCopy(focusOrSubmitRequest), {
+async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign) {
+    request = Object.assign(deepCopy(request), {
         allowForeign: allowForeign,
         foreignFills: settings.foreignFills[settings.host] || {}
     });
 
     await chrome.tabs.executeScript(settings.tab.id, {
         allFrames: allFrames,
-        code: `window.browserpass.focusOrSubmit(${JSON.stringify(focusOrSubmitRequest)});`
+        code: `window.browserpass.focusOrSubmit(${JSON.stringify(request)});`
     });
 }
 
