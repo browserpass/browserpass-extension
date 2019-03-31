@@ -758,9 +758,13 @@ async function parseFields(settings, login) {
     };
     var lines = login.raw.split(/[\r\n]+/).filter(line => line.trim().length > 0);
     lines.forEach(function(line) {
-        // split key / value
-        var parts = line
-            .split(/:(.*)?/, 2)
+        // split key / value & ignore non-k/v lines
+        var parts = line.match(/^(.+?):(.+)$/);
+        if (parts === null) {
+            return;
+        }
+        parts = parts
+            .slice(1)
             .map(value => value.trim())
             .filter(value => value.length);
         if (parts.length != 2) {
