@@ -109,7 +109,7 @@ When Browserpass shows entries for a specific domain, you will see a badge with 
 
 ![image](https://user-images.githubusercontent.com/1177900/54785353-52046a00-4c26-11e9-8497-8dc50701ddc4.png)
 
-If you want to intentionally disable phishing attacks protection and search credentials in the entire password store, you must press <kbd>Backspace</kbd> to confirm this decision (domain badge will disappear), then use Browserpass normally.
+If you want to intentionally disable phishing attack protection and search the entire password store for credentials, you must press <kbd>Backspace</kbd> to confirm this decision (domain badge will disappear), then use Browserpass normally.
 
 ### Available keyboard shortcuts
 
