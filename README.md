@@ -196,7 +196,7 @@ Browserpass aims to protect your passwords and computer from malicious or fraudu
 
 ## Privacy
 
-Browserpass does not send any telemetry data, all metadata it collects to perform its functionality is stored in local storage and never leaves your browser.
+Browserpass does not send any telemetry data. All metadata that is collected in order for the extension to function correctly is stored *only* in local storage, and never leaves your browser.
 
 ## FAQ
 
