@@ -77,7 +77,7 @@ If not, repeat the installation instructions for the extension.
 
 Browserpass was designed with an assumption that certain conventions are being followed when organizing your password store.
 
-1. In order to benefit of phishing attack protection, a password entry file, or any of its parent folders, must contain a full domain name (including TLD like `.com`) in their name.
+1. In order to benefit of phishing attack protection, a password entry file, or any of its parent folders, must contain a full domain name (including TLD like `.com`) in their name in order to automatically match a website. However, entries which do not contain such a domain in their name may still be manually selected.
 
     Some good examples:
 
