@@ -94,7 +94,7 @@ Browserpass was designed with an assumption that certain conventions are being f
 
 1. Username must be defined on a line starting with `login:`, `username:`, `user:` or `email:` (case-insensitive), and if all of these are absent, default username as configured in browser extension or in `.browserpass.json` of specific password store, and finally if everything is absent the file name is considered to be a username.
 
-1. URL ([only](#password-matching-and-sorting) used for [modal authentication](#modal-authentication)!) must be defined on a line starting with `url:`, `uri:`, `website:`, `site:`, `link:` or `launch:` (case-insensitive).
+1. URL ([only](#password-matching-and-sorting) used for [modal HTTP authentication](#modal-http-authentication)!) must be defined on a line starting with `url:`, `uri:`, `website:`, `site:`, `link:` or `launch:` (case-insensitive).
 
 ### First steps in browser extension
 
