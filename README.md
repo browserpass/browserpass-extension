@@ -17,7 +17,7 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [First steps in browser extension](#first-steps-in-browser-extension)
     -   [Available keyboard shortcuts](#available-keyboard-shortcuts)
     -   [Password matching and sorting](#password-matching-and-sorting)
-    -   [Modal authentication](#modal-authentication)
+    -   [Modal HTTP authentication](#modal-http-authentication)
     -   [Password store locations](password-store-locations)
 -   [Options](#options)
 -   [Security](#security)
@@ -147,7 +147,7 @@ The sorting algorithm implemented in Browserpass will use several intuitions to 
 1. Password entries with the identical usage counts are sorted by number of domain levels (specificity), i.e. `wiki.example.com` will be above `example.com`.
 1. If all the above is equal, password entries are sorted alphabetically.
 
-### Modal authentication
+### Modal HTTP authentication
 
 Due to the way browsers are implemented, browser extensions are only able to fill modal credentials (e.g. a popup for basic HTTP auth) for a website if the website in question has been opened by the extension. For this reason alone Browserpass contains functionality to open a URL associated with a password entry in the current or a new browser tab. However, please note that Browserpass is not intended as a bookmark manager.
 
