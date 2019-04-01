@@ -17,7 +17,7 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [First steps in browser extension](#first-steps-in-browser-extension)
     -   [Available keyboard shortcuts](#available-keyboard-shortcuts)
     -   [Password matching and sorting](#password-matching-and-sorting)
-    -   [Basic HTTP authentication](#basic-http-authentication)
+    -   [Modal authentication](#modal-authentication)
     -   [Password store locations](password-store-locations)
 -   [Options](#options)
 -   [Security](#security)
