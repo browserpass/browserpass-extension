@@ -118,7 +118,7 @@ Note: If the cursor is located in the search input field, every shortcut that wo
 | Shortcult                                            | Action                                             |
 | ---------------------------------------------------- | -------------------------------------------------- |
 | <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                             |
-| <kbd>Enter</kbd>                                     | Submit form with currently selected credentials () |
+| <kbd>Enter</kbd>                                     | Submit form with currently selected credentials    |
 | Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Navigate popup list                                |
 | <kbd>Ctrl+C</kbd>                                    | Copy password to clipboard                         |
 | <kbd>Ctrl+Shift+C</kbd>                              | Copy username to clipboard                         |
