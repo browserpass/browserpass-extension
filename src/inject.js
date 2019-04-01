@@ -268,43 +268,47 @@
      * @return The login form
      */
     function form() {
-        var elems = queryAllVisible(document, INPUT_FIELDS, undefined);
-        var forms = [];
-        for (var i = 0; i < elems.length; i++) {
-            var form = elems[i].form;
+        const elems = queryAllVisible(document, INPUT_FIELDS, undefined);
+        const forms = [];
+        for (let elem of elems) {
+            const form = elem.form;
             if (form && forms.indexOf(form) < 0) {
                 forms.push(form);
             }
         }
-        if (forms.length == 0) {
-            return undefined;
-        }
-        if (forms.length == 1) {
-            return forms[0];
-        }
 
-        // If there are multiple forms, try to detect which one is a login form
-        var formProps = [];
-        for (var i = 0; i < forms.length; i++) {
-            var form = forms[i];
-            var props = [form.id, form.name, form.className];
-            formProps.push(props);
-            for (var j = 0; j < FORM_MARKERS.length; j++) {
-                var marker = FORM_MARKERS[j];
-                for (var k = 0; k < props.length; k++) {
-                    var prop = props[k];
+        // Try to filter only forms that have some identifying marker
+        const markedForms = [];
+        for (let form of forms) {
+            const props = [form.id, form.name, form.className, form.action];
+            for (let marker of FORM_MARKERS) {
+                for (let prop of props) {
                     if (prop.toLowerCase().indexOf(marker) > -1) {
-                        return form;
+                        markedForms.push(form);
                     }
                 }
             }
         }
 
-        console.error(
-            "Unable to detect which of the multiple available forms is the login form. Please submit an issue for browserpass on github, and provide the following list in the details: " +
-                JSON.stringify(formProps)
-        );
-        return forms[0];
+        // Try to filter only forms that have a password field
+        const formsWithPassword = [];
+        for (let form of markedForms) {
+            if (find(PASSWORD_FIELDS, form)) {
+                formsWithPassword.push(form);
+            }
+        }
+
+        // Give up and return the first available form, if any
+        if (formsWithPassword.length > 0) {
+            return formsWithPassword[0];
+        }
+        if (markedForms.length > 0) {
+            return markedForms[0];
+        }
+        if (forms.length > 0) {
+            return forms[0];
+        }
+        return undefined;
     }
 
     /**
