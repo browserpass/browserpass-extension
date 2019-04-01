@@ -17,7 +17,7 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [First steps in browser extension](#first-steps-in-browser-extension)
     -   [Available keyboard shortcuts](#available-keyboard-shortcuts)
     -   [Password matching and sorting](#password-matching-and-sorting)
-    -   [Basic HTTP authentication](#basic-http-authentication)
+    -   [Modal HTTP authentication](#modal-http-authentication)
     -   [Password store locations](password-store-locations)
 -   [Options](#options)
 -   [Security](#security)
@@ -77,7 +77,7 @@ If not, repeat the installation instructions for the extension.
 
 Browserpass was designed with an assumption that certain conventions are being followed when organizing your password store.
 
-1. In order to benefit of phishing attack protection, a password entry file, or any of its parent folders, must contain a full domain name (including TLD like `.com`) in their name.
+1. In order to benefit of phishing attack protection, a password entry file, or any of its parent folders, must contain a full domain name (including TLD like `.com`) in their name in order to automatically match a website. However, entries which do not contain such a domain in their name may still be manually selected.
 
     Some good examples:
 
@@ -90,11 +90,11 @@ Browserpass was designed with an assumption that certain conventions are being f
             work.gpg
     ```
 
-1. Password must be defined on a line starting from `password:`, `pass:` or `secret:` (case-insensitive), and if all of these are absent, the first line in the password entry file is considered to be a password.
+1. Password must be defined on a line starting with `password:`, `pass:` or `secret:` (case-insensitive), and if all of these are absent, the first line in the password entry file is considered to be a password.
 
-1. Username must be defined on a line starting from `login:`, `username:`, `user:` or `email:` (case-insensitive), and if all of these are absent, default username as configured in browser extension or in `.browserpass.json` of specific password store, and finally if everything is absent the file name is considered to be a username.
+1. Username must be defined on a line starting with `login:`, `username:`, `user:` or `email:` (case-insensitive), and if all of these are absent, default username as configured in browser extension or in `.browserpass.json` of specific password store, and finally if everything is absent the file name is considered to be a username.
 
-1. URL ([only](#password-matching-and-sorting) used for [basic HTTP auth](#basic-http-authentication)!) must be defined on a line starting from `url:`, `uri:`, `website:`, `site:`, `link:` or `launch:` (case-insensitive).
+1. URL ([only](#password-matching-and-sorting) used for [modal HTTP authentication](#modal-http-authentication)!) must be defined on a line starting with `url:`, `uri:`, `website:`, `site:`, `link:` or `launch:` (case-insensitive).
 
 ### First steps in browser extension
 
@@ -109,22 +109,22 @@ When Browserpass shows entries for a specific domain, you will see a badge with 
 
 ![image](https://user-images.githubusercontent.com/1177900/54785353-52046a00-4c26-11e9-8497-8dc50701ddc4.png)
 
-If you want to intentionally disable phishing attacks protection and search credentials in the entire password store, you must press <kbd>Backspace</kbd> to confirm this decision (domain badge will disappear), then use Browserpass normally.
+If you want to intentionally disable phishing attack protection and search the entire password store for credentials, you must press <kbd>Backspace</kbd> to confirm this decision (domain badge will disappear), then use Browserpass normally.
 
 ### Available keyboard shortcuts
 
 Note: If the cursor is located in the search input field, every shortcut that works on the selected entry will be applied on the first entry in the popup list.
 
-| Shortcult                                            | Action                                        |
-| ---------------------------------------------------- | --------------------------------------------- |
-| <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                        |
-| <kbd>Enter</kbd>                                     | Submit form with these credentials ()         |
-| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Navigate popup list                           |
-| <kbd>Ctrl+C</kbd>                                    | Copy password to clipboard                    |
-| <kbd>Ctrl+Shift+C</kbd>                              | Copy username to clipboard                    |
-| <kbd>Ctrl+G</kbd>                                    | Open URL in the current tab                   |
-| <kbd>Ctrl+Shift+G</kbd>                              | Open URL in the new tab                       |
-| <kbd>Backspace</kbd>                                 | Search passwords in the entire password store |
+| Shortcult                                            | Action                                             |
+| ---------------------------------------------------- | -------------------------------------------------- |
+| <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                             |
+| <kbd>Enter</kbd>                                     | Submit form with currently selected credentials    |
+| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Navigate popup list                                |
+| <kbd>Ctrl+C</kbd>                                    | Copy password to clipboard                         |
+| <kbd>Ctrl+Shift+C</kbd>                              | Copy username to clipboard                         |
+| <kbd>Ctrl+G</kbd>                                    | Open URL in the current tab                        |
+| <kbd>Ctrl+Shift+G</kbd>                              | Open URL in the new tab                            |
+| <kbd>Backspace</kbd> (with no search text entered)   | Search passwords in the entire password store      |
 
 ### Password matching and sorting
 
@@ -134,11 +134,11 @@ When you first open Browserpass popup, you will see a badge with the current dom
 
 This means that phishing attack prevention is enabled, and Browserpass is only showing you entries from your password store that match this domain.
 
-In order for Browserpass to correctly determine matching entries, it is expected that your password store follows naming conventions (see [Organizing password store](#organizing-password-store)), in particular your file or folder name must contain TLD, i.e. not `github.gpg`, but `github.com.gpg`. If an attacker directed you to `https://github.co/login` (notice `.co`), Browserpass will **not** present `github.com` entry in the popup. However if you intentionally want to re-use the same credentials on multiple domains (e.g. `amazon.com` and `amazon.co.uk`), see [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains).
+In order for Browserpass to correctly determine matching entries, it is expected that your password store follows naming conventions (see [Organizing password store](#organizing-password-store)). In particular your file or folder name must contain a domain with a valid TLD, i.e. not `github.gpg`, but `github.com.gpg`. If an attacker directed you to `https://github.co/login` (notice `.co`), Browserpass will **not** present `github.com` entry in the popup. However if you intentionally want to re-use the same credentials on multiple domains (e.g. `amazon.com` and `amazon.co.uk`), see [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains).
 
 Browserpass will display entries for the current domain, as well as all parent entries, but not entries from different subdomains. Suppose you are currently on `https://v3.app.example.com`, Browserpass will present all the following entries in popup (if they exist): `v3.app.example.com`, `app.example.com`, `example.com`; but it will not present entries like `v2.app.example.com` or `wiki.example.com`.
 
-Finally Browserpass will also present entries that you have recently used on this domain, even if they don't belong to this domain. Suppose you have a password for `amazon.com`, but you open `https://amazon.co.uk`, at first Browserpass will present no entries (because nothing matches `amazon.co.uk`), but if you hit <kbd>Backspace</kbd>, find `amazon.com` and use it to login, next time you visit `https://amazon.co.uk` and open Browserpass, `amazon.com` entry will already be present.
+Finally Browserpass will also present entries that you have recently used on this domain, even if they don't actually meet the usual matching requirements. Suppose you have a password for `amazon.com`, but you open `https://amazon.co.uk`, at first Browserpass will present no entries (because nothing matches `amazon.co.uk`), but if you hit <kbd>Backspace</kbd>, find `amazon.com` and use it to login, next time you visit `https://amazon.co.uk` and open Browserpass, `amazon.com` entry will already be present.
 
 The sorting algorithm implemented in Browserpass will use several intuitions to try to order results in the most expected way for a user:
 
@@ -147,17 +147,17 @@ The sorting algorithm implemented in Browserpass will use several intuitions to 
 1. Password entries with the identical usage counts are sorted by number of domain levels (specificity), i.e. `wiki.example.com` will be above `example.com`.
 1. If all the above is equal, password entries are sorted alphabetically.
 
-### Basic HTTP authentication
+### Modal HTTP authentication
 
-Due to the way browsers are implemented, browser extensions are only able to fill basic HTTP auth credentials for a website if these websites were opened by the extension. For this reason alone Browserpass contains a functionality to open a URL associated with a password entry in the current or a new browser tab.
+Due to the way browsers are implemented, browser extensions are only able to fill modal credentials (e.g. a popup for basic HTTP auth) for a website if the website in question has been opened by the extension. For this reason alone Browserpass contains functionality to open a URL associated with a password entry in the current or a new browser tab. However, please note that Browserpass is not intended as a bookmark manager.
 
-If you want Browserpass to fill out basic HTTP auth credentials, you must open these websites using Browserpass.
+If you want Browserpass to handle modal authentication, you must open these websites using Browserpass. This will cause Browserpass to open the target site, and transparently intercept and fill the authentication request. You will not normally see a login popup unless the credentials are incorrect.
 
 ### Password store locations
 
-Browserpass is able to automatically detect your password store location: it first checks `PASSWORD_STORE_DIR` environment variable, if it is not defined it falls back to `$HOME/.password-store`.
+Browserpass is able to automatically detect your password store location: it first checks the `$PASSWORD_STORE_DIR` environment variable. If that variable is not defined, it falls back to `$HOME/.password-store`.
 
-Using `Custom store locations` setting in the browser extension options you are able to define one or multiple locations for password stores: there are no restrictions, it can be subfolders in the password store, gopass mounts or any other folder that contains password entries.
+Using the `Custom store locations` setting in the browser extension options, you are able to define one or more custom locations for password stores. There are no restrictions on where these may be located; they can be subfolders of the main password store, gopass mounts, or any other folder that contains password entries.
 
 ## Options
 
@@ -166,7 +166,7 @@ The list of available options:
 | Name                                                        | Description                                                  |
 | ----------------------------------------------------------- | ------------------------------------------------------------ |
 | Automatically submit forms after filling (aka `autoSubmit`) | Make Browserpass automatically submit the login form for you |
-| Default username (aka `username`)                           | Username to use when it's not defined in password entry      |
+| Default username (aka `username`)                           | Username to use when it's not defined in the password file   |
 | Custom gpg binary (aka `gpgPath`)                           | Path to a custom `gpg` binary to use                         |
 | Custom store locations                                      | List of password stores to use                               |
 
@@ -189,14 +189,14 @@ Browserpass allows configuring certain settings in different places places using
 Browserpass aims to protect your passwords and computer from malicious or fraudulent websites.
 
 -   To protect against phishing, only passwords matching the origin hostname are suggested or selected without an explicit search term.
--   To minimize attack surface, the website is not allowed to trigger any extension action without user invocation.
--   Only data from the selected password is made available to the website.
--   Given full control of the non-native component of the extension, the attacker can extract passwords stored in the configured repository, but can not obtain files elsewhere on the filesystem or reach code execution.
--   Browserpass does not attempt to secure the data it stores in browser local storage, it is assumed that users take precautions to protect their local file system (e.g. by using disk encryption)
+-   To minimize attack surface, the website is not allowed to trigger any extension action. Browserpass must be directly invoked by the user.
+-   Only data from the selected password entry is made available to the website.
+-   Given full control of the non-native component of the extension, an attacker may be able to extract passwords stored in the configured repository, but cannot obtain files elsewhere on the filesystem or execute arbitrary code outside of the browser.
+-   Browserpass does not attempt to secure the data it stores in browser local storage, it is assumed that users take precautions to protect their local file system (e.g. by using disk encryption).
 
 ## Privacy
 
-Browserpass does not send any telemetry data, all metadata it collects to perform its functionality is stored in local storage and never leaves your browser.
+Browserpass does not send any telemetry data. All metadata that is collected in order for the extension to function correctly is stored *only* in local storage, and never leaves your browser.
 
 ## FAQ
 
@@ -206,17 +206,17 @@ There are several ways to tell Browserpass to use the same pair of credentials o
 
 The first option is just to manually find the desired credentials and use them in Browserpass, in other words if you have credentials for `amazon.com`, but you are currently on `https://amazon.co.uk`, open Browserpass, hit <kbd>Backspace</kbd> to search the entire password store, find `amazon.com` and hit <kbd>Enter</kbd> to login. Next time you will open Browserpass on `https://amazon.co.uk`, the popup will already contain the `amazon.com` entry, because it was previously used on this website (for details see [Password matching and sorting](#password-matching-and-sorting) section).
 
-The second option is to create a symlink file `amazon.co.uk.gpg` pointing to `amazon.com.gpg` in your password store, not only Browserpass, but `pass` itself will both recognize the symlink as an existing password entry.
+The second option is to create a symlink file `amazon.co.uk.gpg` pointing to `amazon.com.gpg` in your password store, not only Browserpass, but `pass` itself will both recognize the symlink as an existing password entry. It's also possible to symlink an entire directory, rather than individual files.
 
 If you simply want to re-use the same credentials on multiple subdomains of the same domain (e.g. `app.example.com` and `wiki.example.com`), you can also rename your password entry to a common denominator of the two subdomains, which in this example would be `example.com.gpg` (see [Password matching and sorting](#password-matching-and-sorting)).
 
 ### Why OTP is not supported?
 
-Tools like `pass-otp` make it possible to use `pass` for generating OTP codes, however keeping both passwords and OTP URI in the same location diminishes the major benefit that OTP is supposed to provide: two factor authentication. The purpose of multi-factor authentication is to protect your account even when attackers gain access to your password store, but if your OTP is stored in the same place, all auth factors will be compromised at once. In particular, Browserpass has access to the entire contents of your password entries, so if it is ever compromised, all your accounts will be at risk, even though you signed up for 2FA.
+Tools like `pass-otp` make it possible to use `pass` for generating OTP codes, however keeping both passwords and OTP URI in the same location diminishes the major benefit that OTP is supposed to provide: two factor authentication. The purpose of multi-factor authentication is to protect your account even when attackers gain access to your password store, but if your OTP seed is stored in the same place, all auth factors will be compromised at once. In particular, Browserpass has access to the entire contents of your password entries, so if it is ever compromised, all your accounts will be at risk, even though you signed up for 2FA.
 
 Browserpass is opinionated, it does not promote `pass-otp` and intentionally does not support generating OTP codes from OTP URIs in password entiries, even though there are other password managers that provide such functionality.
 
-There are valid scenarios for using `pass-otp` (e.g. it gives protection against intercepting your password during transmission), but users are strongly advised to very carefully consider if `pass-otp` fits their needs and come up with their own ways of accessing OTP codes that conforms to their security requirements (for example by using dmenu/rofi scripts). For the majority of people `pass-otp` is not recommended, using any phone app like Authy will be a much better and more secure alternative, because this way attackers would have to not only break into your password store, but they would _also_ have to break into your phone.
+There are valid scenarios for using `pass-otp` (e.g. it gives protection against intercepting your password during transmission), but users are strongly advised to very carefully consider whether `pass-otp` is really an appropriate solution - and if so, come up with their own ways of accessing OTP codes that conforms to their security requirements (for example by using dmenu/rofi scripts). For the majority of people `pass-otp` is not recommended; using any phone app like Authy will be a much better and more secure alternative, because this way attackers would have to not only break into your password store, but they would _also_ have to break into your phone.
 
 ## Building the extension
 
