@@ -42,6 +42,12 @@
             "suggested_key": {
                 "default": "Ctrl+Shift+L"
             }
+        },
+        "fillBest": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+U"
+            },
+            "description": "Fill form with the best matching credentials"
         }
     }
 }

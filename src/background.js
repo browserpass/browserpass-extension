@@ -57,6 +57,27 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     return true;
 });
 
+// handle keyboard shortcuts
+chrome.commands.onCommand.addListener(async command => {
+    switch (command) {
+        case "fillBest":
+            try {
+                const settings = await getFullSettings();
+                handleMessage(settings, { action: "listFiles" }, listResults => {
+                    // TODO this simulates the conversion and applied sorting algorithm as in popup...
+                    let bestLogin = {
+                        store: { id: "default" },
+                        login: listResults.files.default[0].replace(/.gpg$/, "")
+                    };
+                    handleMessage(settings, { action: "fill", login: bestLogin }, () => {});
+                });
+            } catch (e) {
+                console.log(e);
+            }
+            break;
+    }
+});
+
 chrome.runtime.onInstalled.addListener(onExtensionInstalled);
 
 //----------------------------------- Function definitions ----------------------------------//
