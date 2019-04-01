@@ -94,7 +94,7 @@ Browserpass was designed with an assumption that certain conventions are being f
 
 1. Username must be defined on a line starting with `login:`, `username:`, `user:` or `email:` (case-insensitive), and if all of these are absent, default username as configured in browser extension or in `.browserpass.json` of specific password store, and finally if everything is absent the file name is considered to be a username.
 
-1. URL ([only](#password-matching-and-sorting) used for [basic HTTP auth](#basic-http-authentication)!) must be defined on a line starting from `url:`, `uri:`, `website:`, `site:`, `link:` or `launch:` (case-insensitive).
+1. URL ([only](#password-matching-and-sorting) used for [modal authentication](#modal-authentication)!) must be defined on a line starting with `url:`, `uri:`, `website:`, `site:`, `link:` or `launch:` (case-insensitive).
 
 ### First steps in browser extension
 
@@ -147,11 +147,11 @@ The sorting algorithm implemented in Browserpass will use several intuitions to 
 1. Password entries with the identical usage counts are sorted by number of domain levels (specificity), i.e. `wiki.example.com` will be above `example.com`.
 1. If all the above is equal, password entries are sorted alphabetically.
 
-### Basic HTTP authentication
+### Modal authentication
 
-Due to the way browsers are implemented, browser extensions are only able to fill basic HTTP auth credentials for a website if these websites were opened by the extension. For this reason alone Browserpass contains a functionality to open a URL associated with a password entry in the current or a new browser tab.
+Due to the way browsers are implemented, browser extensions are only able to fill modal credentials (e.g. a popup for basic HTTP auth) for a website if the website in question has been opened by the extension. For this reason alone Browserpass contains functionality to open a URL associated with a password entry in the current or a new browser tab. However, please note that Browserpass is not intended as a bookmark manager.
 
-If you want Browserpass to fill out basic HTTP auth credentials, you must open these websites using Browserpass.
+If you want Browserpass to handle modal authentication, you must open these websites using Browserpass. This cause Browserpass to open the target site, and transparently intercept and fill the authentication request. You will not normally see a login popup unless the credentials are incorrect.
 
 ### Password store locations
 
