@@ -155,9 +155,9 @@ If you want Browserpass to handle modal authentication, you must open these webs
 
 ### Password store locations
 
-Browserpass is able to automatically detect your password store location: it first checks `PASSWORD_STORE_DIR` environment variable, if it is not defined it falls back to `$HOME/.password-store`.
+Browserpass is able to automatically detect your password store location: it first checks the `$PASSWORD_STORE_DIR` environment variable. If that variable is not defined, it falls back to `$HOME/.password-store`.
 
-Using `Custom store locations` setting in the browser extension options you are able to define one or multiple locations for password stores: there are no restrictions, it can be subfolders in the password store, gopass mounts or any other folder that contains password entries.
+Using the `Custom store locations` setting in the browser extension options, you are able to define one or more custom locations for password stores. There are no restrictions on where these may be located; they can be subfolders of the main password store, gopass mounts, or any other folder that contains password entries.
 
 ## Options
 
