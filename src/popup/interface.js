@@ -103,11 +103,6 @@ function view(ctl, params) {
                             tabindex: 0,
                             title: "Copy username",
                             action: "copyUsername"
-                        }),
-                        m("div.action.launch", {
-                            tabindex: 0,
-                            title: "Open URL",
-                            action: "launch"
                         })
                     ]
                 );
