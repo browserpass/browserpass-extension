@@ -166,7 +166,7 @@ The list of available options:
 | Name                                                        | Description                                                  |
 | ----------------------------------------------------------- | ------------------------------------------------------------ |
 | Automatically submit forms after filling (aka `autoSubmit`) | Make Browserpass automatically submit the login form for you |
-| Default username (aka `username`)                           | Username to use when it's not defined in password entry      |
+| Default username (aka `username`)                           | Username to use when it's not defined in the password file   |
 | Custom gpg binary (aka `gpgPath`)                           | Path to a custom `gpg` binary to use                         |
 | Custom store locations                                      | List of password stores to use                               |
 
