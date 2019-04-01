@@ -189,10 +189,10 @@ Browserpass allows configuring certain settings in different places places using
 Browserpass aims to protect your passwords and computer from malicious or fraudulent websites.
 
 -   To protect against phishing, only passwords matching the origin hostname are suggested or selected without an explicit search term.
--   To minimize attack surface, the website is not allowed to trigger any extension action without user invocation.
--   Only data from the selected password is made available to the website.
--   Given full control of the non-native component of the extension, the attacker can extract passwords stored in the configured repository, but can not obtain files elsewhere on the filesystem or reach code execution.
--   Browserpass does not attempt to secure the data it stores in browser local storage, it is assumed that users take precautions to protect their local file system (e.g. by using disk encryption)
+-   To minimize attack surface, the website is not allowed to trigger any extension action. Browserpass must be directly invoked by the user.
+-   Only data from the selected password entry is made available to the website.
+-   Given full control of the non-native component of the extension, an attacker may be able to extract passwords stored in the configured repository, but cannot obtain files elsewhere on the filesystem or execute arbitrary code outside of the browser.
+-   Browserpass does not attempt to secure the data it stores in browser local storage, it is assumed that users take precautions to protect their local file system (e.g. by using disk encryption).
 
 ## Privacy
 
