@@ -3,7 +3,7 @@
 @hover-bg-color: #363636;
 @text-color: #c4c4c4;
 @error-text-color: #f00;
-@dim-text-color: #808080;
+@dim-text-color: #a0a0a0;
 
 @input-bg-color: #4a4a4a;
 @active-input-bg-color: #4f4f4f;
@@ -37,7 +37,6 @@ html,
 body {
     font-family: "Open Sans";
     font-size: 14px;
-    font-weight: 300;
     margin: 0;
     padding: 0;
     min-width: 260px;
@@ -45,6 +44,13 @@ body {
     white-space: nowrap;
     background-color: @bg-color;
     color: @text-color;
+}
+
+@media (min-resolution: 192dpi) {
+    html,
+    body {
+        font-weight: 300;
+    }
 }
 
 html::-webkit-scrollbar,
