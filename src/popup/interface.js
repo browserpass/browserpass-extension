@@ -5,6 +5,8 @@ var FuzzySort = require("fuzzysort");
 var Moment = require("moment");
 var SearchInterface = require("./searchinterface");
 
+const LATEST_NATIVE_APP_VERSION = 3000002;
+
 /**
  * Popup main interface
  *
@@ -109,6 +111,22 @@ function view(ctl, params) {
             })
         )
     );
+
+    if (this.settings.version < LATEST_NATIVE_APP_VERSION) {
+        nodes.push(
+            m("div.updates", [
+                m("span", "Update native host app: "),
+                m(
+                    "a",
+                    {
+                        href: "https://github.com/browserpass/browserpass-native#installation",
+                        target: "_blank"
+                    },
+                    "instructions"
+                )
+            ])
+        );
+    }
 
     return nodes;
 }
