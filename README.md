@@ -115,16 +115,16 @@ If you want to intentionally disable phishing attack protection and search the e
 
 Note: If the cursor is located in the search input field, every shortcut that works on the selected entry will be applied on the first entry in the popup list.
 
-| Shortcult                                            | Action                                             |
-| ---------------------------------------------------- | -------------------------------------------------- |
-| <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                             |
-| <kbd>Enter</kbd>                                     | Submit form with currently selected credentials    |
-| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Navigate popup list                                |
-| <kbd>Ctrl+C</kbd>                                    | Copy password to clipboard                         |
-| <kbd>Ctrl+Shift+C</kbd>                              | Copy username to clipboard                         |
-| <kbd>Ctrl+G</kbd>                                    | Open URL in the current tab                        |
-| <kbd>Ctrl+Shift+G</kbd>                              | Open URL in the new tab                            |
-| <kbd>Backspace</kbd> (with no search text entered)   | Search passwords in the entire password store      |
+| Shortcult                                            | Action                                          |
+| ---------------------------------------------------- | ----------------------------------------------- |
+| <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                          |
+| <kbd>Enter</kbd>                                     | Submit form with currently selected credentials |
+| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Navigate popup list                             |
+| <kbd>Ctrl+C</kbd>                                    | Copy password to clipboard                      |
+| <kbd>Ctrl+Shift+C</kbd>                              | Copy username to clipboard                      |
+| <kbd>Ctrl+G</kbd>                                    | Open URL in the current tab                     |
+| <kbd>Ctrl+Shift+G</kbd>                              | Open URL in the new tab                         |
+| <kbd>Backspace</kbd> (with no search text entered)   | Search passwords in the entire password store   |
 
 ### Password matching and sorting
 
@@ -196,7 +196,7 @@ Browserpass aims to protect your passwords and computer from malicious or fraudu
 
 ## Privacy
 
-Browserpass does not send any telemetry data. All metadata that is collected in order for the extension to function correctly is stored *only* in local storage, and never leaves your browser.
+Browserpass does not send any telemetry data. All metadata that is collected in order for the extension to function correctly is stored _only_ in local storage, and never leaves your browser.
 
 ## FAQ
 
