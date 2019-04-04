@@ -2,7 +2,6 @@ VERSION ?= $(shell cat .version)
 
 CLEAN_FILES := chromium firefox dist
 CHROME := $(shell which chromium 2>/dev/null || which chromium-browser 2>/dev/null || which chrome 2>/dev/null || which google-chrome 2>/dev/null || which google-chrome-stable 2>/dev/null)
-PEM := $(shell find . -maxdepth 1 -name "*.pem")
 
 #######################
 # For local development
@@ -63,18 +62,18 @@ clean:
 	rm -rf $(CLEAN_FILES)
 	$(MAKE) -C src clean
 
-.PHONY: crx
-crx:
-ifneq ($(PEM),)
-	"$(CHROME)" --disable-gpu --pack-extension=./chromium --pack-extension-key=$(PEM)
-else
-	"$(CHROME)" --disable-gpu --pack-extension=./chromium
-	rm chromium.pem
-endif
-	mv chromium.crx browserpass.crx
+.PHONY: crx-webstore
+crx-webstore:
+	"$(CHROME)" --disable-gpu --pack-extension=./chromium --pack-extension-key=webstore.pem
+	mv chromium.crx browserpass-webstore.crx
+
+.PHONY: crx-github
+crx-github:
+	"$(CHROME)" --disable-gpu --pack-extension=./chromium --pack-extension-key=github.pem
+	mv chromium.crx browserpass-github.crx
 
 .PHONY: dist
-dist: clean extension chromium firefox crx
+dist: clean extension chromium firefox crx-webstore crx-github
 	mkdir -p dist
 
 	git archive -o dist/$(VERSION).tar.gz --format tar.gz --prefix=browserpass-extension-$(VERSION)/ $(VERSION)
@@ -82,7 +81,8 @@ dist: clean extension chromium firefox crx
 	(cd chromium && zip -FSr ../dist/chromium.zip *)
 	(cd firefox  && zip -FSr ../dist/firefox.zip  *)
 
-	mv browserpass.crx dist/
+	mv browserpass-webstore.crx dist/
+	mv browserpass-github.crx dist/
 
 	for file in dist/*; do \
 	    gpg --detach-sign "$$file"; \
