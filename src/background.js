@@ -278,13 +278,6 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
  * @return array List of filled fields
  */
 async function fillFields(settings, login, fields) {
-    // check that required fields are present
-    for (var field of fields) {
-        if (login.fields[field] === null) {
-            throw new Error(`Required field is missing: ${field}`);
-        }
-    }
-
     // inject script
     await chrome.tabs.executeScript(settings.tab.id, {
         allFrames: true,
