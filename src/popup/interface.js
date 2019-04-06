@@ -62,6 +62,9 @@ function view(ctl, params) {
         m(
             "div.logins",
             this.results.map(function(result) {
+                const storeBgColor = result.store.bgColor || result.store.settings.bgColor;
+                const storeColor = result.store.color || result.store.settings.color;
+
                 return m(
                     "div.part.login",
                     {
@@ -83,8 +86,8 @@ function view(ctl, params) {
                                 m(
                                     "div.store.badge",
                                     {
-                                        style: `background-color: ${result.store.bgColor};
-                                                color: ${result.store.color}`
+                                        style: `background-color: ${storeBgColor};
+                                                color: ${storeColor}`
                                     },
                                     result.store.name
                                 ),
