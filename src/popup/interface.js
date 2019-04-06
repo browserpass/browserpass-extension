@@ -80,7 +80,14 @@ function view(ctl, params) {
                     [
                         m("div.name", [
                             m("div.line1", [
-                                m("div.store.badge", result.store.name),
+                                m(
+                                    "div.store.badge",
+                                    {
+                                        style: `background-color: ${result.store.bgColor};
+                                                color: ${result.store.color}`
+                                    },
+                                    result.store.name
+                                ),
                                 m("div.path", [m.trust(result.path)]),
                                 result.recent.when > 0
                                     ? m("div.recent", {
