@@ -278,13 +278,6 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
  * @return array List of filled fields
  */
 async function fillFields(settings, login, fields) {
-    // check that required fields are present
-    for (var field of fields) {
-        if (login.fields[field] === null) {
-            throw new Error(`Required field is missing: ${field}`);
-        }
-    }
-
     // inject script
     await chrome.tabs.executeScript(settings.tab.id, {
         allFrames: true,
@@ -298,49 +291,55 @@ async function fillFields(settings, login, fields) {
         fields: fields
     };
 
-    // fill form via injected script
     let allFrames = false;
     let allowForeign = false;
-    let allowNoSecret = false;
-    let filledFields = await dispatchFill(
-        settings,
-        fillRequest,
-        allFrames,
-        allowForeign,
-        allowNoSecret
+    let allowNoSecret = !fields.includes("secret");
+    let filledFields = [];
+    let importantFieldToFill = fields.includes("openid") ? "openid" : "secret";
+
+    // fill form via injected script
+    filledFields = filledFields.concat(
+        await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
     );
 
-    // try again using same-origin frames if we couldn't fill a password field
-    if (!filledFields.includes("secret")) {
+    // try again using same-origin frames if we couldn't fill an "important" field
+    if (!filledFields.includes(importantFieldToFill)) {
         allFrames = true;
         filledFields = filledFields.concat(
             await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
         );
     }
 
-    // try again using all available frames if we couldn't fill a password field
-    if (!filledFields.includes("secret") && settings.foreignFills[settings.host] !== false) {
+    // try again using all available frames if we couldn't fill an "important" field
+    if (
+        !filledFields.includes(importantFieldToFill) &&
+        settings.foreignFills[settings.host] !== false
+    ) {
         allowForeign = true;
         filledFields = filledFields.concat(
             await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
         );
     }
 
-    // try again using same-origin frames, and don't require a password field
-    if (!filledFields.length) {
-        allowForeign = false;
+    // try again, but don't require a password field (if it was required until now)
+    if (!allowNoSecret) {
         allowNoSecret = true;
-        filledFields = filledFields.concat(
-            await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
-        );
-    }
 
-    // try again using all available frames, and don't require a password field
-    if (!filledFields.length && settings.foreignFills[settings.host] !== false) {
-        allowForeign = true;
-        filledFields = filledFields.concat(
-            await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
-        );
+        // try again using same-origin frames
+        if (!filledFields.length) {
+            allowForeign = false;
+            filledFields = filledFields.concat(
+                await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
+            );
+        }
+
+        // try again using all available frames
+        if (!filledFields.length && settings.foreignFills[settings.host] !== false) {
+            allowForeign = true;
+            filledFields = filledFields.concat(
+                await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
+            );
+        }
     }
 
     if (!filledFields.length) {
@@ -350,7 +349,8 @@ async function fillFields(settings, login, fields) {
     // build focus or submit request
     let focusOrSubmitRequest = {
         origin: new URL(settings.tab.url).origin,
-        autoSubmit: getSetting("autoSubmit", login, settings)
+        autoSubmit: getSetting("autoSubmit", login, settings),
+        filledFields: filledFields
     };
 
     // try to focus or submit form with the settings that were used to fill it
@@ -675,8 +675,10 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "fill":
             try {
+                let fields = message.login.fields.openid ? ["openid"] : ["login", "secret"];
+
                 // dispatch initial fill request
-                var filledFields = await fillFields(settings, message.login, ["login", "secret"]);
+                var filledFields = await fillFields(settings, message.login, fields);
                 saveRecent(settings, message.login);
 
                 // no need to check filledFields, because fillFields() already throws an error if empty
@@ -751,6 +753,7 @@ async function parseFields(settings, login) {
     login.fields = {
         secret: ["secret", "password", "pass"],
         login: ["login", "username", "user", "email"],
+        openid: ["openid"],
         url: ["url", "uri", "website", "site", "link", "launch"]
     };
     login.settings = {
