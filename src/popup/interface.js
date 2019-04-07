@@ -62,6 +62,9 @@ function view(ctl, params) {
         m(
             "div.logins",
             this.results.map(function(result) {
+                const storeBgColor = result.store.bgColor || result.store.settings.bgColor;
+                const storeColor = result.store.color || result.store.settings.color;
+
                 return m(
                     "div.part.login",
                     {
@@ -80,7 +83,14 @@ function view(ctl, params) {
                     [
                         m("div.name", [
                             m("div.line1", [
-                                m("div.store.badge", result.store.name),
+                                m(
+                                    "div.store.badge",
+                                    {
+                                        style: `background-color: ${storeBgColor};
+                                                color: ${storeColor}`
+                                    },
+                                    result.store.name
+                                ),
                                 m("div.path", [m.trust(result.path)]),
                                 result.recent.when > 0
                                     ? m("div.recent", {

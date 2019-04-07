@@ -180,6 +180,24 @@ function createCustomStore(storeId) {
                 this.saveEnabled = true;
             }
         }),
+        m("input[type=text].bgColor", {
+            title: "Badge background color",
+            value: store.bgColor,
+            placeholder: "#626262",
+            onchange: e => {
+                store.bgColor = e.target.value;
+                this.saveEnabled = true;
+            }
+        }),
+        m("input[type=text].color", {
+            title: "Badge text color",
+            value: store.color,
+            placeholder: "#c4c4c4",
+            onchange: e => {
+                store.color = e.target.value;
+                this.saveEnabled = true;
+            }
+        }),
         m(
             "a.remove",
             {
