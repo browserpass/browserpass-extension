@@ -200,7 +200,7 @@
                     result.needPressEnter = true;
                 }
                 // We need to keep focus somewhere within the form, so that Enter hopefully submits the form.
-                for (let selectors of [PASSWORD_FIELDS, USERNAME_FIELDS, OPENID_FIELDS]) {
+                for (let selectors of [OPENID_FIELDS, PASSWORD_FIELDS, USERNAME_FIELDS]) {
                     let field = find(selectors, loginForm);
                     if (field) {
                         field.focus();

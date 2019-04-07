@@ -295,7 +295,7 @@ async function fillFields(settings, login, fields) {
     let allowForeign = false;
     let allowNoSecret = !fields.includes("secret");
     let filledFields = [];
-    let importantFieldToFill = fields.includes("secret") ? "secret" : "openid";
+    let importantFieldToFill = fields.includes("openid") ? "openid" : "secret";
 
     // fill form via injected script
     filledFields = filledFields.concat(
