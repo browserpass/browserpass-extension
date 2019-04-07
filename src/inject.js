@@ -1,11 +1,11 @@
 (function() {
     const FORM_MARKERS = ["login", "log-in", "log_in", "signin", "sign-in", "sign_in"];
+    const OPENID_FIELDS = {
+        selectors: ["input[name*=openid i]", "input[id*=openid i]", "input[class*=openid i]"],
+        types: ["text"]
+    };
     const USERNAME_FIELDS = {
         selectors: [
-            "input[id*=openid i]",
-            "input[name*=openid i]",
-            "input[class*=openid i]",
-
             "input[name*=login i]",
             "input[name*=user i]",
             "input[name*=email i]",
@@ -25,7 +25,9 @@
         selectors: ["input[type=password i]"]
     };
     const INPUT_FIELDS = {
-        selectors: PASSWORD_FIELDS.selectors.concat(USERNAME_FIELDS.selectors)
+        selectors: PASSWORD_FIELDS.selectors
+            .concat(USERNAME_FIELDS.selectors)
+            .concat(OPENID_FIELDS.selectors)
     };
     const SUBMIT_FIELDS = {
         selectors: [
@@ -84,10 +86,17 @@
         };
 
         // get the login form
-        var loginForm = form();
+        let loginForm = undefined;
+        if (request.fields.includes("openid")) {
+            // this is an attempt to fill a form containing only openid field
+            loginForm = form(OPENID_FIELDS);
+        } else {
+            // this is an attempt to fill a regular login form
+            loginForm = form(INPUT_FIELDS);
+        }
 
         // don't attempt to fill non-secret forms unless non-secret filling is allowed
-        if (!find(PASSWORD_FIELDS, loginForm) && !request.allowNoSecret) {
+        if (!request.allowNoSecret && !find(PASSWORD_FIELDS, loginForm)) {
             return result;
         }
 
@@ -126,6 +135,14 @@
             result.filledFields.push("secret");
         }
 
+        // fill openid field
+        if (
+            request.fields.includes("openid") &&
+            update(OPENID_FIELDS, request.login.fields.openid, loginForm)
+        ) {
+            result.filledFields.push("openid");
+        }
+
         // finished filling things successfully
         return result;
     }
@@ -144,7 +161,14 @@
         };
 
         // get the login form
-        var loginForm = form();
+        let loginForm = undefined;
+        if (request.filledFields.includes("openid")) {
+            // this is an attempt to focus or submit a form containing only openid field
+            loginForm = form(OPENID_FIELDS);
+        } else {
+            // this is an attempt to focus or submit a regular login form
+            loginForm = form(INPUT_FIELDS);
+        }
 
         // ensure the origin is the same or allowed
         if (window.location.origin !== request.origin) {
@@ -176,13 +200,11 @@
                     result.needPressEnter = true;
                 }
                 // We need to keep focus somewhere within the form, so that Enter hopefully submits the form.
-                var password = find(PASSWORD_FIELDS, loginForm);
-                if (password) {
-                    password.focus();
-                } else {
-                    var username = find(USERNAME_FIELDS, loginForm);
-                    if (username) {
-                        username.focus();
+                for (let selectors of [OPENID_FIELDS, PASSWORD_FIELDS, USERNAME_FIELDS]) {
+                    let field = find(selectors, loginForm);
+                    if (field) {
+                        field.focus();
+                        break;
                     }
                 }
             }
@@ -265,10 +287,11 @@
      *
      * @since 3.0.0
      *
+     * @param array selectors Selectors to use to find the right form
      * @return The login form
      */
-    function form() {
-        const elems = queryAllVisible(document, INPUT_FIELDS, undefined);
+    function form(selectors) {
+        const elems = queryAllVisible(document, selectors, undefined);
         const forms = [];
         for (let elem of elems) {
             const form = elem.form;
