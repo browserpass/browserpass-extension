@@ -1,4 +1,4 @@
-<p align="center"><img src="/src/images/logotype-horizontal.png"></p>
+<p align="center"><img src="images/logotype-horizontal.png"></p>
 
 # Browserpass - browser extension
 
