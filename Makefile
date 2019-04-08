@@ -1,6 +1,6 @@
 VERSION ?= $(shell cat .version)
 
-CLEAN_FILES := chromium firefox dist
+CLEAN_FILES := chromium firefox dist dist-webstore
 CHROME := $(shell which chromium 2>/dev/null || which chromium-browser 2>/dev/null || which chrome 2>/dev/null || which google-chrome 2>/dev/null || which google-chrome-stable 2>/dev/null)
 
 #######################
@@ -78,8 +78,8 @@ dist: clean extension chromium firefox crx-webstore crx-github
 
 	git archive -o dist/$(VERSION).tar.gz --format tar.gz --prefix=browserpass-extension-$(VERSION)/ $(VERSION)
 
-	(cd chromium && zip -FSr ../dist/chromium.zip *)
-	(cd firefox  && zip -FSr ../dist/firefox.zip  *)
+	(cd chromium && zip -r ../dist/chromium.zip *)
+	(cd firefox  && zip -r ../dist/firefox.zip  *)
 
 	mv browserpass-webstore.crx dist/
 	mv browserpass-github.crx dist/
@@ -89,3 +89,9 @@ dist: clean extension chromium firefox crx-webstore crx-github
 	done
 
 	rm -f dist/$(VERSION).tar.gz
+
+	mkdir -p dist-webstore
+	cp -a chromium dist-webstore/
+	sed -i '/"key"/d' dist-webstore/chromium/manifest.json
+	(cd dist-webstore/chromium && zip -r ../chrome.zip *)
+	rm -rf dist-webstore/chromium

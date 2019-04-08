@@ -1,6 +1,7 @@
 /chromium
 /firefox
 /dist
+/dist-webstore
 
 /src/node_modules
 /src/css
