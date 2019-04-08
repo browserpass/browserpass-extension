@@ -1,3 +1,5 @@
+<p align="center"><img src="images/logotype-horizontal.png"></p>
+
 # Browserpass - browser extension
 
 Browserpass is a browser extension for [zx2c4's pass](https://www.passwordstore.org/), a UNIX based password store manager. It allows you to auto-fill or copy to clipboard credentials for the current domain, protecting you from phishing attacks.
