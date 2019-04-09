@@ -19,6 +19,7 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [First steps in browser extension](#first-steps-in-browser-extension)
     -   [Available keyboard shortcuts](#available-keyboard-shortcuts)
     -   [Password matching and sorting](#password-matching-and-sorting)
+    -   [OpenID authentication](#openid-authentication)
     -   [Modal HTTP authentication](#modal-http-authentication)
     -   [Password store locations](password-store-locations)
 -   [Options](#options)
@@ -99,6 +100,8 @@ Browserpass was designed with an assumption that certain conventions are being f
 
 1. Username must be defined on a line starting with `login:`, `username:`, `user:` or `email:` (case-insensitive), and if all of these are absent, default username as configured in browser extension or in `.browserpass.json` of specific password store, and finally if everything is absent the file name is considered to be a username.
 
+1. OpenID URL must be defined on a line starting with `openid:` (case-insensitive).
+
 1. URL ([only](#password-matching-and-sorting) used for [modal HTTP authentication](#modal-http-authentication)!) must be defined on a line starting with `url:`, `uri:`, `website:`, `site:`, `link:` or `launch:` (case-insensitive).
 
 ### First steps in browser extension
@@ -151,6 +154,10 @@ The sorting algorithm implemented in Browserpass will use several intuitions to 
 1. The rest of the available password entries will be sorted by the frequency of their usage, the more times a password was used, the higher it will be in the list.
 1. Password entries with the identical usage counts are sorted by number of domain levels (specificity), i.e. `wiki.example.com` will be above `example.com`.
 1. If all the above is equal, password entries are sorted alphabetically.
+
+### OpenID authentication
+
+OpenID is often used when someone doesn't trust (or doesn't want to need to trust) a website with their authentication credentials. For this reason, to prevent leaking credentials Browserpass considers OpenID and username+password authentications mutually exclusive: when `openid:` field is present in a password entry, Browserpass will _only_ attempt to fill the OpenID field in a form, it will not even attempt to fill username and password fields, even if they are also present in the password entry, even if a website contains username and password fields in a login form.
 
 ### Modal HTTP authentication
 
