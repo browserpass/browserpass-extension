@@ -157,7 +157,7 @@ The sorting algorithm implemented in Browserpass will use several intuitions to 
 
 ### OpenID authentication
 
-When `openid:` field is defined in a password entry, Browserpass will _only_ attempt to fill the OpenID field in a form, it will not attempt to fill username and password fields even if they are also present in the password entry.
+OpenID is often used when someone doesn't trust (or doesn't want to need to trust) a website with their authentication credentials. For this reason, to prevent leaking credentials Browserpass considers OpenID and username+password authentications mutually exclusive: when `openid:` field is present in a password entry, Browserpass will _only_ attempt to fill the OpenID field in a form, it will not even attempt to fill username and password fields, even if they are also present in the password entry, even if a website contains username and password fields in a login form.
 
 ### Modal HTTP authentication
 
