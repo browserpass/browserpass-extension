@@ -85,7 +85,7 @@ dist: clean extension chromium firefox crx-webstore crx-github
 	mv browserpass-github.crx dist/browserpass-github-$(VERSION).crx
 
 	for file in dist/*; do \
-	    gpg --detach-sign "$$file"; \
+	    gpg --detach-sign --armor "$$file"; \
 	done
 
 	rm -f dist/browserpass-extension-$(VERSION).tar.gz
