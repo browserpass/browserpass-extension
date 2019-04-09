@@ -44,14 +44,14 @@ In order to install Browserpass correctly, you have to install two of its compon
 
 -   [Native messaging host](https://github.com/browserpass/browserpass-native#installation)
 -   Browser extension for Chromium-based browsers (choose one of the options):
-    -   Install the extension from [Chrome Web Store](https://chrome.google.com/webstore/detail/browserpass-ce/naepdomgkenhinolocfifgehidddafch) (which will provide auto-updates)
+    -   Available since Saturday, 13 April: ~Install the extension from [Chrome Web Store](https://chrome.google.com/webstore/detail/browserpass-ce/naepdomgkenhinolocfifgehidddafch) (which will provide auto-updates)~
     -   Download `browserpass-webstore.crx` from the latest release and drag'n'drop it into `chrome://extensions`
         -   This extension has the same ID as the one in Chrome Web Store, so when a new version will appear in Web Store, it will auto-update! Use if you want to be on latest and greatest version.
     -   Download `browserpass-github.crx` from the latest release and drag'n'drop it into `chrome://extensions`
         -   This extension has a different ID comparing to the one in Chrome Web Store, so you will not receive any auto-updates! Use for creating distro packages, or if you simply don't tolerate being forced to update when a new version is released.
     -   Download `browserpass-chromium.zip`, unarchive and use `Load unpacked extension` in `chrome://extensions` in Developer mode.
 -   Browser extension for Firefox-based browsers (choose one of the options):
-    -   Install the extension from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/browserpass-ce/) (which will provide auto-updates)
+    -   Available since Saturday, 13 April: ~Install the extension from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/browserpass-ce/) (which will provide auto-updates)~
     -   Download `browserpass-firefox.zip` from the latest release, unarchive and use `Load Temporary Add-on` on `about:debugging#addons` (remember the extension will be removed after browser is closed!).
 
 ### Verifying authenticity of the Github releases
