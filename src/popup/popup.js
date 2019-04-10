@@ -30,7 +30,7 @@ function handleError(error, type = "error") {
 }
 
 /**
- * Get the deepest available domain component of a path
+ * Get the outermost available domain component of a path
  *
  * @since 3.0.0
  *
@@ -38,11 +38,8 @@ function handleError(error, type = "error") {
  * @return string|null Extracted domain
  */
 function pathToDomain(path) {
-    var parts = path.split(/\//).reverse();
+    var parts = path.split(/\//);
     for (var key in parts) {
-        if (parts[key].indexOf("@") >= 0) {
-            continue;
-        }
         var t = TldJS.parse(parts[key]);
         if (t.isValid && t.domain !== null) {
             return t.hostname;
@@ -105,6 +102,7 @@ async function run() {
                 logins.push(login);
             }
         }
+        console.log(logins);
         var popup = new Interface(settings, logins);
         popup.attach(document.body);
     } catch (e) {

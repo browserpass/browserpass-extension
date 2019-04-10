@@ -53,7 +53,7 @@ chrome.runtime.onInstalled.addListener(onExtensionInstalled);
 //----------------------------------- Function definitions ----------------------------------//
 
 /**
- * Get the deepest available domain component of a path
+ * Get the outermost available domain component of a path
  *
  * @since 3.0.0
  *
@@ -61,11 +61,8 @@ chrome.runtime.onInstalled.addListener(onExtensionInstalled);
  * @return string|null Extracted domain
  */
 function pathToDomain(path) {
-    var parts = path.split(/\//).reverse();
+    var parts = path.split(/\//);
     for (var key in parts) {
-        if (parts[key].indexOf("@") >= 0) {
-            continue;
-        }
         var t = TldJS.parse(parts[key]);
         if (t.isValid && t.domain !== null) {
             return t.hostname;
