@@ -5,7 +5,7 @@ var FuzzySort = require("fuzzysort");
 var Moment = require("moment");
 var SearchInterface = require("./searchinterface");
 
-const LATEST_NATIVE_APP_VERSION = 3000004;
+const LATEST_NATIVE_APP_VERSION = 3000003;
 
 /**
  * Popup main interface
