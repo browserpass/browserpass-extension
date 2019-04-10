@@ -44,7 +44,7 @@ function pathToDomain(path) {
             continue;
         }
         var t = TldJS.parse(parts[key]);
-        if (t.isValid && t.domain !== null) {
+        if (t.isValid && t.tldExists && t.domain !== null) {
             return t.hostname;
         }
     }
