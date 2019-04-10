@@ -10,10 +10,14 @@
         "scripts": ["js/background.dist.js"]
     },
     "icons": {
+        "16": "icon16.png",
         "128": "icon.png"
     },
     "browser_action": {
-        "default_icon": "icon.svg",
+        "default_icon": {
+            "16": "icon16.png",
+            "128": "icon.png"
+        },
         "default_popup": "popup/popup.html"
     },
     "options_ui": {
