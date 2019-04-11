@@ -224,11 +224,11 @@
      * @return array List of search results
      */
     function queryAllVisible(parent, field, form) {
-        var result = [];
-        for (var i = 0; i < field.selectors.length; i++) {
-            var elems = parent.querySelectorAll(field.selectors[i]);
-            for (var j = 0; j < elems.length; j++) {
-                var elem = elems[j];
+        const result = [];
+        for (let i = 0; i < field.selectors.length; i++) {
+            let elems = parent.querySelectorAll(field.selectors[i]);
+            for (let j = 0; j < elems.length; j++) {
+                let elem = elems[j];
                 // Select only elements from specified form
                 if (form && form != elem.form) {
                     continue;
@@ -247,17 +247,33 @@
                     continue;
                 }
                 // Elem takes space on the screen, but it or its parent is hidden with a visibility style.
-                var style = window.getComputedStyle(elem);
+                let style = window.getComputedStyle(elem);
                 if (style.visibility == "hidden") {
                     continue;
                 }
                 // Elem is outside of the boundaries of the visible viewport.
-                var rect = elem.getBoundingClientRect();
+                let rect = elem.getBoundingClientRect();
                 if (
                     rect.x + rect.width < 0 ||
                     rect.y + rect.height < 0 ||
                     (rect.x > window.innerWidth || rect.y > window.innerHeight)
                 ) {
+                    continue;
+                }
+                // Elem is hidden by its or or its parent's opacity rules
+                const OPACITY_LIMIT = 0.1;
+                let opacity = 1;
+                for (
+                    let testElem = elem;
+                    opacity >= OPACITY_LIMIT && testElem && testElem.nodeType === Node.ELEMENT_NODE;
+                    testElem = testElem.parentNode
+                ) {
+                    let style = window.getComputedStyle(testElem);
+                    if (style.opacity) {
+                        opacity *= parseFloat(style.opacity);
+                    }
+                }
+                if (opacity < OPACITY_LIMIT) {
                     continue;
                 }
                 // This element is visible, will use it.
