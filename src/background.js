@@ -778,7 +778,7 @@ async function parseFields(settings, login) {
         for (var key in login.fields) {
             if (
                 Array.isArray(login.fields[key]) &&
-                login.fields[key].indexOf(parts[0].toLowerCase()) >= 0
+                login.fields[key].includes(parts[0].toLowerCase())
             ) {
                 login.fields[key] = parts[1];
                 break;
@@ -789,7 +789,7 @@ async function parseFields(settings, login) {
         for (var key in login.settings) {
             if (
                 typeof login.settings[key].type !== "undefined" &&
-                login.settings[key].name.indexOf(parts[0].toLowerCase()) >= 0
+                login.settings[key].name === parts[0].toLowerCase()
             ) {
                 if (login.settings[key].type === "bool") {
                     login.settings[key] = ["true", "yes"].includes(parts[1].toLowerCase());
@@ -805,9 +805,9 @@ async function parseFields(settings, login) {
     // clean up unassigned fields
     for (var key in login.fields) {
         if (Array.isArray(login.fields[key])) {
-            if (key == "secret" && lines.length) {
+            if (key === "secret" && lines.length) {
                 login.fields.secret = lines[0];
-            } else if (key == "login") {
+            } else if (key === "login") {
                 const defaultUsername = getSetting("username", login, settings);
                 login.fields[key] = defaultUsername || login.login.match(/([^\/]+)$/)[1];
             } else {
@@ -905,14 +905,14 @@ function onExtensionInstalled(details) {
         });
     };
 
-    if (details.reason == "install") {
+    if (details.reason === "install") {
         show(
             "installed",
             "browserpass: Install native host app",
             "Remember to install the complementary native host app to use this extension.\n" +
                 "Instructions here: https://github.com/browserpass/browserpass-native"
         );
-    } else if (details.reason == "update") {
+    } else if (details.reason === "update") {
         var changelog = {
             3000000:
                 "New major update is out, please update the native host app to v3.\n" +
