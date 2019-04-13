@@ -392,7 +392,7 @@ async function getFullSettings() {
     });
     var response = await hostAction(configureSettings, "configure");
     if (response.status != "ok") {
-        throw new Error(JSON.stringify(response)); // TODO handle host error
+        settings.hostError = response;
     }
     settings.version = response.version;
     if (Object.keys(settings.stores).length > 0) {
