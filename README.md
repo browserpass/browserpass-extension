@@ -26,8 +26,8 @@ In order to use Browserpass you must also install a [companion native messaging 
 -   [Security](#security)
 -   [Privacy](#privacy)
 -   [FAQ](#faq)
-    -   [Why OTP is not supported?](#why-otp-is-not-supported)
     -   [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains)
+    -   [Why is OTP not supported?](#why-is-otp-not-supported)
     -   [Hints for macOS users](#hints-for-macos-users)
     -   [Hints for NixOS / Nix users](#hints-for-nixos--nix-users)
 -   [Contributing](#contributing)
@@ -236,13 +236,15 @@ The second option is to create a symlink file `amazon.co.uk.gpg` pointing to `am
 
 If you simply want to re-use the same credentials on multiple subdomains of the same domain (e.g. `app.example.com` and `wiki.example.com`), you can also rename your password entry to a common denominator of the two subdomains, which in this example would be `example.com.gpg` (see [Password matching and sorting](#password-matching-and-sorting)).
 
-### Why OTP is not supported?
+### Why is OTP not supported?
 
 Tools like `pass-otp` make it possible to use `pass` for generating OTP codes, however keeping both passwords and OTP URI in the same location diminishes the major benefit that OTP is supposed to provide: two factor authentication. The purpose of multi-factor authentication is to protect your account even when attackers gain access to your password store, but if your OTP seed is stored in the same place, all auth factors will be compromised at once. In particular, Browserpass has access to the entire contents of your password entries, so if it is ever compromised, all your accounts will be at risk, even though you signed up for 2FA.
 
 Browserpass is opinionated, it does not promote `pass-otp` and intentionally does not support generating OTP codes from OTP URIs in password entiries, even though there are other password managers that provide such functionality.
 
 There are valid scenarios for using `pass-otp` (e.g. it gives protection against intercepting your password during transmission), but users are strongly advised to very carefully consider whether `pass-otp` is really an appropriate solution - and if so, come up with their own ways of accessing OTP codes that conforms to their security requirements (for example by using dmenu/rofi scripts). For the majority of people `pass-otp` is not recommended; using any phone app like Authy will be a much better and more secure alternative, because this way attackers would have to not only break into your password store, but they would _also_ have to break into your phone.
+
+Going forward, OTP support will be provided via a [separate extension](https://github.com/browserpass/browserpass-extension/issues/76). That extension will integrate with browserpass to ensure a streamlined workflow - if the OTP extension is installed, it will be automatically triggered when browserpass fills an entry and an OTP token is present.
 
 ## Building the extension
 
