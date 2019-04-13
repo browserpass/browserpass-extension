@@ -411,7 +411,7 @@ async function getFullSettings() {
                 }
             }
         }
-    } else {
+    } else if (response.status == "ok") {
         // no user-configured stores, so use the default store
         settings.stores.default = {
             id: "default",
