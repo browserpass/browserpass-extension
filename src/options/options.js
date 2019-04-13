@@ -42,6 +42,14 @@ async function saveSettings(settings) {
     if (response.status != "ok") {
         throw new Error(response.message);
     }
+
+    // reload settings
+    var response = await chrome.runtime.sendMessage({ action: "getSettings" });
+    if (response.status != "ok") {
+        throw new Error(response.message);
+    }
+
+    return response.settings;
 }
 
 /**
