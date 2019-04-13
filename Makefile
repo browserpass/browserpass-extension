@@ -90,6 +90,7 @@ dist: clean extension chromium firefox crx-webstore crx-github
 
 	mkdir -p dist-webstore
 
+	cp dist/browserpass-firefox-$(VERSION).zip dist-webstore/firefox-$(VERSION).zip
 	mv dist/browserpass-extension-$(VERSION).tar.gz dist-webstore/firefox-$(VERSION)-src.tar.gz
 
 	cp -a chromium dist-webstore/
