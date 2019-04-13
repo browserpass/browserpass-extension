@@ -76,6 +76,10 @@ function view(ctl, params) {
     if (typeof this.error !== "undefined") {
         nodes.push(m("div.error", this.error.message));
     }
+    if (this.settings.hasOwnProperty("hostError")) {
+        let hostError = this.settings.hostError;
+        nodes.push(m("div.error", hostError.params.message));
+    }
 
     nodes.push(
         m(
