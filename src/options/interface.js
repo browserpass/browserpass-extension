@@ -20,9 +20,6 @@ function Interface(settings, saveSettings) {
     this.settings = settings;
     this.saveSettings = saveSettings;
     this.saveEnabled = false;
-
-    // 'default' store must not be displayed or later attempted to be saved
-    delete this.settings.stores.default;
 }
 
 /**
