@@ -67,6 +67,10 @@ async function run() {
         }
         var settings = response.settings;
 
+        if (settings.hasOwnProperty("hostError")) {
+            throw new Error(settings.hostError.params.message);
+        }
+
         if (typeof settings.host === "undefined") {
             throw new Error("Unable to retrieve current tab information");
         }
