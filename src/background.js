@@ -863,11 +863,6 @@ async function saveSettings(settings) {
     // 'default' is our reserved name for the default store
     delete settingsToSave.stores.default;
 
-    var response = await hostAction(settingsToSave, "configure");
-    if (response.status != "ok") {
-        throw new Error(JSON.stringify(response)); // TODO handle host error
-    }
-
     // before save, make sure to remove store settings that we receive from the host app
     if (typeof settingsToSave.stores === "object") {
         for (var store in settingsToSave.stores) {
