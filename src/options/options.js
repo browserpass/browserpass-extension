@@ -28,6 +28,25 @@ function handleError(error, type = "error") {
 }
 
 /**
+ * Get settings
+ *
+ * @since 3.0.9
+ *
+ * @return object Settings object
+ */
+async function getSettings() {
+    var response = await chrome.runtime.sendMessage({ action: "getSettings" });
+    if (response.status != "ok") {
+        throw new Error(response.message);
+    }
+
+    // 'default' store must not be displayed or later attempted to be saved
+    delete response.settings.stores.default;
+
+    return response.settings;
+}
+
+/**
  * Save settings
  *
  * @since 3.0.0
@@ -45,12 +64,7 @@ async function saveSettings(settings) {
     }
 
     // reload settings
-    var response = await chrome.runtime.sendMessage({ action: "getSettings" });
-    if (response.status != "ok") {
-        throw new Error(response.message);
-    }
-
-    return response.settings;
+    return await getSettings();
 }
 
 /**
@@ -62,12 +76,7 @@ async function saveSettings(settings) {
  */
 async function run() {
     try {
-        var response = await chrome.runtime.sendMessage({ action: "getSettings" });
-        if (response.status != "ok") {
-            throw new Error(response.message);
-        }
-
-        var options = new Interface(response.settings, saveSettings);
+        var options = new Interface(await getSettings(), saveSettings);
         options.attach(document.body);
     } catch (e) {
         handleError(e);
