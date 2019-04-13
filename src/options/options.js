@@ -64,7 +64,7 @@ async function saveSettings(settings) {
     }
 
     // reload settings
-    return getSettings();
+    return await getSettings();
 }
 
 /**
