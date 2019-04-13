@@ -6,7 +6,7 @@ Browserpass is a browser extension for [zx2c4's pass](https://www.passwordstore.
 
 In order to use Browserpass you must also install a [companion native messaging host](https://github.com/browserpass/browserpass-native), which provides an interface to your password store.
 
-![demo](https://user-images.githubusercontent.com/1177900/54850099-79227080-4ce6-11e9-9c94-d05ede9ee246.gif)
+![demo](https://user-images.githubusercontent.com/1177900/56079873-87057600-5dfa-11e9-8ff1-c51744c75585.gif)
 
 ## Table of Contents
 
