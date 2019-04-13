@@ -88,9 +88,10 @@ dist: clean extension chromium firefox crx-webstore crx-github
 	    gpg --detach-sign --armor "$$file"; \
 	done
 
-	rm -f dist/browserpass-extension-$(VERSION).tar.gz
-
 	mkdir -p dist-webstore
+
+	mv dist/browserpass-extension-$(VERSION).tar.gz dist-webstore/firefox-$(VERSION)-src.tar.gz
+
 	cp -a chromium dist-webstore/
 	sed -i '/"key"/d' dist-webstore/chromium/manifest.json
 	(cd dist-webstore/chromium && zip -r ../chrome-$(VERSION).zip *)
