@@ -395,37 +395,41 @@ async function getFullSettings() {
         settings.hostError = response;
     }
     settings.version = response.version;
-    if (Object.keys(settings.stores).length > 0) {
-        // there are user-configured stores present
-        for (var storeId in settings.stores) {
-            if (response.data.storeSettings.hasOwnProperty(storeId)) {
-                var fileSettings = JSON.parse(response.data.storeSettings[storeId]);
-                if (typeof settings.stores[storeId].settings !== "object") {
-                    settings.stores[storeId].settings = {};
-                }
-                var storeSettings = settings.stores[storeId].settings;
-                for (var settingKey in fileSettings) {
-                    if (!storeSettings.hasOwnProperty(settingKey)) {
-                        storeSettings[settingKey] = fileSettings[settingKey];
+
+    // Fill store settings, only makes sense if 'configure' succeeded
+    if (response.status === "ok") {
+        if (Object.keys(settings.stores).length > 0) {
+            // there are user-configured stores present
+            for (var storeId in settings.stores) {
+                if (response.data.storeSettings.hasOwnProperty(storeId)) {
+                    var fileSettings = JSON.parse(response.data.storeSettings[storeId]);
+                    if (typeof settings.stores[storeId].settings !== "object") {
+                        settings.stores[storeId].settings = {};
+                    }
+                    var storeSettings = settings.stores[storeId].settings;
+                    for (var settingKey in fileSettings) {
+                        if (!storeSettings.hasOwnProperty(settingKey)) {
+                            storeSettings[settingKey] = fileSettings[settingKey];
+                        }
                     }
                 }
             }
-        }
-    } else if (response.status == "ok") {
-        // no user-configured stores, so use the default store
-        settings.stores.default = {
-            id: "default",
-            name: "pass",
-            path: response.data.defaultStore.path
-        };
-        var fileSettings = JSON.parse(response.data.defaultStore.settings);
-        if (typeof settings.stores.default.settings !== "object") {
-            settings.stores.default.settings = {};
-        }
-        var storeSettings = settings.stores.default.settings;
-        for (var settingKey in fileSettings) {
-            if (!storeSettings.hasOwnProperty(settingKey)) {
-                storeSettings[settingKey] = fileSettings[settingKey];
+        } else {
+            // no user-configured stores, so use the default store
+            settings.stores.default = {
+                id: "default",
+                name: "pass",
+                path: response.data.defaultStore.path
+            };
+            var fileSettings = JSON.parse(response.data.defaultStore.settings);
+            if (typeof settings.stores.default.settings !== "object") {
+                settings.stores.default.settings = {};
+            }
+            var storeSettings = settings.stores.default.settings;
+            for (var settingKey in fileSettings) {
+                if (!storeSettings.hasOwnProperty(settingKey)) {
+                    storeSettings[settingKey] = fileSettings[settingKey];
+                }
             }
         }
     }
