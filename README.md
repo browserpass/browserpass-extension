@@ -25,6 +25,7 @@ In order to use Browserpass you must also install a [companion native messaging 
 -   [Options](#options)
 -   [Security](#security)
 -   [Privacy](#privacy)
+-   [Requested permissions](#requested-permissions)
 -   [FAQ](#faq)
     -   [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains)
     -   [Why is OTP not supported?](#why-is-otp-not-supported)
@@ -227,6 +228,23 @@ Browserpass aims to protect your passwords and computer from malicious or fraudu
 ## Privacy
 
 Browserpass does not send any telemetry data. All metadata that is collected in order for the extension to function correctly is stored _only_ in local storage, and never leaves your browser.
+
+## Requested permissions
+
+Browserpass extension requests the following permissions:
+
+| Name                 | Reason                                                                                                                                                                                                                                                                                                                                               |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `debugger`           | Only used for "auto-submit" functionality: if all attepts to locate a "Submit" button failed, Browserpass will put focus inside the login form and issue an <kbd>Enter</kbd> keypress. This is only available in Chromium-based browsers, and sadly this permission [cannot be specified as optional](https://developer.chrome.com/apps/permissions) |
+| `activeTab`          | To get URL of the current tab, used for example to determine which passwords to show you by default in the popup                                                                                                                                                                                                                                     |
+| `tabs`               | To get URL of a given tab, used for example to set count of the matching passwords for a given tab                                                                                                                                                                                                                                                   |
+| `clipboardWrite`     | For "Copy password" and "Copy username" functionality                                                                                                                                                                                                                                                                                                |
+| `nativeMessaging`    | To allow communication with the native app                                                                                                                                                                                                                                                                                                           |
+| `notifications`      | To show browser notifications on install or update                                                                                                                                                                                                                                                                                                   |
+| `webRequest`         | For modal HTTP authentication                                                                                                                                                                                                                                                                                                                        |
+| `webRequestBlocking` | For modal HTTP authentication                                                                                                                                                                                                                                                                                                                        |
+| `http://*/*`         | To allow using Browserpass on all websites                                                                                                                                                                                                                                                                                                           |
+| `https://*/*`        | To allow using Browserpass on all websites                                                                                                                                                                                                                                                                                                           |
 
 ## FAQ
 
