@@ -392,7 +392,7 @@ async function getFullSettings() {
     });
     var response = await hostAction(configureSettings, "configure");
     if (response.status != "ok") {
-        throw new Error(JSON.stringify(response)); // TODO handle host error
+        settings.hostError = response;
     }
     settings.version = response.version;
     if (Object.keys(settings.stores).length > 0) {
@@ -411,7 +411,7 @@ async function getFullSettings() {
                 }
             }
         }
-    } else {
+    } else if (response.status == "ok") {
         // no user-configured stores, so use the default store
         settings.stores.default = {
             id: "default",
@@ -593,7 +593,7 @@ async function handleMessage(settings, message, sendResponse) {
             } catch (e) {
                 sendResponse({
                     status: "error",
-                    message: "Unable to save settings" + e.toString()
+                    message: e.message
                 });
             }
             break;
@@ -863,9 +863,10 @@ async function saveSettings(settings) {
     // 'default' is our reserved name for the default store
     delete settingsToSave.stores.default;
 
+    // verify that the native host is happy with the provided settings
     var response = await hostAction(settingsToSave, "configure");
     if (response.status != "ok") {
-        throw new Error(JSON.stringify(response)); // TODO handle host error
+        throw new Error(`${response.params.message}: ${response.params.error}`);
     }
 
     // before save, make sure to remove store settings that we receive from the host app

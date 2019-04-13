@@ -33,6 +33,7 @@ function handleError(error, type = "error") {
  * @since 3.0.0
  *
  * @param object settings Settings object
+ * @return object Settings object
  */
 async function saveSettings(settings) {
     var response = await chrome.runtime.sendMessage({
@@ -42,6 +43,14 @@ async function saveSettings(settings) {
     if (response.status != "ok") {
         throw new Error(response.message);
     }
+
+    // reload settings
+    var response = await chrome.runtime.sendMessage({ action: "getSettings" });
+    if (response.status != "ok") {
+        throw new Error(response.message);
+    }
+
+    return response.settings;
 }
 
 /**

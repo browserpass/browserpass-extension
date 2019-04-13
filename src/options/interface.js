@@ -76,6 +76,10 @@ function view(ctl, params) {
     if (typeof this.error !== "undefined") {
         nodes.push(m("div.error", this.error.message));
     }
+    if (this.settings.hasOwnProperty("hostError")) {
+        let hostError = this.settings.hostError;
+        nodes.push(m("div.error", hostError.params.message));
+    }
 
     nodes.push(
         m(
@@ -84,7 +88,7 @@ function view(ctl, params) {
                 disabled: !this.saveEnabled,
                 onclick: async () => {
                     try {
-                        await this.saveSettings(this.settings);
+                        this.settings = await this.saveSettings(this.settings);
                         this.error = undefined;
                     } catch (e) {
                         this.error = e;
