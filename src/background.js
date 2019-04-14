@@ -87,7 +87,6 @@ function pathToDomain(path) {
 async function updateMatchingPasswordsCount(tabId) {
     try {
         const settings = await getFullSettings();
-        console.log(JSON.stringify(settings));
         if (settings.disableBadge === true) {
             return;
         }
