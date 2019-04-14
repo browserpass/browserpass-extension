@@ -4,6 +4,7 @@
 require("chrome-extension-async");
 var TldJS = require("tldjs");
 var sha1 = require("sha1");
+var idb = require("idb");
 
 // native application id
 var appID = "com.github.browserpass.native";
@@ -163,7 +164,7 @@ function copyToClipboard(text) {
  * @param bool   remove   Remove this item from recent history
  * @return void
  */
-function saveRecent(settings, login, remove = false) {
+async function saveRecent(settings, login, remove = false) {
     var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
 
     // save store timestamp
@@ -183,6 +184,15 @@ function saveRecent(settings, login, remove = false) {
     if (!login.inCurrentDomain && login.recent.count === 1) {
         updateMatchingPasswordsCount(settings.tab.id);
     }
+
+    // save to usage log
+    const DB_VERSION = 1;
+    const db = await idb.openDB("browserpass", DB_VERSION, {
+        upgrade(db) {
+            db.createObjectStore("log", { keyPath: "time" });
+        }
+    });
+    await db.add("log", { time: Date.now(), host: settings.host, login: login.login });
 }
 
 /**
@@ -624,7 +634,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "copyPassword":
             try {
                 copyToClipboard(message.login.fields.secret);
-                saveRecent(settings, message.login);
+                await saveRecent(settings, message.login);
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
@@ -636,7 +646,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "copyUsername":
             try {
                 copyToClipboard(message.login.fields.login);
-                saveRecent(settings, message.login);
+                await saveRecent(settings, message.login);
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
@@ -689,7 +699,7 @@ async function handleMessage(settings, message, sendResponse) {
 
                 // dispatch initial fill request
                 var filledFields = await fillFields(settings, message.login, fields);
-                saveRecent(settings, message.login);
+                await saveRecent(settings, message.login);
 
                 // no need to check filledFields, because fillFields() already throws an error if empty
                 sendResponse({ status: "ok", filledFields: filledFields });
@@ -705,6 +715,17 @@ async function handleMessage(settings, message, sendResponse) {
                     // whether triggering the extension menu from the background script is possible.
                     console.log(e);
                 }
+            }
+            break;
+        case "clearUsageData":
+            try {
+                await clearUsageData();
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: e.message
+                });
             }
             break;
         default:
@@ -857,6 +878,27 @@ async function receiveMessage(message, sender, sendResponse) {
         console.log(e);
         sendResponse({ status: "error", message: e.toString() });
     }
+}
+
+/**
+ * Clear usage data
+ *
+ * @since 3.0.10
+ *
+ * @return void
+ */
+async function clearUsageData() {
+    // clear local storage
+    localStorage.removeItem("foreignFills");
+    localStorage.removeItem("recent");
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith("recent:")) {
+            localStorage.removeItem(key);
+        }
+    });
+
+    // clear Indexed DB
+    await idb.deleteDB("browserpass");
 }
 
 /**

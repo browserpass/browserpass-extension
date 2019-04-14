@@ -68,6 +68,20 @@ async function saveSettings(settings) {
 }
 
 /**
+ * Clear usage data
+ *
+ * @since 3.0.10
+ *
+ * @return void
+ */
+async function clearUsageData() {
+    var response = await chrome.runtime.sendMessage({ action: "clearUsageData" });
+    if (response.status != "ok") {
+        throw new Error(response.message);
+    }
+}
+
+/**
  * Run the main options logic
  *
  * @since 3.0.0
@@ -76,7 +90,7 @@ async function saveSettings(settings) {
  */
 async function run() {
     try {
-        var options = new Interface(await getSettings(), saveSettings);
+        var options = new Interface(await getSettings(), saveSettings, clearUsageData);
         options.attach(document.body);
     } catch (e) {
         handleError(e);
