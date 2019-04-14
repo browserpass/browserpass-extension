@@ -711,9 +711,9 @@ async function handleMessage(settings, message, sendResponse) {
                 }
             }
             break;
-        case "clearData":
+        case "clearUsageData":
             try {
-                await clearData();
+                await clearUsageData();
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
@@ -875,17 +875,18 @@ async function receiveMessage(message, sender, sendResponse) {
 }
 
 /**
- * Clear local metadata
+ * Clear usage data
  *
  * @since 3.0.10
  *
  * @return void
  */
-async function clearData() {
+async function clearUsageData() {
     // clear local storage
     localStorage.removeItem("foreignFills");
+    localStorage.removeItem("recent");
     Object.keys(localStorage).forEach(key => {
-        if (key.startsWith("recent")) {
+        if (key.startsWith("recent:")) {
             localStorage.removeItem(key);
         }
     });

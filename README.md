@@ -238,7 +238,7 @@ Browserpass does not send any telemetry data. All metadata that is collected in 
 
 This data is not synchronized between your computers, and upon removing Browserpass extension all the data will be automatically purged by your browser.
 
-In order to remove all metadata, use "Clear all data" button in the extension options page or do it using your browser's devtools.
+In order to remove all metadata, use "Clear usage data" button in the extension options page or do it using your browser's devtools.
 
 ## Requested permissions
 

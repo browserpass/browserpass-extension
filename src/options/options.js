@@ -68,14 +68,14 @@ async function saveSettings(settings) {
 }
 
 /**
- * Clear all local metadata
+ * Clear usage data
  *
  * @since 3.0.10
  *
  * @return void
  */
-async function clearData() {
-    var response = await chrome.runtime.sendMessage({ action: "clearData" });
+async function clearUsageData() {
+    var response = await chrome.runtime.sendMessage({ action: "clearUsageData" });
     if (response.status != "ok") {
         throw new Error(response.message);
     }
@@ -90,7 +90,7 @@ async function clearData() {
  */
 async function run() {
     try {
-        var options = new Interface(await getSettings(), saveSettings, clearData);
+        var options = new Interface(await getSettings(), saveSettings, clearUsageData);
         options.attach(document.body);
     } catch (e) {
         handleError(e);
