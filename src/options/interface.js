@@ -45,7 +45,7 @@ function attach(element) {
  */
 function view(ctl, params) {
     var nodes = [];
-    nodes.push(m("h3", "Basic settings"));
+    nodes.push(m("h3", "Login settings"));
     nodes.push(createCheckbox.call(this, "autoSubmit", "Automatically submit forms after filling"));
     nodes.push(createInput.call(this, "username", "Default username", "john.smith"));
     nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary", "/path/to/gpg"));
@@ -71,9 +71,7 @@ function view(ctl, params) {
     );
 
     nodes.push(m("h3", "UI settings"));
-    nodes.push(
-        createCheckbox.call(this, "disableBadge", "Disable the badge counter")
-    );
+    nodes.push(createCheckbox.call(this, "disableBadge", "Disable the badge counter"));
 
     if (typeof this.error !== "undefined") {
         nodes.push(m("div.error", this.error.message));
