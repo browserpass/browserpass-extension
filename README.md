@@ -111,7 +111,7 @@ Browserpass was designed with an assumption that certain conventions are being f
 
 1. Password must be defined on a line starting with `password:`, `pass:` or `secret:` (case-insensitive), and if all of these are absent, the first line in the password entry file is considered to be a password.
 
-1. Username must be defined on a line starting with `login:`, `username:`, `user:` or `email:` (case-insensitive), and if all of these are absent, default username as configured in browser extension or in `.browserpass.json` of specific password store, and finally if everything is absent the file name is considered to be a username.
+1. Username must be defined on a line starting with `login:`, `username:`, or `user:` (case-insensitive), and if all of these are absent, default username as configured in browser extension or in `.browserpass.json` of specific password store, and finally if everything is absent the file name is considered to be a username.
 
 1. OpenID URL must be defined on a line starting with `openid:` (case-insensitive).
 
