@@ -45,7 +45,12 @@ function pathToDomain(path, currentHost) {
             continue;
         }
         var t = TldJS.parse(parts[key]);
-        if (t.isValid && ((t.tldExists && t.domain !== null) || t.hostname === currentHost)) {
+        if (
+            t.isValid &&
+            ((t.tldExists && t.domain !== null) ||
+                t.hostname === currentHost ||
+                currentHost.endsWith(`.${t.hostname}`))
+        ) {
             return t.hostname;
         }
     }
