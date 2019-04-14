@@ -23,7 +23,7 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [Modal HTTP authentication](#modal-http-authentication)
     -   [Password store locations](password-store-locations)
 -   [Options](#options)
--   [Usage metadata](#usage-metadata)
+-   [Usage data](#usage-data)
 -   [Security](#security)
 -   [Privacy](#privacy)
 -   [Requested permissions](#requested-permissions)
@@ -216,7 +216,7 @@ Browserpass allows configuring certain settings in different places places using
     - Custom store locations - badge background color (aka `bgColor`)
     - Custom store locations - badge text color (aka `color`)
 
-## Usage metadata
+## Usage data
 
 Browserpass keeps metadata of recently used credentials in local storage and Indexed DB of the background page. This is first and foremost internal data to make Browserpass function properly, used for example to implement the [Password matching and sorting](#password-matching-and-sorting) algorithm, but nevertheless you might find it useful to explore using your browser's devtools. For example, if you are considering to rotate all passwords that you used in the past month (e.g. if you just found out that you had a malicious app installed for several weeks), you can retrieve such list from Indexed DB quite easily (open an issue if you need help).
 
@@ -238,7 +238,7 @@ Browserpass does not send any telemetry data. All metadata that is collected in 
 
 This data is not synchronized between your computers, and upon removing Browserpass extension all the data will be automatically purged by your browser.
 
-In order to remove all metadata, use "Clear usage data" button in the extension options page or do it using your browser's devtools.
+In order to remove all metadata, use the "Clear usage data" button in the extension options page or do it using your browser's devtools.
 
 ## Requested permissions
 
