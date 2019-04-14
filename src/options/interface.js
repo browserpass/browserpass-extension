@@ -9,9 +9,10 @@ var m = require("mithril");
  *
  * @param object settings Settings object
  * @param function saveSettings Function to save settings
+ * @param function clearData Function to clear local metadata
  * @return void
  */
-function Interface(settings, saveSettings) {
+function Interface(settings, saveSettings, clearData) {
     // public methods
     this.attach = attach;
     this.view = view;
@@ -20,6 +21,7 @@ function Interface(settings, saveSettings) {
     this.settings = settings;
     this.saveSettings = saveSettings;
     this.saveEnabled = false;
+    this.clearData = clearData;
 }
 
 /**
@@ -95,6 +97,24 @@ function view(ctl, params) {
                 }
             },
             "Save"
+        )
+    );
+
+    nodes.push(
+        m(
+            "button.clearData",
+            {
+                onclick: async () => {
+                    try {
+                        await this.clearData();
+                        this.error = undefined;
+                    } catch (e) {
+                        this.error = e;
+                    }
+                    m.redraw();
+                }
+            },
+            "Clear all data"
         )
     );
     return nodes;

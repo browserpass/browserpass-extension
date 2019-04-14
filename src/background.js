@@ -180,7 +180,8 @@ async function saveRecent(settings, login, remove = false) {
     }
 
     // save to usage log
-    const db = await idb.openDB("browserpass", 1, {
+    const DB_VERSION = 1;
+    const db = await idb.openDB("browserpass", DB_VERSION, {
         upgrade(db) {
             db.createObjectStore("log", { keyPath: "time" });
         }
@@ -710,6 +711,17 @@ async function handleMessage(settings, message, sendResponse) {
                 }
             }
             break;
+        case "clearData":
+            try {
+                await clearData();
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: e.message
+                });
+            }
+            break;
         default:
             sendResponse({
                 status: "error",
@@ -860,6 +872,26 @@ async function receiveMessage(message, sender, sendResponse) {
         console.log(e);
         sendResponse({ status: "error", message: e.toString() });
     }
+}
+
+/**
+ * Clear local metadata
+ *
+ * @since 3.0.10
+ *
+ * @return void
+ */
+async function clearData() {
+    // clear local storage
+    localStorage.removeItem("foreignFills");
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith("recent")) {
+            localStorage.removeItem(key);
+        }
+    });
+
+    // clear Indexed DB
+    await idb.deleteDB("browserpass");
 }
 
 /**
