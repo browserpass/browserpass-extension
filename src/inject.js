@@ -319,10 +319,11 @@
         // Try to filter only forms that have some identifying marker
         const markedForms = [];
         for (let form of forms) {
-            const props = [form.id, form.name, form.className, form.action];
+            const props = ["id", "name", "class", "action"];
             for (let marker of FORM_MARKERS) {
                 for (let prop of props) {
-                    if (prop.toLowerCase().indexOf(marker) > -1) {
+                    let propValue = form.getAttribute(prop) || "";
+                    if (propValue.toLowerCase().indexOf(marker) > -1) {
                         markedForms.push(form);
                     }
                 }
