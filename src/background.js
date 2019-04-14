@@ -756,7 +756,7 @@ async function parseFields(settings, login) {
     // parse lines
     login.fields = {
         secret: ["secret", "password", "pass"],
-        login: ["login", "username", "user", "email"],
+        login: ["login", "username", "user"],
         openid: ["openid"],
         url: ["url", "uri", "website", "site", "link", "launch"]
     };
