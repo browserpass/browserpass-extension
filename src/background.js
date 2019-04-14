@@ -11,6 +11,7 @@ var appID = "com.github.browserpass.native";
 // default settings
 var defaultSettings = {
     autoSubmit: false,
+    disableBadge: false,
     gpgPath: null,
     stores: {},
     foreignFills: {},
@@ -86,6 +87,11 @@ function pathToDomain(path) {
 async function updateMatchingPasswordsCount(tabId) {
     try {
         const settings = await getFullSettings();
+        console.log(JSON.stringify(settings));
+        if (settings.disableBadge === true) {
+            return;
+        }
+
         var response = await hostAction(settings, "list");
         if (response.status != "ok") {
             throw new Error(JSON.stringify(response));
