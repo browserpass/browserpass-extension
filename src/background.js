@@ -57,17 +57,23 @@ chrome.runtime.onInstalled.addListener(onExtensionInstalled);
  *
  * @since 3.0.0
  *
- * @param string path Path to parse
+ * @param string path        Path to parse
+ * @param string currentHost Current hostname for the active tab
  * @return string|null Extracted domain
  */
-function pathToDomain(path) {
+function pathToDomain(path, currentHost) {
     var parts = path.split(/\//).reverse();
     for (var key in parts) {
         if (parts[key].indexOf("@") >= 0) {
             continue;
         }
         var t = TldJS.parse(parts[key]);
-        if (t.isValid && t.tldExists && t.domain !== null) {
+        if (
+            t.isValid &&
+            ((t.tldExists && t.domain !== null) ||
+                t.hostname === currentHost ||
+                currentHost.endsWith(`.${t.hostname}`))
+        ) {
             return t.hostname;
         }
     }
@@ -104,7 +110,7 @@ async function updateMatchingPasswordsCount(tabId) {
         for (var storeId in response.data.files) {
             for (var key in response.data.files[storeId]) {
                 const login = response.data.files[storeId][key].replace(/\.gpg$/i, "");
-                const domain = pathToDomain(storeId + "/" + login);
+                const domain = pathToDomain(storeId + "/" + login, currentDomain);
                 const inCurrentDomain =
                     currentDomain === domain || currentDomain.endsWith("." + domain);
                 const recent = settings.recent[sha1(currentDomain + sha1(storeId + sha1(login)))];
