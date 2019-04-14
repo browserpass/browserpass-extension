@@ -72,7 +72,7 @@ function view(ctl, params) {
 
     nodes.push(m("h3", "Advanced settings"));
     nodes.push(
-        createCheckbox.call(this, "disableBadge", "Disable the matching-domains-count badge")
+        createCheckbox.call(this, "disableBadge", "Disable the badge counter")
     );
 
     if (typeof this.error !== "undefined") {
