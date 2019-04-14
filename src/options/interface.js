@@ -49,6 +49,9 @@ function view(ctl, params) {
     nodes.push(createCheckbox.call(this, "autoSubmit", "Automatically submit forms after filling"));
     nodes.push(createInput.call(this, "username", "Default username", "john.smith"));
     nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary", "/path/to/gpg"));
+    nodes.push(
+        createCheckbox.call(this, "disableBadge", "Disable the matching-domains-count badge")
+    );
 
     nodes.push(m("h3", "Custom store locations"));
     nodes.push(
