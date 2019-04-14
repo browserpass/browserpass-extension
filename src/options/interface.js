@@ -70,7 +70,7 @@ function view(ctl, params) {
         )
     );
 
-    nodes.push(m("h3", "Advanced settings"));
+    nodes.push(m("h3", "UI settings"));
     nodes.push(
         createCheckbox.call(this, "disableBadge", "Disable the badge counter")
     );
