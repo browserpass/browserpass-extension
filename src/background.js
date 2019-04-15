@@ -785,6 +785,7 @@ async function parseFields(settings, login) {
         secret: ["secret", "password", "pass"],
         login: ["login", "username", "user"],
         openid: ["openid"],
+        otp: ["otp", "totp", "hotp"],
         url: ["url", "uri", "website", "site", "link", "launch"]
     };
     login.settings = {
@@ -792,6 +793,12 @@ async function parseFields(settings, login) {
     };
     var lines = login.raw.split(/[\r\n]+/).filter(line => line.trim().length > 0);
     lines.forEach(function(line) {
+        // check for uri-encoded otp
+        if (line.match(/^otpauth:\/\/.+/)) {
+            login.fields.otp = { key: null, data: line };
+            return;
+        }
+
         // split key / value & ignore non-k/v lines
         var parts = line.match(/^(.+?):(.+)$/);
         if (parts === null) {
@@ -811,7 +818,11 @@ async function parseFields(settings, login) {
                 Array.isArray(login.fields[key]) &&
                 login.fields[key].includes(parts[0].toLowerCase())
             ) {
-                login.fields[key] = parts[1];
+                if (key === "otp") {
+                    login.fields[key] = { key: parts[0].toLowerCase(), data: parts[1] };
+                } else {
+                    login.fields[key] = parts[1];
+                }
                 break;
             }
         }
