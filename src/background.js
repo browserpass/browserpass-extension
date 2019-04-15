@@ -875,7 +875,7 @@ async function parseFields(settings, login) {
             chrome.runtime
                 .sendMessage(otpID[key], {
                     otp: login.fields.otp,
-                    host: new URL(settings.tab.url).hostname,
+                    host: settings.host,
                     tab: settings.tab
                 })
                 // Both response & error are noop functions, because we don't care about
