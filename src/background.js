@@ -9,6 +9,12 @@ var idb = require("idb");
 // native application id
 var appID = "com.github.browserpass.native";
 
+// OTP extension id
+var otpID = [
+    "afjjoildnccgmjbblnklbohcbjehjaph", // webstore releases
+    "jbnpmhhgnchcoljeobafpinmchnpdpin" // github releases
+];
+
 // default settings
 var defaultSettings = {
     autoSubmit: false,
@@ -860,6 +866,23 @@ async function parseFields(settings, login) {
     for (var key in login.settings) {
         if (typeof login.settings[key].type !== "undefined") {
             delete login.settings[key];
+        }
+    }
+
+    // trigger otp extension
+    if (login.fields.hasOwnProperty("otp")) {
+        for (let key in otpID) {
+            chrome.runtime
+                .sendMessage(otpID[key], {
+                    otp: login.fields.otp,
+                    host: new URL(settings.tab.url).hostname,
+                    tab: settings.tab
+                })
+                // Both response & error are noop functions, because we don't care about
+                // the response, and if there's an error it just means the otp extension
+                // is probably not installed. We can't detect that without requesting the
+                // management permission, so this is an acceptable workaround.
+                .then(noop => null, noop => null);
         }
     }
 }
