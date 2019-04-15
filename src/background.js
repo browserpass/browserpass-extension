@@ -13,7 +13,8 @@ var appID = "com.github.browserpass.native";
 var otpID = [
     "afjjoildnccgmjbblnklbohcbjehjaph", // webstore releases
     "jbnpmhhgnchcoljeobafpinmchnpdpin", // github releases
-    "fcmmcnalhjjejhpnlfnddimcdlmpkbdf" // local unpacked
+    "fcmmcnalhjjejhpnlfnddimcdlmpkbdf", // local unpacked
+    "browserpass-otp@maximbaz.com" // firefox
 ];
 
 // default settings
