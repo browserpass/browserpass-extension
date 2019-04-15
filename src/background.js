@@ -9,6 +9,12 @@ var idb = require("idb");
 // native application id
 var appID = "com.github.browserpass.native";
 
+// OTP extension id
+var otpID = [
+    "afjjoildnccgmjbblnklbohcbjehjaph", // webstore releases
+    "jbnpmhhgnchcoljeobafpinmchnpdpin" // github releases
+];
+
 // default settings
 var defaultSettings = {
     autoSubmit: false,
@@ -785,6 +791,7 @@ async function parseFields(settings, login) {
         secret: ["secret", "password", "pass"],
         login: ["login", "username", "user"],
         openid: ["openid"],
+        otp: ["otp", "totp", "hotp"],
         url: ["url", "uri", "website", "site", "link", "launch"]
     };
     login.settings = {
@@ -792,6 +799,12 @@ async function parseFields(settings, login) {
     };
     var lines = login.raw.split(/[\r\n]+/).filter(line => line.trim().length > 0);
     lines.forEach(function(line) {
+        // check for uri-encoded otp
+        if (line.match(/^otpauth:\/\/.+/)) {
+            login.fields.otp = { key: null, data: line };
+            return;
+        }
+
         // split key / value & ignore non-k/v lines
         var parts = line.match(/^(.+?):(.+)$/);
         if (parts === null) {
@@ -811,7 +824,11 @@ async function parseFields(settings, login) {
                 Array.isArray(login.fields[key]) &&
                 login.fields[key].includes(parts[0].toLowerCase())
             ) {
-                login.fields[key] = parts[1];
+                if (key === "otp") {
+                    login.fields[key] = { key: parts[0].toLowerCase(), data: parts[1] };
+                } else {
+                    login.fields[key] = parts[1];
+                }
                 break;
             }
         }
@@ -849,6 +866,23 @@ async function parseFields(settings, login) {
     for (var key in login.settings) {
         if (typeof login.settings[key].type !== "undefined") {
             delete login.settings[key];
+        }
+    }
+
+    // trigger otp extension
+    if (login.fields.hasOwnProperty("otp")) {
+        for (let key in otpID) {
+            chrome.runtime
+                .sendMessage(otpID[key], {
+                    otp: login.fields.otp,
+                    host: settings.host,
+                    tab: settings.tab
+                })
+                // Both response & error are noop functions, because we don't care about
+                // the response, and if there's an error it just means the otp extension
+                // is probably not installed. We can't detect that without requesting the
+                // management permission, so this is an acceptable workaround.
+                .then(noop => null, noop => null);
         }
     }
 }
