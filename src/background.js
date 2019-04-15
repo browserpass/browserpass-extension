@@ -12,7 +12,8 @@ var appID = "com.github.browserpass.native";
 // OTP extension id
 var otpID = [
     "afjjoildnccgmjbblnklbohcbjehjaph", // webstore releases
-    "jbnpmhhgnchcoljeobafpinmchnpdpin" // github releases
+    "jbnpmhhgnchcoljeobafpinmchnpdpin", // github releases
+    "fcmmcnalhjjejhpnlfnddimcdlmpkbdf" // local unpacked
 ];
 
 // default settings
