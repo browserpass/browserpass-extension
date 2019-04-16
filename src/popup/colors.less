@@ -10,9 +10,9 @@
     @active-input-bg-color,
     @input-text-color,
     @hint-bg-color,
-    @hint-color) {
-    @match-text-color: @hint-bg-color;
-
+    @hint-color,
+    @match-text-bg-color,
+    @match-text-color) {
     html,
     body {
         background-color: @bg-color;
@@ -62,6 +62,7 @@
     }
 
     .part.login em {
+        background-color: @match-text-bg-color;
         color: @match-text-color;
     }
 
