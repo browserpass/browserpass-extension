@@ -59,7 +59,12 @@ function view(ctl, params) {
     nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary", "/path/to/gpg"));
 
     nodes.push(m("h3", "Theme"));
-    nodes.push(createDropdown.call(this, "theme", [m("option", { value: "dark" }, "Dark")]));
+    nodes.push(
+        createDropdown.call(this, "theme", [
+            m("option", { value: "dark" }, "Dark"),
+            m("option", { value: "light" }, "Light")
+        ])
+    );
 
     nodes.push(m("h3", "Custom store locations"));
     nodes.push(
