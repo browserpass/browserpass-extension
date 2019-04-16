@@ -1,0 +1,76 @@
+.colors(
+    @bg-color,
+    @default-bg-color,
+    @hover-bg-color,
+    @text-color,
+    @error-text-color,
+    @dim-text-color,
+    @badge-color,
+    @input-bg-color,
+    @active-input-bg-color,
+    @input-text-color,
+    @hint-bg-color,
+    @hint-color) {
+    @match-text-color: @hint-bg-color;
+
+    html,
+    body {
+        background-color: @bg-color;
+        color: @text-color;
+    }
+
+    .badge {
+        background-color: @badge-color;
+    }
+
+    .part.error {
+        color: @error-text-color;
+    }
+
+    .part.search {
+        background-color: @input-bg-color;
+    }
+
+    .part.search:focus-within {
+        background-color: @active-input-bg-color;
+    }
+
+    .part.search > .hint {
+        background-color: @hint-bg-color;
+        color: @hint-color;
+    }
+
+    .part.search > input[type="text"] {
+        background-color: transparent;
+        color: @input-text-color;
+    }
+
+    .part.search > input[type="text"]::placeholder {
+        color: @dim-text-color;
+    }
+
+    .logins:not(:hover):not(:focus-within) .part.login:first-child > .name {
+        background-color: @default-bg-color;
+    }
+
+    .part.login > .name:hover,
+    .part.login > .name:focus,
+    .part.login > .action:hover,
+    .part.login > .action:focus,
+    .part.login:focus > .name {
+        background-color: @hover-bg-color;
+    }
+
+    .part.login em {
+        color: @match-text-color;
+    }
+
+    .updates {
+        border-top: 1px solid @hover-bg-color;
+
+        span,
+        a {
+            color: @error-text-color;
+        }
+    }
+}

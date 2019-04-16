@@ -1,18 +1,4 @@
-@bg-color: #414141;
-@default-bg-color: #393939;
-@hover-bg-color: #363636;
-@text-color: #c4c4c4;
-@error-text-color: #f00;
-@dim-text-color: #a0a0a0;
-
-@input-bg-color: #4a4a4a;
-@active-input-bg-color: #4f4f4f;
-@input-text-color: #eee;
-
-@hint-bg-color: #d79921;
-@hint-color: #363636;
-
-@match-text-color: @hint-bg-color;
+@import "colors-dark.less";
 
 @login-height: 53px;
 @max-logins-height: @login-height * 7;
@@ -42,8 +28,6 @@ body {
     min-width: 260px;
     overflow-x: hidden;
     white-space: nowrap;
-    background-color: @bg-color;
-    color: @text-color;
 }
 
 @media (min-resolution: 192dpi) {
@@ -75,7 +59,6 @@ body {
 .badge {
     display: flex;
     align-items: center;
-    background-color: #626262;
     border-radius: 4px;
     font-size: 12px;
     margin-right: 8px;
@@ -98,7 +81,6 @@ body {
 }
 
 .part.error {
-    color: @error-text-color;
     white-space: normal;
     padding: 7px;
 }
@@ -114,16 +96,9 @@ body {
     background-position: top 6px right 6px;
     background-repeat: no-repeat;
     background-size: 18px;
-    background-color: @input-bg-color;
-}
-
-.part.search:focus-within {
-    background-color: @active-input-bg-color;
 }
 
 .part.search > .hint {
-    background-color: @hint-bg-color;
-    color: @hint-color;
     line-height: 19px;
 }
 
@@ -138,21 +113,14 @@ body {
 }
 
 .part.search > input[type="text"] {
-    background-color: transparent;
     border: none;
     outline: none;
     width: 100%;
-    color: @input-text-color;
     font-family: "Open Sans";
 }
 
 .part.search > input[type="text"]::placeholder {
-    color: @dim-text-color;
     opacity: 1;
-}
-
-.logins:not(:hover):not(:focus-within) .part.login:first-child > .name {
-    background-color: @default-bg-color;
 }
 
 .part.login > .name:hover,
@@ -160,7 +128,6 @@ body {
 .part.login > .action:hover,
 .part.login > .action:focus,
 .part.login:focus > .name {
-    background-color: @hover-bg-color;
     outline: none;
 }
 
@@ -221,16 +188,9 @@ body {
 }
 
 .part.login em {
-    color: @match-text-color;
     font-style: normal;
 }
 
 .updates {
     padding: @login-part-padding;
-    border-top: 1px solid @hover-bg-color;
-
-    span,
-    a {
-        color: @error-text-color;
-    }
 }

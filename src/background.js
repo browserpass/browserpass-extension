@@ -23,7 +23,8 @@ var defaultSettings = {
     gpgPath: null,
     stores: {},
     foreignFills: {},
-    username: null
+    username: null,
+    theme: "dark"
 };
 
 var authListeners = {};

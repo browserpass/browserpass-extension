@@ -58,6 +58,9 @@ function view(ctl, params) {
     nodes.push(createInput.call(this, "username", "Default username", "john.smith"));
     nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary", "/path/to/gpg"));
 
+    nodes.push(m("h3", "Theme"));
+    nodes.push(createDropdown.call(this, "theme", [m("option", { value: "dark" }, "Dark")]));
+
     nodes.push(m("h3", "Custom store locations"));
     nodes.push(
         m("div", { class: "notice" }, "(this overrides default store and $PASSWORD_STORE_DIR)")
@@ -150,6 +153,29 @@ function createInput(key, title, placeholder) {
             })
         ])
     ]);
+}
+
+/**
+ * Generates vnode for a dropdown setting
+ *
+ * @since 3.0.13
+ *
+ * @param string key     Settings key
+ * @param array options  Array of objects with value and text fields
+ * @return Vnode
+ */
+function createDropdown(key, options) {
+    return m(
+        "select",
+        {
+            value: this.settings[key],
+            onchange: e => {
+                this.settings[key] = e.target.value;
+                this.saveEnabled = true;
+            }
+        },
+        options
+    );
 }
 
 /**
