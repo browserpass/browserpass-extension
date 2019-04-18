@@ -1014,12 +1014,15 @@ function onExtensionInstalled(details) {
     };
 
     if (details.reason === "install") {
-        show(
-            "installed",
-            "browserpass: Install native host app",
-            "Remember to install the complementary native host app to use this extension.\n" +
-                "Instructions here: https://github.com/browserpass/browserpass-native"
-        );
+        if (localStorage.getItem("installed") === null) {
+            localStorage.setItem("installed", Date.now());
+            show(
+                "installed",
+                "browserpass: Install native host app",
+                "Remember to install the complementary native host app to use this extension.\n" +
+                    "Instructions here: https://github.com/browserpass/browserpass-native"
+            );
+        }
     } else if (details.reason === "update") {
         var changelog = {
             3000000:
