@@ -172,9 +172,9 @@ The sorting algorithm implemented in Browserpass will use several intuitions to 
 
 ### Searching password entries
 
-The search box allows you to filter the list of currently displayed password entries in the popup. If you are searching for a password entry that is not already visible (for example it doesn't match the current domain), first press <kbd>Backspace</kbd> to disable phishing attack protection and search the entire password store (see [First steps in browser extension](#first-steps-in-browser-extension) for details).
+The search box allows you to filter the list of currently displayed password entries in the popup. If you are searching for a password entry that is not already visible (for example if it doesn't match the current domain), first press <kbd>Backspace</kbd> to disable phishing attack protection and search the entire password store (see [First steps in browser extension](#first-steps-in-browser-extension) for details).
 
-The search algorithm combines fuzzy and substring filtering approaches to achieve the most optimal results. The matches will be highlighted in a different color to explain the results.
+The search algorithm combines fuzzy and substring filtering approaches to achieve the most optimal results. The matching parts of each result are highlighted in a different color.
 
 The first word in the search term activates the fuzzy filtering and takes into consideration password store name, folder and password entry name:
 
