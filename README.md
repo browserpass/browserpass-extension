@@ -19,6 +19,7 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [First steps in browser extension](#first-steps-in-browser-extension)
     -   [Available keyboard shortcuts](#available-keyboard-shortcuts)
     -   [Password matching and sorting](#password-matching-and-sorting)
+    -   [Searching password entries](#searching-password-entries)
     -   [OpenID authentication](#openid-authentication)
     -   [Modal HTTP authentication](#modal-http-authentication)
     -   [Password store locations](password-store-locations)
@@ -168,6 +169,20 @@ The sorting algorithm implemented in Browserpass will use several intuitions to 
 1. The rest of the available password entries will be sorted by the frequency of their usage, the more times a password was used, the higher it will be in the list.
 1. Password entries with the identical usage counts are sorted by number of domain levels (specificity), i.e. `wiki.example.com` will be above `example.com`.
 1. If all the above is equal, password entries are sorted alphabetically.
+
+### Searching password entries
+
+The search box allows you to filter the list of currently displayed password entries in the popup. If you are searching for a password entry that is not already visible (for example it doesn't match the current domain), first press <kbd>Backspace</kbd> to disable phishing attack protection and search the entire password store (see [First steps in browser extension](#first-steps-in-browser-extension) for details).
+
+The search algorithm combines fuzzy and substring filtering approaches to achieve the most optimal results. The matches will be highlighted in a different color to explain the results.
+
+The first word in the search term activates the fuzzy filtering and takes into consideration password store name, folder and password entry name:
+
+![fuzzy-search](https://user-images.githubusercontent.com/1177900/56358004-9b23eb80-61dd-11e9-9af9-3583c7969732.png)
+
+All subsequent words in the search term additionally filter our the remaining results using a substring filtering on folder and password entry name.
+
+If you would prefer to use substring search only, simply enter a space character prior to your search term - this disables fuzzy search entirely.
 
 ### OpenID authentication
 
