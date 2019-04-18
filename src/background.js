@@ -977,8 +977,10 @@ function triggerOTPExtension(settings, action, otp) {
                 version: chrome.runtime.getManifest().version,
                 action: action,
                 otp: otp,
-                host: settings.host,
-                tab: settings.tab
+                settings: {
+                    host: settings.host,
+                    tab: settings.tab
+                }
             })
             // Both response & error are noop functions, because we don't care about
             // the response, and if there's an error it just means the otp extension
