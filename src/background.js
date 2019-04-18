@@ -294,6 +294,26 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
 }
 
 /**
+ * Inject script
+ *
+ * @param object settings Settings object
+ * @param boolean allFrames Inject in all frames
+ * @return object Cancellable promise
+ */
+async function injectScript(settings, allFrames) {
+    const MAX_WAIT = 1000;
+
+    return new Promise(async (resolve, reject) => {
+        setTimeout(reject, MAX_WAIT);
+        await chrome.tabs.executeScript(settings.tab.id, {
+            allFrames: allFrames,
+            file: "js/inject.dist.js"
+        });
+        resolve(true);
+    });
+}
+
+/**
  * Fill form fields
  *
  * @param object settings Settings object
@@ -303,10 +323,17 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
  */
 async function fillFields(settings, login, fields) {
     // inject script
-    await chrome.tabs.executeScript(settings.tab.id, {
-        allFrames: true,
-        file: "js/inject.dist.js"
-    });
+    try {
+        await injectScript(settings, false);
+    } catch {
+        throw new Error("Unable to inject script in the top frame");
+    }
+
+    let injectedAllFrames = false;
+    try {
+        await injectScript(settings, true);
+        injectedAllFrames = true;
+    } catch {}
 
     // build fill request
     var fillRequest = {
@@ -326,43 +353,68 @@ async function fillFields(settings, login, fields) {
         await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
     );
 
-    // try again using same-origin frames if we couldn't fill an "important" field
-    if (!filledFields.includes(importantFieldToFill)) {
-        allFrames = true;
-        filledFields = filledFields.concat(
-            await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
-        );
-    }
+    if (injectedAllFrames) {
+        // try again using same-origin frames if we couldn't fill an "important" field
+        if (!filledFields.includes(importantFieldToFill)) {
+            allFrames = true;
+            filledFields = filledFields.concat(
+                await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
+            );
+        }
 
-    // try again using all available frames if we couldn't fill an "important" field
-    if (
-        !filledFields.includes(importantFieldToFill) &&
-        settings.foreignFills[settings.host] !== false
-    ) {
-        allowForeign = true;
-        filledFields = filledFields.concat(
-            await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
-        );
+        // try again using all available frames if we couldn't fill an "important" field
+        if (
+            !filledFields.includes(importantFieldToFill) &&
+            settings.foreignFills[settings.host] !== false
+        ) {
+            allowForeign = true;
+            filledFields = filledFields.concat(
+                await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
+            );
+        }
     }
 
     // try again, but don't require a password field (if it was required until now)
     if (!allowNoSecret) {
         allowNoSecret = true;
 
-        // try again using same-origin frames
+        // try again using only the top frame
         if (!filledFields.length) {
+            allFrames = false;
             allowForeign = false;
             filledFields = filledFields.concat(
                 await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
             );
         }
 
-        // try again using all available frames
-        if (!filledFields.length && settings.foreignFills[settings.host] !== false) {
-            allowForeign = true;
-            filledFields = filledFields.concat(
-                await dispatchFill(settings, fillRequest, allFrames, allowForeign, allowNoSecret)
-            );
+        if (injectedAllFrames) {
+            // try again using same-origin frames
+            if (!filledFields.length) {
+                allFrames = true;
+                filledFields = filledFields.concat(
+                    await dispatchFill(
+                        settings,
+                        fillRequest,
+                        allFrames,
+                        allowForeign,
+                        allowNoSecret
+                    )
+                );
+            }
+
+            // try again using all available frames
+            if (!filledFields.length && settings.foreignFills[settings.host] !== false) {
+                allowForeign = true;
+                filledFields = filledFields.concat(
+                    await dispatchFill(
+                        settings,
+                        fillRequest,
+                        allFrames,
+                        allowForeign,
+                        allowNoSecret
+                    )
+                );
+            }
         }
     }
 
