@@ -1014,7 +1014,7 @@ function onExtensionInstalled(details) {
     };
 
     if (details.reason === "install") {
-        if (!("installed" in localStorage)) {
+        if (localStorage.getItem("installed") === null) {
             localStorage.setItem("installed", Date.now());
             show(
                 "installed",
