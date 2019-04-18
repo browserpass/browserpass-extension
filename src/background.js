@@ -971,9 +971,9 @@ async function saveSettings(settings) {
  */
 function triggerOTPExtension(settings, action, otp) {
     // trigger otp extension
-    for (let key in otpID) {
+    for (let targetID of otpID) {
         chrome.runtime
-            .sendMessage(otpID[key], {
+            .sendMessage(targetID, {
                 version: chrome.runtime.getManifest().version,
                 action: action,
                 otp: otp,
