@@ -743,6 +743,11 @@ async function handleMessage(settings, message, sendResponse) {
             });
             break;
     }
+
+    // trigger browserpass-otp
+    if (typeof message.login !== "undefined" && message.login.fields.hasOwnProperty("otp")) {
+        triggerOTPExtension(settings, message.action, message.login.fields.otp);
+    }
 }
 
 /**
@@ -870,23 +875,6 @@ async function parseFields(settings, login) {
             delete login.settings[key];
         }
     }
-
-    // trigger otp extension
-    if (login.fields.hasOwnProperty("otp")) {
-        for (let key in otpID) {
-            chrome.runtime
-                .sendMessage(otpID[key], {
-                    otp: login.fields.otp,
-                    host: settings.host,
-                    tab: settings.tab
-                })
-                // Both response & error are noop functions, because we don't care about
-                // the response, and if there's an error it just means the otp extension
-                // is probably not installed. We can't detect that without requesting the
-                // management permission, so this is an acceptable workaround.
-                .then(noop => null, noop => null);
-        }
-    }
 }
 
 /**
@@ -968,6 +956,35 @@ async function saveSettings(settings) {
         if (settingsToSave.hasOwnProperty(key)) {
             localStorage.setItem(key, JSON.stringify(settingsToSave[key]));
         }
+    }
+}
+
+/**
+ * Trigger OTP extension (browserpass-otp)
+ *
+ * @since 3.0.13
+ *
+ * @param object settings Settings object
+ * @param string action   Browserpass action
+ * @param object otp      OTP field data
+ * @return void
+ */
+function triggerOTPExtension(settings, action, otp) {
+    // trigger otp extension
+    for (let targetID of otpID) {
+        chrome.runtime
+            .sendMessage(targetID, {
+                version: chrome.runtime.getManifest().version,
+                action: action,
+                otp: otp,
+                host: settings.host,
+                tab: settings.tab
+            })
+            // Both response & error are noop functions, because we don't care about
+            // the response, and if there's an error it just means the otp extension
+            // is probably not installed. We can't detect that without requesting the
+            // management permission, so this is an acceptable workaround.
+            .then(noop => null, noop => null);
     }
 }
 
