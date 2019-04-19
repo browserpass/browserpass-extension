@@ -64,13 +64,12 @@ chrome.commands.onCommand.addListener(async command => {
             try {
                 const settings = await getFullSettings();
                 handleMessage(settings, { action: "listFiles" }, listResults => {
+                    const currentDomainOnly = !settings.tab.url.match(/^(chrome|about):/);
                     const logins = helpers.prepareLogins(listResults.files, settings);
-                    // TODO this simulates the conversion and applied sorting algorithm as in popup...
-                    let bestLogin = {
-                        store: { id: "default" },
-                        login: listResults.files.default[0].replace(/.gpg$/, "")
-                    };
-                    handleMessage(settings, { action: "fill", login: bestLogin }, () => {});
+                    const bestLogin = helpers.filterSortLogins(logins, "", currentDomainOnly)[0];
+                    if (bestLogin) {
+                        handleMessage(settings, { action: "fill", login: bestLogin }, () => {});
+                    }
                 });
             } catch (e) {
                 console.log(e);
