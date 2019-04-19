@@ -203,7 +203,7 @@ async function saveRecent(settings, login, remove = false) {
         });
         await db.add("log", { time: Date.now(), host: settings.host, login: login.login });
     } catch {
-        // ignore if we cannot write to Indexed DB (e.g. it's readonly in incognito mode)
+        // ignore any errors and proceed without saving a log entry to Indexed DB
     }
 }
 
