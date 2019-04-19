@@ -194,13 +194,17 @@ async function saveRecent(settings, login, remove = false) {
     }
 
     // save to usage log
-    const DB_VERSION = 1;
-    const db = await idb.openDB("browserpass", DB_VERSION, {
-        upgrade(db) {
-            db.createObjectStore("log", { keyPath: "time" });
-        }
-    });
-    await db.add("log", { time: Date.now(), host: settings.host, login: login.login });
+    try {
+        const DB_VERSION = 1;
+        const db = await idb.openDB("browserpass", DB_VERSION, {
+            upgrade(db) {
+                db.createObjectStore("log", { keyPath: "time" });
+            }
+        });
+        await db.add("log", { time: Date.now(), host: settings.host, login: login.login });
+    } catch {
+        // ignore if we cannot write to Indexed DB (e.g. it's readonly in incognito mode)
+    }
 }
 
 /**
