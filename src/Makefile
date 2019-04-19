@@ -6,7 +6,7 @@ CLEAN_FILES := css js
 PRETTIER_FILES := $(wildcard *.json *.js popup/*.js options/*.js *.less popup/*.less options/*.less *.html popup/*.html options/*.html)
 
 .PHONY: all
-all: deps prettier css/popup.dist.css css/options.dist.css js/background.dist.js js/popup.dist.js js/options.dist.js js/inject.dist.js js/helpers.dist.js
+all: deps prettier css/popup.dist.css css/options.dist.css js/background.dist.js js/popup.dist.js js/options.dist.js js/inject.dist.js
 
 .PHONY: deps
 deps:
@@ -43,10 +43,6 @@ js/inject.dist.js: $(BROWSERIFY) inject.js
 	# Firefox requires the last command to evaluate to something serializable
 	# https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/tabs/executeScript#Return_value
 	echo ";undefined" >> js/inject.dist.js
-
-js/helpers.dist.js: $(BROWSERIFY) helpers.js
-	[ -d js ] || mkdir -p js
-	$(BROWSERIFY) -o js/helpers.dist.js helpers.js
 
 .PHONY: clean
 clean:
