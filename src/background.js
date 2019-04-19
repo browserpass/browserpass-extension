@@ -63,10 +63,13 @@ chrome.commands.onCommand.addListener(async command => {
         case "fillBest":
             try {
                 const settings = await getFullSettings();
+                if (settings.tab.url.match(/^(chrome|about):/)) {
+                    // only fill on real domains
+                    return;
+                }
                 handleMessage(settings, { action: "listFiles" }, listResults => {
-                    const currentDomainOnly = !settings.tab.url.match(/^(chrome|about):/);
                     const logins = helpers.prepareLogins(listResults.files, settings);
-                    const bestLogin = helpers.filterSortLogins(logins, "", currentDomainOnly)[0];
+                    const bestLogin = helpers.filterSortLogins(logins, "", true)[0];
                     if (bestLogin) {
                         handleMessage(settings, { action: "fill", login: bestLogin }, () => {});
                     }
