@@ -304,11 +304,12 @@ async function injectScript(settings, allFrames) {
     const MAX_WAIT = 1000;
 
     return new Promise(async (resolve, reject) => {
-        setTimeout(reject, MAX_WAIT);
+        const waitTimeout = setTimeout(reject, MAX_WAIT);
         await chrome.tabs.executeScript(settings.tab.id, {
             allFrames: allFrames,
             file: "js/inject.dist.js"
         });
+        clearTimeout(waitTimeout);
         resolve(true);
     });
 }
@@ -333,7 +334,9 @@ async function fillFields(settings, login, fields) {
     try {
         await injectScript(settings, true);
         injectedAllFrames = true;
-    } catch {}
+    } catch {
+        // we'll proceed with trying to fill only the top frame
+    }
 
     // build fill request
     var fillRequest = {
