@@ -121,7 +121,7 @@ Browserpass was designed with an assumption that certain conventions are being f
 
 ### First steps in browser extension
 
-Click on the icon or use <kbd>Ctrl+Shift+L</kbd> to open Browserpass with the entries that match current domain.
+Click on the icon or use <kbd>Ctrl+Shift+L</kbd> to open Browserpass popup with the entries that match the current domain. You can also use <kbd>Ctrl+Shift+F</kbd> to fill the form with the best matching credentials without even opening the popup (the best matching credentials are the first ones on the list if you open the popup).
 
 How to change the shortcut:
 
@@ -139,15 +139,16 @@ If you want to intentionally disable phishing attack protection and search the e
 Note: If the cursor is located in the search input field, every shortcut that works on the selected entry will be applied on the first entry in the popup list.
 
 | Shortcut                                             | Action                                          |
-| ---------------------------------------------------- | ----------------------------------------------- |
-| <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                          |
-| <kbd>Enter</kbd>                                     | Submit form with currently selected credentials |
-| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Navigate popup list                             |
-| <kbd>Ctrl+C</kbd>                                    | Copy password to clipboard                      |
-| <kbd>Ctrl+Shift+C</kbd>                              | Copy username to clipboard                      |
-| <kbd>Ctrl+G</kbd>                                    | Open URL in the current tab                     |
-| <kbd>Ctrl+Shift+G</kbd>                              | Open URL in the new tab                         |
-| <kbd>Backspace</kbd> (with no search text entered)   | Search passwords in the entire password store   |
+| ---------------------------------------------------- | ------------------------------------------------ |
+| <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                           |
+| <kbd>Ctrl+Shift+F</kbd>                              | Fill the form with the best matching credentials |
+| <kbd>Enter</kbd>                                     | Submit form with currently selected credentials  |
+| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Navigate popup list                              |
+| <kbd>Ctrl+C</kbd>                                    | Copy password to clipboard                       |
+| <kbd>Ctrl+Shift+C</kbd>                              | Copy username to clipboard                       |
+| <kbd>Ctrl+G</kbd>                                    | Open URL in the current tab                      |
+| <kbd>Ctrl+Shift+G</kbd>                              | Open URL in the new tab                          |
+| <kbd>Backspace</kbd> (with no search text entered)   | Search passwords in the entire password store    |
 
 ### Password matching and sorting
 
