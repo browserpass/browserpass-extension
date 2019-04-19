@@ -2,7 +2,7 @@
 "use strict";
 
 require("chrome-extension-async");
-var Interface = require("./interface");
+const Interface = require("./interface");
 
 run();
 
