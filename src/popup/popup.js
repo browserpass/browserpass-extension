@@ -5,6 +5,7 @@ require("chrome-extension-async");
 var TldJS = require("tldjs");
 var sha1 = require("sha1");
 var Interface = require("./interface");
+var AddInterface = require("./add-interface");
 
 run();
 
@@ -79,6 +80,24 @@ async function run() {
 
         if (typeof settings.host === "undefined") {
             throw new Error("Unable to retrieve current tab information");
+        }
+
+        response = await chrome.runtime.sendMessage({ action: "listCredentials" });
+        if (response.status != "ok") {
+            throw new Error(response.message);
+        }
+
+        if (response.credentials.length > 0) {
+            var popup = new AddInterface(response.credentials, settings);
+            for (let credential of response.credentials) {
+                credential.doAction = withCredential.bind({
+                    settings: settings,
+                    credentials: credential,
+                    interface: popup
+                });
+            }
+            popup.attach(document.body);
+            return;
         }
 
         // get list of logins
@@ -170,5 +189,25 @@ async function withLogin(action) {
         }
     } catch (e) {
         handleError(e);
+    }
+}
+
+async function withCredential(action) {
+    const credentials = JSON.parse(JSON.stringify(this.credentials));
+    let response = await chrome.runtime.sendMessage({
+        action: action,
+        credentials: credentials
+    });
+
+    switch (action) {
+        case "dismiss":
+            window.close();
+            break;
+        case "create":
+            if (response.status != "ok") handleError(Error(response.message));
+
+            let credentialsLeft = this.interface.dismissCredential();
+            if (credentialsLeft === 0) window.close();
+            break;
     }
 }

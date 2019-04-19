@@ -5,6 +5,7 @@ require("chrome-extension-async");
 var TldJS = require("tldjs");
 var sha1 = require("sha1");
 var idb = require("idb");
+var Interject = require("./background-interject.js");
 
 // native application id
 var appID = "com.github.browserpass.native";
@@ -51,8 +52,50 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 
 chrome.runtime.onInstalled.addListener(onExtensionInstalled);
 
+let recentCredentials = {};
+let dismissedCredentials = new Set();
+
+chrome.webRequest.onBeforeRequest.addListener(
+    async function(details) {
+        if (details.method == "POST") {
+            let formData = details.requestBody.formData;
+            if (!formData) {
+                return;
+            }
+
+            let credentials = Interject.extractFormData(formData);
+            if (!credentials) return;
+
+            let currentDomain = new URL(details.url).hostname;
+            credentials.domain = currentDomain;
+
+            let path = currentDomain + "/" + credentials.login + ".gpg";
+            credentials.path = path;
+
+            if (await fileExists(path)) return;
+
+            let id = hashCredentials(credentials);
+            if (recentCredentials.hasOwnProperty(id)) return;
+            if (dismissedCredentials.has(id)) return;
+
+            credentials.path = path;
+            recentCredentials[id] = credentials;
+        }
+    },
+    { urls: ["<all_urls>"] },
+    ["requestBody"]
+);
+
 //----------------------------------- Function definitions ----------------------------------//
 
+async function fileExists(path) {
+    let settings = await getFullSettings();
+    let response = await hostAction(settings, "exists", {
+        file: path
+    });
+
+    return response.data.exists;
+}
 /**
  * Get the deepest available domain component of a path
  *
@@ -600,6 +643,13 @@ async function handleMessage(settings, message, sendResponse) {
 
     // route action
     switch (message.action) {
+        case "listCredentials":
+            sendResponse({
+                status: "ok",
+                credentials: Object.values(recentCredentials)
+            });
+            // recentCredentials = [];
+            break;
         case "getSettings":
             sendResponse({
                 status: "ok",
@@ -705,7 +755,7 @@ async function handleMessage(settings, message, sendResponse) {
                 sendResponse({ status: "ok", filledFields: filledFields });
             } catch (e) {
                 try {
-                    sendResponse({
+                    await sendResponse({
                         status: "error",
                         message: e.toString()
                     });
@@ -727,6 +777,32 @@ async function handleMessage(settings, message, sendResponse) {
                     message: e.message
                 });
             }
+            break;
+        case "create":
+            try {
+                response = await hostAction(settings, "create", {
+                    storeID: settings.stores.default.id,
+                    credentials: message.credentials,
+                    file: message.credentials.path
+                });
+                if (response.status != "ok") {
+                    throw new Error(JSON.stringify(response));
+                }
+                let id = hashCredentials(message.credentials);
+                delete recentCredentials[id];
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to create password file" + e.toString()
+                });
+            }
+            break;
+        case "dismiss":
+            let id = hashCredentials(message.credentials);
+            dismissedCredentials.add(id);
+            delete recentCredentials[id];
+            sendResponse({ status: "ok" });
             break;
         default:
             sendResponse({
@@ -878,6 +954,10 @@ async function receiveMessage(message, sender, sendResponse) {
         console.log(e);
         sendResponse({ status: "error", message: e.toString() });
     }
+}
+
+function hashCredentials(credentials) {
+    return credentials.login + credentials.email + credentials.password;
 }
 
 /**

@@ -99,7 +99,6 @@
         if (!request.allowNoSecret && !find(PASSWORD_FIELDS, loginForm)) {
             return result;
         }
-
         // ensure the origin is the same, or ask the user for permissions to continue
         if (window.location.origin !== request.origin) {
             if (!request.allowForeign || request.foreignFills[window.location.origin] === false) {

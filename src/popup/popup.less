@@ -234,3 +234,45 @@ body {
         color: @error-text-color;
     }
 }
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    height: @login-height;
+}
+
+.storeButton {
+    width: 100%;
+    border: none;
+    background-color: @bg-color;
+    font-size: 16px;
+    overflow: hidden;
+    color: @text-color;
+    outline: none;
+}
+
+.storeButton:hover,
+.storeButton:focus {
+    background-color: @hover-bg-color;
+}
+
+.label,
+.credential {
+    font-size: 16px;
+}
+
+.title {
+    text-align: center;
+    font-size: 20px;
+    width: 100%;
+    background-color: @hover-bg-color;
+}
+
+textarea:focus,
+input:focus {
+    outline: none;
+}
+
+*:focus {
+    outline: none;
+}
