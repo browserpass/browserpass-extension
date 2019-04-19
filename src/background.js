@@ -64,6 +64,7 @@ chrome.commands.onCommand.addListener(async command => {
             try {
                 const settings = await getFullSettings();
                 handleMessage(settings, { action: "listFiles" }, listResults => {
+                    const logins = helpers.prepareLogins(listResults.files, settings);
                     // TODO this simulates the conversion and applied sorting algorithm as in popup...
                     let bestLogin = {
                         store: { id: "default" },
@@ -99,27 +100,18 @@ async function updateMatchingPasswordsCount(tabId) {
         }
 
         // Get tab info
-        let currentDomain = undefined;
         try {
             const tab = await chrome.tabs.get(tabId);
-            currentDomain = new URL(tab.url).hostname;
+            settings.host = new URL(tab.url).hostname;
         } catch (e) {
             throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
         }
 
-        let matchedPasswordsCount = 0;
-        for (var storeId in response.data.files) {
-            for (var key in response.data.files[storeId]) {
-                const login = response.data.files[storeId][key].replace(/\.gpg$/i, "");
-                const domain = helpers.pathToDomain(storeId + "/" + login, currentDomain);
-                const inCurrentDomain =
-                    currentDomain === domain || currentDomain.endsWith("." + domain);
-                const recent = settings.recent[sha1(currentDomain + sha1(storeId + sha1(login)))];
-                if (recent || inCurrentDomain) {
-                    matchedPasswordsCount++;
-                }
-            }
-        }
+        const logins = helpers.prepareLogins(response.data.files, settings);
+        const matchedPasswordsCount = logins.reduce(
+            (acc, login) => acc + (login.recent.count || login.inCurrentDomain ? 1 : 0),
+            0
+        );
 
         if (matchedPasswordsCount) {
             // Set badge for the current tab
