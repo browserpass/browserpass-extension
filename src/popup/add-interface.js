@@ -23,6 +23,14 @@ function view(ctl, params) {
 
     nodes.push(m("div.label.title", "Save credentials to store?"));
 
+    nodes.push(m("div.label", "Store:"));
+    let select = m(
+        "select",
+        Object.values(this.settings.stores).map(store =>
+            m("option", { storeID: store.id }, store.name)
+        )
+    );
+    nodes.push(select);
     nodes.push(m("div.label", "Path:"));
     nodes.push(
         m("input.credential", {
@@ -63,7 +71,8 @@ function view(ctl, params) {
                 "button.storeButton",
                 {
                     onclick: async function(e) {
-                        await credentials.doAction("create");
+                        let storeID = select.dom.selectedOptions[0].getAttribute("storeID");
+                        await credentials.doAction("create", storeID);
                     }
                 },
                 "Yes"

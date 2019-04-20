@@ -192,11 +192,12 @@ async function withLogin(action) {
     }
 }
 
-async function withCredential(action) {
+async function withCredential(action, storeID) {
     const credentials = JSON.parse(JSON.stringify(this.credentials));
     let response = await chrome.runtime.sendMessage({
         action: action,
-        credentials: credentials
+        credentials: credentials,
+        storeID: storeID
     });
 
     switch (action) {

@@ -781,7 +781,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "create":
             try {
                 response = await hostAction(settings, "create", {
-                    storeID: settings.stores.default.id,
+                    storeID: message.storeID,
                     credentials: message.credentials,
                     file: message.credentials.path
                 });
