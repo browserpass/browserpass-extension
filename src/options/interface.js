@@ -1,6 +1,6 @@
 module.exports = Interface;
 
-var m = require("mithril");
+const m = require("mithril");
 
 /**
  * Options main interface

@@ -1,9 +1,9 @@
 module.exports = Interface;
 
-var m = require("mithril");
-var FuzzySort = require("fuzzysort");
-var Moment = require("moment");
-var SearchInterface = require("./searchinterface");
+const m = require("mithril");
+const FuzzySort = require("fuzzysort");
+const Moment = require("moment");
+const SearchInterface = require("./searchinterface");
 
 const LATEST_NATIVE_APP_VERSION = 3000003;
 

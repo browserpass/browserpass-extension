@@ -2,7 +2,7 @@ BROWSERIFY := node_modules/.bin/browserify
 PRETTIER := node_modules/.bin/prettier
 LESSC := node_modules/.bin/lessc
 
-CLEAN_FILES := js
+CLEAN_FILES := css js
 PRETTIER_FILES := $(wildcard *.json *.js popup/*.js options/*.js *.less popup/*.less options/*.less *.html popup/*.html options/*.html)
 
 .PHONY: all
@@ -24,11 +24,11 @@ css/options.dist.css: $(LESSC) options/options.less
 	[ -d css ] || mkdir -p css
 	$(LESSC) options/options.less css/options.dist.css
 
-js/background.dist.js: $(BROWSERIFY) background.js
+js/background.dist.js: $(BROWSERIFY) background.js helpers.js
 	[ -d js ] || mkdir -p js
 	$(BROWSERIFY) -o js/background.dist.js background.js
 
-js/popup.dist.js: $(BROWSERIFY) popup/*.js
+js/popup.dist.js: $(BROWSERIFY) popup/*.js helpers.js
 	[ -d js ] || mkdir -p js
 	$(BROWSERIFY) -o js/popup.dist.js popup/popup.js
 
