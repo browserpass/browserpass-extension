@@ -45,7 +45,7 @@ function pathToDomain(path, currentHost) {
 /**
  * Prepare list of logins based on provided files
  *
- * @since 3.0.16
+ * @since 3.1.0
  *
  * @param string array  List of password files
  * @param string object Settings object
@@ -86,7 +86,7 @@ function prepareLogins(files, settings) {
 /**
  * Filter and sort logins
  *
- * @since 3.0.16
+ * @since 3.1.0
  *
  * @param string array  List of logins
  * @param string object Settings object
