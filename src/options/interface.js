@@ -48,7 +48,7 @@ function attach(element) {
 function view(ctl, params) {
     var nodes = [];
     nodes.push(m("h3", "Basic settings"));
-    nodes.push(createCheckbox.call(this, "autoSubmit", "Automatically submit forms after filling"));
+    nodes.push(createCheckbox.call(this, "autoSubmit", "Automatically submit forms after filling (not recommended)"));
     nodes.push(createInput.call(this, "username", "Default username", "john.smith"));
     nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary", "/path/to/gpg"));
 

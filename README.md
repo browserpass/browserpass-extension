@@ -24,6 +24,7 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [Modal HTTP authentication](#modal-http-authentication)
     -   [Password store locations](password-store-locations)
 -   [Options](#options)
+-   -   [A note about autosubmit](#a-note-about-autosubmit)
 -   [Usage data](#usage-data)
 -   [Security](#security)
 -   [Privacy](#privacy)
@@ -231,6 +232,12 @@ Browserpass allows configuring certain settings in different places places using
     - Custom store locations
     - Custom store locations - badge background color (aka `bgColor`)
     - Custom store locations - badge text color (aka `color`)
+
+### A note about autosubmit
+
+While we provide autosubmit as an option for users, we do not recommend it. This is because, while Browserpass' fill logic is robust and usually reliable, it occasionally gets things wrong and fills something (typically the username) into a field or form where it doesn't belong. If autosubmit is enabled, then this can result in Browserpass _automatically submitting_ sensitive credentials into something that isn't a login form.
+
+As the demand for autosubmit is extremely high, we have decided to provide it anyway - however it is disabled by default, and we recommend that users do not enable it.
 
 ## Usage data
 
