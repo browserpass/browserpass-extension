@@ -14,7 +14,6 @@ extension:
 	$(MAKE) -C src
 
 EXTENSION_FILES := \
-	src/*.css \
 	src/*.png \
 	src/*.svg \
 	src/fonts/* \

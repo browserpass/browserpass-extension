@@ -1,6 +1,6 @@
 module.exports = SearchInterface;
 
-var m = require("mithril");
+const m = require("mithril");
 
 /**
  * Search interface

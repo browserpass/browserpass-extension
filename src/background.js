@@ -2,9 +2,9 @@
 "use strict";
 
 require("chrome-extension-async");
-var TldJS = require("tldjs");
-var sha1 = require("sha1");
-var idb = require("idb");
+const sha1 = require("sha1");
+const idb = require("idb");
+const helpers = require("./helpers");
 
 // native application id
 var appID = "com.github.browserpass.native";
@@ -62,35 +62,6 @@ chrome.runtime.onInstalled.addListener(onExtensionInstalled);
 //----------------------------------- Function definitions ----------------------------------//
 
 /**
- * Get the deepest available domain component of a path
- *
- * @since 3.0.0
- *
- * @param string path        Path to parse
- * @param string currentHost Current hostname for the active tab
- * @return string|null Extracted domain
- */
-function pathToDomain(path, currentHost) {
-    var parts = path.split(/\//).reverse();
-    for (var key in parts) {
-        if (parts[key].indexOf("@") >= 0) {
-            continue;
-        }
-        var t = TldJS.parse(parts[key]);
-        if (
-            t.isValid &&
-            ((t.tldExists && t.domain !== null) ||
-                t.hostname === currentHost ||
-                currentHost.endsWith(`.${t.hostname}`))
-        ) {
-            return t.hostname;
-        }
-    }
-
-    return null;
-}
-
-/**
  * Set badge text with the number of matching password entries
  *
  * @since 3.0.0
@@ -119,7 +90,7 @@ async function updateMatchingPasswordsCount(tabId) {
         for (var storeId in response.data.files) {
             for (var key in response.data.files[storeId]) {
                 const login = response.data.files[storeId][key].replace(/\.gpg$/i, "");
-                const domain = pathToDomain(storeId + "/" + login, currentDomain);
+                const domain = helpers.pathToDomain(storeId + "/" + login, currentDomain);
                 const inCurrentDomain =
                     currentDomain === domain || currentDomain.endsWith("." + domain);
                 const recent = settings.recent[sha1(currentDomain + sha1(storeId + sha1(login)))];
