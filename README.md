@@ -121,7 +121,7 @@ Browserpass was designed with an assumption that certain conventions are being f
 
 ### First steps in browser extension
 
-Click on the icon or use <kbd>Ctrl+Shift+L</kbd> to open Browserpass popup with the entries that match the current domain. You can also use <kbd>Ctrl+Shift+F</kbd> to fill the form with the best matching credentials without even opening the popup (the best matching credentials are the first ones on the list if you open the popup).
+Click on the icon or use <kbd>Ctrl+Shift+L</kbd> to open the Browserpass popup with the entries that match the current domain. You can also use <kbd>Ctrl+Shift+F</kbd> to fill the form with the best matching credentials without even opening the popup (the best matching credentials are the first ones on the list if you open the popup).
 
 How to change the shortcut:
 
@@ -152,7 +152,7 @@ Note: If the cursor is located in the search input field, every shortcut that wo
 
 ### Password matching and sorting
 
-When you first open Browserpass popup, you will see a badge with the current domain name in the search input field:
+When you first open the Browserpass popup, you will see a badge with the current domain name in the search input field:
 
 ![image](https://user-images.githubusercontent.com/1177900/54785353-52046a00-4c26-11e9-8497-8dc50701ddc4.png)
 
