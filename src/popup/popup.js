@@ -2,7 +2,6 @@
 "use strict";
 
 require("chrome-extension-async");
-const sha1 = require("sha1");
 const Interface = require("./interface");
 const helpers = require("../helpers");
 
@@ -58,34 +57,11 @@ async function run() {
             throw new Error(response.message);
         }
 
-        var logins = [];
-        var index = 0;
-        for (var storeId in response.files) {
-            for (var key in response.files[storeId]) {
-                // set login fields
-                var login = {
-                    index: index++,
-                    store: settings.stores[storeId],
-                    login: response.files[storeId][key].replace(/\.gpg$/i, ""),
-                    allowFill: true
-                };
-                login.domain = helpers.pathToDomain(storeId + "/" + login.login, settings.host);
-                login.inCurrentDomain =
-                    settings.host == login.domain || settings.host.endsWith("." + login.domain);
-                login.recent =
-                    settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))];
-                if (!login.recent) {
-                    login.recent = {
-                        when: 0,
-                        count: 0
-                    };
-                }
-                // bind handlers
-                login.doAction = withLogin.bind({ settings: settings, login: login });
-
-                logins.push(login);
-            }
+        const logins = helpers.prepareLogins(response.files, settings);
+        for (let login of logins) {
+            login.doAction = withLogin.bind({ settings: settings, login: login });
         }
+
         var popup = new Interface(settings, logins);
         popup.attach(document.body);
     } catch (e) {
