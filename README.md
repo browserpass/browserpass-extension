@@ -138,7 +138,7 @@ If you want to intentionally disable phishing attack protection and search the e
 
 Note: If the cursor is located in the search input field, every shortcut that works on the selected entry will be applied on the first entry in the popup list.
 
-| Shortcult                                            | Action                                          |
+| Shortcut                                             | Action                                          |
 | ---------------------------------------------------- | ----------------------------------------------- |
 | <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                          |
 | <kbd>Enter</kbd>                                     | Submit form with currently selected credentials |
