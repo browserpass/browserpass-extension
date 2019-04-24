@@ -34,19 +34,18 @@ chrome.browserAction.setBadgeBackgroundColor({
 
 // watch for tab updates
 chrome.tabs.onUpdated.addListener((tabId, info) => {
-    // ignore non-complete status
-    if (info.status !== "complete") {
-        return;
-    }
-
     // unregister any auth listeners for this tab
-    if (authListeners[tabId]) {
-        chrome.webRequest.onAuthRequired.removeListener(authListeners[tabId]);
-        delete authListeners[tabId];
+    if (info.status === "complete") {
+        if (authListeners[tabId]) {
+            chrome.webRequest.onAuthRequired.removeListener(authListeners[tabId]);
+            delete authListeners[tabId];
+        }
     }
 
-    // show number of matching passwords in a badge
-    updateMatchingPasswordsCount(tabId);
+    // refresh badge counter when url in a tab changes
+    if (info.url) {
+        updateMatchingPasswordsCount(tabId);
+    }
 });
 
 // handle incoming messages
