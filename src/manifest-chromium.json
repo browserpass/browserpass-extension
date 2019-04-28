@@ -29,7 +29,9 @@
     "permissions": [
         "debugger",
         "activeTab",
+        "alarms",
         "tabs",
+        "clipboardRead",
         "clipboardWrite",
         "nativeMessaging",
         "notifications",

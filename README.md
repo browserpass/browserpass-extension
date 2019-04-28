@@ -139,17 +139,17 @@ If you want to intentionally disable phishing attack protection and search the e
 
 Note: If the cursor is located in the search input field, every shortcut that works on the selected entry will be applied on the first entry in the popup list.
 
-| Shortcut                                             | Action                                          |
-| ---------------------------------------------------- | ------------------------------------------------ |
-| <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                           |
-| <kbd>Ctrl+Shift+F</kbd>                              | Fill the form with the best matching credentials |
-| <kbd>Enter</kbd>                                     | Submit form with currently selected credentials  |
-| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Navigate popup list                              |
-| <kbd>Ctrl+C</kbd>                                    | Copy password to clipboard                       |
-| <kbd>Ctrl+Shift+C</kbd>                              | Copy username to clipboard                       |
-| <kbd>Ctrl+G</kbd>                                    | Open URL in the current tab                      |
-| <kbd>Ctrl+Shift+G</kbd>                              | Open URL in the new tab                          |
-| <kbd>Backspace</kbd> (with no search text entered)   | Search passwords in the entire password store    |
+| Shortcut                                             | Action                                                |
+| ---------------------------------------------------- | ----------------------------------------------------- |
+| <kbd>Ctrl+Shift+L</kbd>                              | Open Browserpass popup                                |
+| <kbd>Ctrl+Shift+F</kbd>                              | Fill the form with the best matching credentials      |
+| <kbd>Enter</kbd>                                     | Submit form with currently selected credentials       |
+| Arrow keys and <kbd>Tab</kbd> / <kbd>Shift+Tab</kbd> | Navigate popup list                                   |
+| <kbd>Ctrl+C</kbd>                                    | Copy password to clipboard (will clear in 60 seconds) |
+| <kbd>Ctrl+Shift+C</kbd>                              | Copy username to clipboard (will clear in 60 seconds) |
+| <kbd>Ctrl+G</kbd>                                    | Open URL in the current tab                           |
+| <kbd>Ctrl+Shift+G</kbd>                              | Open URL in the new tab                               |
+| <kbd>Backspace</kbd> (with no search text entered)   | Search passwords in the entire password store         |
 
 ### Password matching and sorting
 
@@ -271,7 +271,9 @@ Browserpass extension requests the following permissions:
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `debugger`           | Only used for "auto-submit" functionality: if all attepts to locate a "Submit" button failed, Browserpass will put focus inside the login form and issue an <kbd>Enter</kbd> keypress. This is only available in Chromium-based browsers, and sadly this permission [cannot be specified as optional](https://developer.chrome.com/apps/permissions) |
 | `activeTab`          | To get URL of the current tab, used for example to determine which passwords to show you by default in the popup                                                                                                                                                                                                                                     |
+| `alarms`             | To set a timer for clearing the clipboard 60 seconds after credentials are copied                                                                                                                                                                                                                                                                    |
 | `tabs`               | To get URL of a given tab, used for example to set count of the matching passwords for a given tab                                                                                                                                                                                                                                                   |
+| `clipboardRead`      | To ensure only copied credentials and not other content is cleared from the clipboard after 60 seconds                                                                                                                                                                                                                                         |
 | `clipboardWrite`     | For "Copy password" and "Copy username" functionality                                                                                                                                                                                                                                                                                                |
 | `nativeMessaging`    | To allow communication with the native app                                                                                                                                                                                                                                                                                                           |
 | `notifications`      | To show browser notifications on install or update                                                                                                                                                                                                                                                                                                   |
