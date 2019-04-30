@@ -8,7 +8,14 @@ function findFormDataEntries(formData, keys) {
     let found = [];
 
     for (key in formData) {
-        if (keys.includes(key)) {
+	// strip keys of the form user[x]
+        let strippedKey = key;
+        let match = /\[.*\]/.exec(key);
+        if (match) {
+            strippedKey = key.substring(match.index + 1, match.index + match[0].length - 1);
+        }
+
+        if (keys.includes(strippedKey)) {
             let entry = formData[key];
             if (entry != "") found.push(entry[0]);
         }

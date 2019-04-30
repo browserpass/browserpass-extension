@@ -58,6 +58,9 @@ let dismissedCredentials = new Set();
 chrome.webRequest.onBeforeRequest.addListener(
     async function(details) {
         if (details.method == "POST") {
+            if (!details.requestBody) {
+                return;
+            }
             let formData = details.requestBody.formData;
             if (!formData) {
                 return;
