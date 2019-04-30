@@ -252,7 +252,7 @@ Browserpass aims to protect your passwords and computer from malicious or fraudu
 -   To protect against phishing, only passwords matching the origin hostname are suggested or selected without an explicit search term.
 -   To minimize attack surface, the website is not allowed to trigger any extension action. Browserpass must be directly invoked by the user.
 -   Only data from the selected password entry is made available to the website.
--   Given full control of the non-native component of the extension, an attacker may be able to extract passwords stored in the configured repository, but cannot obtain files elsewhere on the filesystem or execute arbitrary code outside of the browser.
+-   Given full control of the non-native component of the extension, an attacker may be able to list and decrypt `.gpg` files that can be accessed by the current user, but cannot execute arbitrary code outside of the browser.
 -   Browserpass does not attempt to secure the data it stores in browser local storage, it is assumed that users take precautions to protect their local file system (e.g. by using disk encryption).
 
 ## Privacy
