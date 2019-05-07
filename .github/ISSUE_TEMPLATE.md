@@ -16,7 +16,7 @@
 
 ---
 
-If you are seeing "Error: Specified native messaging host not found", have you followed [Configure browsers](https://github.com/browserpass/browserpass-native#configure-browsers) documentation section?
+If you are getting an error immediately after opening popup, have you followed the [Configure browsers](https://github.com/browserpass/browserpass-native#configure-browsers) documentation section?
 
 ---
 
