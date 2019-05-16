@@ -28,6 +28,9 @@ var defaultSettings = {
 
 var authListeners = {};
 
+// the last text copied to the clipboard is stored here in order to be cleared after 60 seconds
+let lastCopiedText = null;
+
 chrome.browserAction.setBadgeBackgroundColor({
     color: "#666"
 });
@@ -80,6 +83,16 @@ chrome.commands.onCommand.addListener(async command => {
     }
 });
 
+// handle fired alarms
+chrome.alarms.onAlarm.addListener(alarm => {
+    if (alarm.name === "clearClipboard") {
+        if (readFromClipboard() === lastCopiedText) {
+            copyToClipboard("", false);
+        }
+        lastCopiedText = null;
+    }
+});
+
 chrome.runtime.onInstalled.addListener(onExtensionInstalled);
 
 //----------------------------------- Function definitions ----------------------------------//
@@ -127,14 +140,15 @@ async function updateMatchingPasswordsCount(tabId) {
 }
 
 /**
- * Copy text to clipboard
+ * Copy text to clipboard and optionally clear it from the clipboard after one minute
  *
- * @since 3.0.0
+ * @since 3.2.0
  *
  * @param string text Text to copy
+ * @param boolean clear Whether to clear the clipboard after one minute
  * @return void
  */
-function copyToClipboard(text) {
+function copyToClipboard(text, clear = true) {
     document.addEventListener(
         "copy",
         function(e) {
@@ -144,6 +158,31 @@ function copyToClipboard(text) {
         { once: true }
     );
     document.execCommand("copy");
+
+    if (clear) {
+        lastCopiedText = text;
+        chrome.alarms.create("clearClipboard", { delayInMinutes: 1 });
+    }
+}
+
+/**
+ * Read plain text from clipboard
+ *
+ * @since 3.2.0
+ *
+ * @return string The current plaintext content of the clipboard
+ */
+function readFromClipboard() {
+    const ta = document.createElement("textarea");
+    // these lines are carefully crafted to make paste work in both Chrome and Firefox
+    ta.contentEditable = true;
+    ta.textContent = "";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("paste");
+    const content = ta.value;
+    document.body.removeChild(ta);
+    return content;
 }
 
 /**
@@ -1069,6 +1108,7 @@ function onExtensionInstalled(details) {
         }
     } else if (details.reason === "update") {
         var changelog = {
+            3002000: "New permissions added to clear copied credentials after 60 seconds.",
             3000000:
                 "New major update is out, please update the native host app to v3.\n" +
                 "Instructions here: https://github.com/browserpass/browserpass-native"
