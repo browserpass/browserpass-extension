@@ -103,6 +103,8 @@ Browserpass was designed with an assumption that certain conventions are being f
 
 1. In order to benefit of phishing attack protection, a password entry file, or any of its parent folders, must contain a full domain name (including TLD like `.com`) in their name in order to automatically match a website. However, entries which do not contain such a domain in their name may still be manually selected.
 
+    File names are not allowed to contain `\` or `/` characters, because both of them are considered to be path separators.
+
     Some good examples:
 
     ```
