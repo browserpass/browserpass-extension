@@ -266,13 +266,13 @@ function highlightMatches(entry, fuzzyResults, substringFilters) {
 /**
  * Filter out ignored files according to .browserpass.json rules
  *
- * @since 3.1.2
+ * @since 3.2.0
  *
- * @param object settings Settings object
  * @param object files    Arrays of files, grouped by store
+ * @param object settings Settings object
  * @return object Filtered arrays of files, grouped by store
  */
-function ignoreFiles(settings, files) {
+function ignoreFiles(files, settings) {
     let filteredFiles = {};
     for (let store in files) {
         let storeSettings = settings.stores[store].settings;
