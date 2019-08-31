@@ -124,6 +124,8 @@ Browserpass was designed with an assumption that certain conventions are being f
 
 1. URL ([only](#password-matching-and-sorting) used for [modal HTTP authentication](#modal-http-authentication)!) must be defined on a line starting with `url:`, `uri:`, `website:`, `site:`, `link:` or `launch:` (case-insensitive).
 
+If there are entries in your password store that you do not wish to see via Browserpass, you can ignore them by setting the `ignore` option in `.browserpass.json`. This is defined as either a string, or an array of strings, using the standard `.gitignore` syntax. Any matching files or directories will be completely ignored.
+
 ### First steps in browser extension
 
 Click on the icon or use <kbd>Ctrl+Shift+L</kbd> to open the Browserpass popup with the entries that match the current domain. You can also use <kbd>Ctrl+Shift+F</kbd> to fill the form with the best matching credentials without even opening the popup (the best matching credentials are the first ones on the list if you open the popup).
@@ -218,6 +220,7 @@ The list of available options:
 | Custom store locations                                          | List of password stores to use                               |
 | Custom store locations - badge background color (aka `bgColor`) | Badge background color for a given password store in popup   |
 | Custom store locations - badge text color (aka `color`)         | Badge text color for a given password store in popup         |
+| Ignore items (aka `ignore`)                                     | Ignore all matching logins                                   |
 
 Browserpass allows configuring certain settings in different places places using the following priority, highest first:
 
@@ -229,6 +232,7 @@ Browserpass allows configuring certain settings in different places places using
     - `username`
     - `bgColor`
     - `color`
+    - `ignore`
 1. Options defined in browser extension options:
     - Automatically submit forms after filling (aka `autoSubmit`)
     - Default username (aka `username`)

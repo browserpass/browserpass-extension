@@ -121,7 +121,8 @@ async function updateMatchingPasswordsCount(tabId) {
             throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
         }
 
-        const logins = helpers.prepareLogins(response.data.files, settings);
+        const files = helpers.ignoreFiles(settings, response.data.files);
+        const logins = helpers.prepareLogins(files, settings);
         const matchedPasswordsCount = logins.reduce(
             (acc, login) => acc + (login.recent.count || login.inCurrentDomain ? 1 : 0),
             0
@@ -714,7 +715,8 @@ async function handleMessage(settings, message, sendResponse) {
                 if (response.status != "ok") {
                     throw new Error(JSON.stringify(response)); // TODO handle host error
                 }
-                sendResponse({ status: "ok", files: response.data.files });
+                let files = helpers.ignoreFiles(settings, response.data.files);
+                sendResponse({ status: "ok", files });
             } catch (e) {
                 sendResponse({
                     status: "error",
