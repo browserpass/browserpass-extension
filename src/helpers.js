@@ -4,11 +4,13 @@
 const FuzzySort = require("fuzzysort");
 const TldJS = require("tldjs");
 const sha1 = require("sha1");
+const ignore = require("ignore");
 
 module.exports = {
     pathToDomain,
     prepareLogins,
-    filterSortLogins
+    filterSortLogins,
+    ignoreFiles
 };
 
 //----------------------------------- Function definitions ----------------------------------//
@@ -259,6 +261,33 @@ function highlightMatches(entry, fuzzyResults, substringFilters) {
         path: path,
         display: display
     });
+}
+
+/**
+ * Filter out ignored files according to .browserpass.json rules
+ *
+ * @since 3.2.0
+ *
+ * @param object files    Arrays of files, grouped by store
+ * @param object settings Settings object
+ * @return object Filtered arrays of files, grouped by store
+ */
+function ignoreFiles(files, settings) {
+    let filteredFiles = {};
+    for (let store in files) {
+        let storeSettings = settings.stores[store].settings;
+        if (storeSettings.hasOwnProperty("ignore")) {
+            if (typeof storeSettings.ignore === "string") {
+                storeSettings.ignore = [storeSettings.ignore];
+            }
+            filteredFiles[store] = ignore()
+                .add(storeSettings.ignore)
+                .filter(files[store]);
+        } else {
+            filteredFiles[store] = files[store];
+        }
+    }
+    return filteredFiles;
 }
 
 /**
