@@ -399,7 +399,7 @@
             el.dispatchEvent(new Event(eventName, { bubbles: true }));
         }
 
-        // Send some keyboard events indicating that value modification has started
+        // Send some keyboard events indicating that value modification has started (no associated keycode)
         for (let eventName of ["keydown", "keypress", "keyup", "input", "change"]) {
             el.dispatchEvent(new Event(eventName, { bubbles: true }));
         }
@@ -408,7 +408,7 @@
         el.setAttribute("value", value);
         el.value = value;
 
-        // Send the keyboard events again indicating that value modification has finished
+        // Send the keyboard events again indicating that value modification has finished (no associated keycode)
         for (let eventName of ["keydown", "keypress", "keyup", "input", "change"]) {
             el.dispatchEvent(new Event(eventName, { bubbles: true }));
         }
