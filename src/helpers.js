@@ -31,11 +31,15 @@ function pathToDomain(path, currentHost) {
             continue;
         }
         var t = TldJS.parse(parts[key]);
+
+        // Part is considered to be a domain component in one of the following cases:
+        // - it is a valid domain with well-known TLD (github.com, login.github.com)
+        // - it is a valid domain with unknown TLD but the current host is it's subdomain (pi.hole, login.pi.hole)
+        // - it is not a valid domain but the current host matches it EXACTLY (localhost)
         if (
             t.isValid &&
-            ((t.tldExists && t.domain !== null) ||
-                t.hostname === currentHost ||
-                currentHost.endsWith(`.${t.hostname}`))
+            ((t.domain !== null && (t.tldExists || currentHost.endsWith(`.${t.hostname}`))) ||
+                currentHost === t.hostname)
         ) {
             return t.hostname;
         }
