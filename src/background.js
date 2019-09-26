@@ -124,13 +124,21 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
 
         // Calculate number of matching password
         if (!(hostname in badgeCounters)) {
+            // Mark the entry as processing, to avoid running block below simultaneously
+            badgeCounters[hostname] = 0;
+
+            // Get settings
             const settings = await getFullSettings();
             var response = await hostAction(settings, "list");
             if (response.status != "ok") {
+                // Mark the entry to be refreshed on next run
+                delete badgeCounters[hostname];
+
                 throw new Error(JSON.stringify(response));
             }
             settings.host = hostname;
 
+            // Compule badge counter
             const files = helpers.ignoreFiles(response.data.files, settings);
             const logins = helpers.prepareLogins(files, settings);
             badgeCounters[hostname] = logins.reduce(
