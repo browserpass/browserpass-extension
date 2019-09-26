@@ -109,39 +109,39 @@ chrome.runtime.onInstalled.addListener(onExtensionInstalled);
 async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
     try {
         // Get tab info
-        let hostname = null;
+        let url = null;
         try {
             const tab = await chrome.tabs.get(tabId);
-            hostname = new URL(tab.url).hostname;
+            url = new URL(tab.url);
         } catch (e) {
             throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
         }
 
         // Optionally invalidate cache
         if (forceRefresh) {
-            delete badgeCounters[hostname];
+            delete badgeCounters[url.origin];
         }
 
         // Calculate number of matching password
-        if (!(hostname in badgeCounters)) {
+        if (!(url.origin in badgeCounters)) {
             // Mark the entry as processing, to avoid running block below simultaneously
-            badgeCounters[hostname] = 0;
+            badgeCounters[url.origin] = 0;
 
             // Get settings
             const settings = await getFullSettings();
             var response = await hostAction(settings, "list");
             if (response.status != "ok") {
                 // Mark the entry to be refreshed on next run
-                delete badgeCounters[hostname];
+                delete badgeCounters[url.origin];
 
                 throw new Error(JSON.stringify(response));
             }
-            settings.host = hostname;
+            settings.host = url.hostname;
 
             // Compule badge counter
             const files = helpers.ignoreFiles(response.data.files, settings);
             const logins = helpers.prepareLogins(files, settings);
-            badgeCounters[hostname] = logins.reduce(
+            badgeCounters[url.origin] = logins.reduce(
                 (acc, login) => acc + (login.recent.count || login.inCurrentDomain ? 1 : 0),
                 0
             );
@@ -149,7 +149,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
 
         // Set badge for the current tab
         chrome.browserAction.setBadgeText({
-            text: "" + (badgeCounters[hostname] || ""),
+            text: "" + (badgeCounters[url.origin] || ""),
             tabId: tabId
         });
     } catch (e) {
