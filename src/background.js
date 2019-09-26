@@ -118,7 +118,6 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
                 settings: null,
                 expires: Date.now() + 60 * 1000
             };
-            console.log("refreshing!!");
 
             badgeCache.settings = await getFullSettings();
 
