@@ -380,14 +380,13 @@
         }
 
         // Focus the input element first
-        var el = find(field, form);
+        let el = find(field, form);
         if (!el) {
             return false;
         }
-        var eventNames = ["click", "focus"];
-        eventNames.forEach(function(eventName) {
+        for (let eventName of ["click", "focus"]) {
             el.dispatchEvent(new Event(eventName, { bubbles: true }));
-        });
+        }
 
         // Focus may have triggered unvealing a true input, find it again
         el = find(field, form);
@@ -395,13 +394,27 @@
             return false;
         }
 
-        // Now set the value and unfocus
+        // Focus the potentially new element again
+        for (let eventName of ["click", "focus"]) {
+            el.dispatchEvent(new Event(eventName, { bubbles: true }));
+        }
+
+        // Send some keyboard events indicating that value modification has started (no associated keycode)
+        for (let eventName of ["keydown", "keypress", "keyup", "input", "change"]) {
+            el.dispatchEvent(new Event(eventName, { bubbles: true }));
+        }
+
+        // Set the field value
         el.setAttribute("value", value);
         el.value = value;
-        var eventNames = ["keypress", "keydown", "keyup", "input", "blur", "change"];
-        eventNames.forEach(function(eventName) {
+
+        // Send the keyboard events again indicating that value modification has finished (no associated keycode)
+        for (let eventName of ["keydown", "keypress", "keyup", "input", "change"]) {
             el.dispatchEvent(new Event(eventName, { bubbles: true }));
-        });
+        }
+
+        // Finally unfocus the element
+        el.dispatchEvent(new Event("blur", { bubbles: true }));
         return true;
     }
 
