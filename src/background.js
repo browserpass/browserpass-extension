@@ -28,6 +28,12 @@ var defaultSettings = {
 
 var authListeners = {};
 
+var badgeCache = {
+    files: null,
+    settings: null,
+    expires: Date.now()
+};
+
 // the last text copied to the clipboard is stored here in order to be cleared after 60 seconds
 let lastCopiedText = null;
 
@@ -45,10 +51,8 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
         }
     }
 
-    // refresh badge counter when url in a tab changes
-    if (info.url) {
-        updateMatchingPasswordsCount(tabId);
-    }
+    // redraw badge counter
+    updateMatchingPasswordsCount(tabId);
 });
 
 // handle incoming messages
@@ -102,39 +106,53 @@ chrome.runtime.onInstalled.addListener(onExtensionInstalled);
  *
  * @since 3.0.0
  *
- * @param int tabId Tab id
+ * @param int  tabId Tab id
+ * @param bool forceRefresh force invalidate cache
  * @return void
  */
-async function updateMatchingPasswordsCount(tabId) {
+async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
     try {
-        const settings = await getFullSettings();
-        var response = await hostAction(settings, "list");
-        if (response.status != "ok") {
-            throw new Error(JSON.stringify(response));
+        if (forceRefresh || Date.now() > badgeCache.expires) {
+            badgeCache = {
+                files: null,
+                settings: null,
+                expires: Date.now() + 60 * 1000
+            };
+
+            badgeCache.settings = await getFullSettings();
+
+            var response = await hostAction(badgeCache.settings, "list");
+            if (response.status != "ok") {
+                throw new Error(JSON.stringify(response));
+            }
+
+            badgeCache.files = response.data.files;
         }
 
-        // Get tab info
+        if (badgeCache.files === null) {
+            return; // badge cache refresh in progress
+        }
+
         try {
             const tab = await chrome.tabs.get(tabId);
-            settings.host = new URL(tab.url).hostname;
+            badgeCache.settings.host = new URL(tab.url).hostname;
         } catch (e) {
             throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
         }
 
-        const files = helpers.ignoreFiles(response.data.files, settings);
-        const logins = helpers.prepareLogins(files, settings);
+        // Compule badge counter
+        const files = helpers.ignoreFiles(badgeCache.files, badgeCache.settings);
+        const logins = helpers.prepareLogins(files, badgeCache.settings);
         const matchedPasswordsCount = logins.reduce(
             (acc, login) => acc + (login.recent.count || login.inCurrentDomain ? 1 : 0),
             0
         );
 
-        if (matchedPasswordsCount) {
-            // Set badge for the current tab
-            chrome.browserAction.setBadgeText({
-                text: "" + matchedPasswordsCount,
-                tabId: tabId
-            });
-        }
+        // Set badge for the current tab
+        chrome.browserAction.setBadgeText({
+            text: "" + (matchedPasswordsCount || ""),
+            tabId: tabId
+        });
     } catch (e) {
         console.log(e);
     }
@@ -215,7 +233,7 @@ async function saveRecent(settings, login, remove = false) {
 
     // a new entry was added to the popup matching list, need to refresh the count
     if (!login.inCurrentDomain && login.recent.count === 1) {
-        updateMatchingPasswordsCount(settings.tab.id);
+        updateMatchingPasswordsCount(settings.tab.id, true);
     }
 
     // save to usage log
