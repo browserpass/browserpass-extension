@@ -31,9 +31,11 @@ In order to use Browserpass you must also install a [companion native messaging 
 -   [Requested permissions](#requested-permissions)
 -   [FAQ](#faq)
     -   [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains)
+    -   [Why Browserpass on Firefox does not work on Mozilla domains?](#why-browserpass-on-firefox-does-not-work-on-mozilla-domains)
     -   [Why is OTP not supported?](#why-is-otp-not-supported)
-    -   [Hints for macOS users](#hints-for-macos-users)
-    -   [Hints for NixOS / Nix users](#hints-for-nixos--nix-users)
+-   [Building the extension](#building-the-extension)
+    -   [Build locally](#build-locally)
+    -   [Load an unpacked extension](#load-an-unpacked-extension)
 -   [Contributing](#contributing)
 
 ## Requirements
@@ -281,7 +283,7 @@ Browserpass extension requests the following permissions:
 | `activeTab`          | To get URL of the current tab, used for example to determine which passwords to show you by default in the popup                                                                                                                                                                                                                                     |
 | `alarms`             | To set a timer for clearing the clipboard 60 seconds after credentials are copied                                                                                                                                                                                                                                                                    |
 | `tabs`               | To get URL of a given tab, used for example to set count of the matching passwords for a given tab                                                                                                                                                                                                                                                   |
-| `clipboardRead`      | To ensure only copied credentials and not other content is cleared from the clipboard after 60 seconds                                                                                                                                                                                                                                         |
+| `clipboardRead`      | To ensure only copied credentials and not other content is cleared from the clipboard after 60 seconds                                                                                                                                                                                                                                               |
 | `clipboardWrite`     | For "Copy password" and "Copy username" functionality                                                                                                                                                                                                                                                                                                |
 | `nativeMessaging`    | To allow communication with the native app                                                                                                                                                                                                                                                                                                           |
 | `notifications`      | To show browser notifications on install or update                                                                                                                                                                                                                                                                                                   |
@@ -302,6 +304,28 @@ The second option is to create a symlink file `amazon.co.uk.gpg` pointing to `am
 
 If you simply want to re-use the same credentials on multiple subdomains of the same domain (e.g. `app.example.com` and `wiki.example.com`), you can also rename your password entry to a common denominator of the two subdomains, which in this example would be `example.com.gpg` (see [Password matching and sorting](#password-matching-and-sorting)).
 
+### Why Browserpass on Firefox does not work on Mozilla domains?
+
+Firefox has decided to [block all extensions from injecting any content scripts on their domains](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_scripts), sadly there's nothing we can do about it.
+
+The full list of blocked domains at the time of writing is:
+
+-   accounts-static.cdn.mozilla.net
+-   accounts.firefox.com
+-   addons.cdn.mozilla.net
+-   addons.mozilla.org
+-   api.accounts.firefox.com
+-   content.cdn.mozilla.net
+-   content.cdn.mozilla.net
+-   discovery.addons.mozilla.org
+-   input.mozilla.org
+-   install.mozilla.org
+-   oauth.accounts.firefox.com
+-   profile.accounts.firefox.com
+-   support.mozilla.org
+-   sync.services.mozilla.com
+-   testpilot.firefox.com
+
 ### Why is OTP not supported?
 
 Tools like `pass-otp` make it possible to use `pass` for generating OTP codes, however keeping both passwords and OTP URI in the same location diminishes the major benefit that OTP is supposed to provide: two factor authentication. The purpose of multi-factor authentication is to protect your account even when attackers gain access to your password store, but if your OTP seed is stored in the same place, all auth factors will be compromised at once. In particular, Browserpass has access to the entire contents of your password entries, so if it is ever compromised, all your accounts will be at risk, even though you signed up for 2FA.
@@ -310,7 +334,7 @@ Browserpass is opinionated, it does not promote `pass-otp` and intentionally doe
 
 There are valid scenarios for using `pass-otp` (e.g. it gives protection against intercepting your password during transmission), but users are strongly advised to very carefully consider whether `pass-otp` is really an appropriate solution - and if so, come up with their own ways of accessing OTP codes that conforms to their security requirements (for example by using dmenu/rofi scripts). For the majority of people `pass-otp` is not recommended; using any phone app like Authy will be a much better and more secure alternative, because this way attackers would have to not only break into your password store, but they would _also_ have to break into your phone.
 
-Going forward, OTP support will be provided via a [separate extension](https://github.com/browserpass/browserpass-extension/issues/76). That extension will integrate with browserpass to ensure a streamlined workflow - if the OTP extension is installed, it will be automatically triggered when browserpass fills an entry and an OTP token is present.
+If you still want the OTP support, it is provided via a separate extension [browserpass-otp](https://github.com/browserpass/browserpass-otp). That extension integrates with Browserpass to ensure a streamlined workflow, for example if the OTP extension is installed, it will be automatically triggered when Browserpass fills an entry and an OTP token is present.
 
 ## Building the extension
 
