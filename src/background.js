@@ -112,6 +112,10 @@ chrome.runtime.onInstalled.addListener(onExtensionInstalled);
  * @return void
  */
 async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
+    if (badgeCache.isRefreshing) {
+        return;
+    }
+
     try {
         if (forceRefresh || Date.now() > badgeCache.expires) {
             badgeCache.isRefreshing = true;
@@ -122,16 +126,13 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
                 throw new Error(JSON.stringify(response));
             }
 
+            const CACHE_TTL_MS = 60 * 1000;
             badgeCache = {
                 files: response.data.files,
                 settings: settings,
-                expires: Date.now() + 60 * 1000,
+                expires: Date.now() + CACHE_TTL_MS,
                 isRefreshing: false
             };
-        }
-
-        if (badgeCache.isRefreshing) {
-            return;
         }
 
         try {
