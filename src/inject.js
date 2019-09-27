@@ -6,6 +6,7 @@
     };
     const USERNAME_FIELDS = {
         selectors: [
+            "input[autocomplete=username i]",
             "input[name*=login i]",
             "input[name*=user i]",
             "input[name*=email i]",
@@ -22,7 +23,10 @@
         types: ["email", "text", "tel"]
     };
     const PASSWORD_FIELDS = {
-        selectors: ["input[type=password i]"]
+        selectors: [
+            "input[type=password i][autocomplete=current-password i]",
+            "input[type=password i]"
+        ]
     };
     const INPUT_FIELDS = {
         selectors: PASSWORD_FIELDS.selectors
