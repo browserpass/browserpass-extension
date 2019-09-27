@@ -31,7 +31,8 @@ var authListeners = {};
 var badgeCache = {
     files: null,
     settings: null,
-    expires: Date.now()
+    expires: Date.now(),
+    isRefreshing: false
 };
 
 // the last text copied to the clipboard is stored here in order to be cleared after 60 seconds
@@ -113,24 +114,24 @@ chrome.runtime.onInstalled.addListener(onExtensionInstalled);
 async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
     try {
         if (forceRefresh || Date.now() > badgeCache.expires) {
-            badgeCache = {
-                files: null,
-                settings: null,
-                expires: Date.now() + 60 * 1000
-            };
+            badgeCache.isRefreshing = true;
 
-            badgeCache.settings = await getFullSettings();
-
-            var response = await hostAction(badgeCache.settings, "list");
+            let settings = await getFullSettings();
+            let response = await hostAction(settings, "list");
             if (response.status != "ok") {
                 throw new Error(JSON.stringify(response));
             }
 
-            badgeCache.files = response.data.files;
+            badgeCache = {
+                files: response.data.files,
+                settings: settings,
+                expires: Date.now() + 60 * 1000,
+                isRefreshing: false
+            };
         }
 
-        if (badgeCache.files === null) {
-            return; // badge cache refresh in progress
+        if (badgeCache.isRefreshing) {
+            return;
         }
 
         try {
