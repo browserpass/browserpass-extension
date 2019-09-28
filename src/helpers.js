@@ -7,7 +7,7 @@ const sha1 = require("sha1");
 const ignore = require("ignore");
 
 module.exports = {
-    pathToDomain,
+    pathToHostInfo,
     prepareLogins,
     filterSortLogins,
     ignoreFiles
@@ -22,15 +22,24 @@ module.exports = {
  *
  * @param string path        Path to parse
  * @param string currentHost Current hostname for the active tab
- * @return string|null Extracted domain
+ * @return {host: string, isMatch: boolean}|null Extracted domain
  */
-function pathToDomain(path, currentHost) {
+function pathToHostInfo(path, currentHost) {
+    var portRegex = /(:[0-9]+)?$/;
+    var currentDomain = currentHost.replace(portRegex, "");
+    var currentPort = currentHost.match(portRegex)[0];
     var parts = path.split(/\//).reverse();
     for (var key in parts) {
         if (parts[key].indexOf("@") >= 0) {
             continue;
         }
         var t = TldJS.parse(parts[key]);
+        // gets port with ':' prefix if it exists, '' otherwise
+        var tPort = parts[key].match(portRegex)[0];
+        var tHost = t.hostname + tPort;
+
+        var currentComponent = tPort ? currentHost : currentDomain;
+        var tComponent = tPort ? tHost : t.hostname;
 
         // Part is considered to be a domain component in one of the following cases:
         // - it is a valid domain with well-known TLD (github.com, login.github.com)
@@ -41,7 +50,11 @@ function pathToDomain(path, currentHost) {
             ((t.domain !== null && (t.tldExists || currentHost.endsWith(`.${t.hostname}`))) ||
                 currentHost === t.hostname)
         ) {
-            return t.hostname;
+            return {
+                host: tHost,
+                isMatch:
+                    currentComponent.endsWith(`.${tComponent}`) || currentComponent === tComponent
+            };
         }
     }
 
@@ -68,11 +81,15 @@ function prepareLogins(files, settings) {
                 index: index++,
                 store: settings.stores[storeId],
                 login: files[storeId][key].replace(/\.gpg$/i, ""),
-                allowFill: true
+                allowFill: true,
+                domain: null,
+                inCurrentDomain: false
             };
-            login.domain = pathToDomain(storeId + "/" + login.login, settings.host);
-            login.inCurrentDomain =
-                settings.host == login.domain || settings.host.endsWith("." + login.domain);
+            var hostInfo = pathToHostInfo(storeId + "/" + login.login, settings.host);
+            if (hostInfo !== null) {
+                login.domain = hostInfo.host;
+                login.inCurrentDomain = hostInfo.isMatch;
+            }
             login.recent =
                 settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))];
             if (!login.recent) {

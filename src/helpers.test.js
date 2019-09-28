@@ -1,14 +1,52 @@
-var helpers = require('./helpers.js')
+var helpers = require("./helpers.js");
 
-test('pathToHost', function() {
-    var pathToHost = helpers.pathToHost;
-    expect(pathToHost('./dir/example.com/email@example.com', 'example.com')).toBe('example.com')
-    expect(pathToHost('./dir/example.com/sub.example.com', 'example.com')).toBe('sub.example.com')
-    expect(pathToHost('pi.hole', 'pi.hole')).toBe('pi.hole')
-    expect(pathToHost('pi.hole', 'local.pi.hole')).toBe('pi.hole')
-    expect(pathToHost('email@example.com', 'example.com')).toBe(null)
-    expect(pathToHost('example.com', 'example.com:8080')).toBe('example.com')
-    expect(pathToHost('example.com:8080', 'example.com:8080')).toBe('example.com:8080')
-    expect(pathToHost('example.com:1234', 'example.com:8080')).toBe(null)
-    expect(pathToHost('example.com:8080', 'example.com')).toBe(null)
-})
+test("info", function() {
+    var info = helpers.pathToHostInfo;
+    expect(info("./dir/example.com/email@example.com", "example.com")).toStrictEqual({
+        host: "example.com",
+        isMatch: true
+    });
+    expect(info("./dir/example.com/sub.example.com", "example.com")).toStrictEqual({
+        host: "sub.example.com",
+        isMatch: false
+    });
+    expect(info("pi.hole", "pi.hole")).toStrictEqual({ host: "pi.hole", isMatch: true });
+    expect(info("pi.hole", "local.pi.hole")).toStrictEqual({
+        host: "pi.hole",
+        isMatch: true
+    });
+    expect(info("pi.hole", "random.com")).toStrictEqual(null);
+    expect(info("email@example.com", "example.com")).toStrictEqual(null);
+    expect(info("example.com", "example.com:8080")).toStrictEqual({
+        host: "example.com",
+        isMatch: true
+    });
+    expect(info("example.com", "random.com")).toStrictEqual({
+        host: "example.com",
+        isMatch: false
+    });
+    expect(info("example.com", "sub.example.com:8080")).toStrictEqual({
+        host: "example.com",
+        isMatch: true
+    });
+    expect(info("example.com:8080", "example.com:8080")).toStrictEqual({
+        host: "example.com:8080",
+        isMatch: true
+    });
+    expect(info("example.com:1234", "example.com:8080")).toStrictEqual({
+        host: "example.com:1234",
+        isMatch: false
+    });
+    expect(info("example.com:8080", "example.com")).toStrictEqual({
+        host: "example.com:8080",
+        isMatch: false
+    });
+    expect(info("example.com:8080", "sub.example.com")).toStrictEqual({
+        host: "example.com:8080",
+        isMatch: false
+    });
+    expect(info("example.com:8080", "sub.example.com:8080")).toStrictEqual({
+        host: "example.com:8080",
+        isMatch: true
+    });
+});
