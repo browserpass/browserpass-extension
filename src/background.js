@@ -580,7 +580,7 @@ async function getFullSettings() {
     // Fill current tab info
     try {
         settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-        settings.host = new URL(settings.tab.url).hostname;
+        settings.host = new URL(settings.tab.url).host;
     } catch (e) {}
 
     return settings;
