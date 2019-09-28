@@ -8,12 +8,7 @@ test('pathToHost', function() {
     expect(pathToHost('pi.hole', 'local.pi.hole')).toBe('pi.hole')
     expect(pathToHost('email@example.com', 'example.com')).toBe(null)
     expect(pathToHost('example.com', 'example.com:8080')).toBe('example.com')
-    // future behavior
-    // expect(pathToHost('example.com:8080', 'example.com:8080')).toBe('example.com:8080')
-    // expect(pathToHost('example.com:1234', 'example.com:8080')).toBe(null)
-    // expect(pathToHost('example.com:8080', 'example.com')).toBe(null)
-    // current behavior
     expect(pathToHost('example.com:8080', 'example.com:8080')).toBe('example.com:8080')
-    expect(pathToHost('example.com:1234', 'example.com:8080')).toBe('example.com:1234')
-    expect(pathToHost('example.com:8080', 'example.com')).toBe('example.com:8080')
+    expect(pathToHost('example.com:1234', 'example.com:8080')).toBe(null)
+    expect(pathToHost('example.com:8080', 'example.com')).toBe(null)
 })
