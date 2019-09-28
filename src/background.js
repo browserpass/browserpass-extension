@@ -136,7 +136,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
 
         try {
             const tab = await chrome.tabs.get(tabId);
-            badgeCache.settings.host = new URL(tab.url).hostname;
+            badgeCache.settings.host = new URL(tab.url).host;
         } catch (e) {
             throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
         }
@@ -211,7 +211,7 @@ function readFromClipboard() {
  * @since 3.0.0
  *
  * @param object settings Settings object
- * @param string host     Hostname
+ * @param string host     Host
  * @param object login    Login object
  * @param bool   remove   Remove this item from recent history
  * @return void
