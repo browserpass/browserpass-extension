@@ -4,6 +4,7 @@
 /dist-webstore
 
 /src/node_modules
+/src/coverage
 /src/css
 /src/js
 /src/*.log
