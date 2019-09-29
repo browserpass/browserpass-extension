@@ -7,7 +7,7 @@ const ignore = require("ignore");
 const BrowserPassURL = require("@browserpass/url");
 
 module.exports = {
-    pathToDomain,
+    pathToDomainInfo,
     prepareLogins,
     filterSortLogins,
     ignoreFiles
@@ -18,19 +18,19 @@ module.exports = {
 /**
  * Get the deepest available domain component of a path
  *
- * @since 3.0.0
+ * @since 3.2.3
  *
  * @param string path        Path to parse
  * @param string currentHost Current hostname for the active tab
- * @return string|null Extracted domain
+ * @return string|null Extracted domain info
  */
-function pathToDomain(path, currentHost) {
+function pathToDomainInfo(path, currentHost) {
     var parts = path.split(/\//).reverse();
     for (var key in parts) {
         if (parts[key].indexOf("@") >= 0) {
             continue;
         }
-        var info = BrowserPassURL.parseHostname(parts[key]);
+        var info = BrowserPassURL.parseHost(parts[key]);
 
         // Part is considered to be a domain component in one of the following cases:
         // - it is a valid domain with well-known TLD (github.com, login.github.com)
@@ -41,7 +41,7 @@ function pathToDomain(path, currentHost) {
             currentHost.endsWith(`.${info.hostname}`) ||
             currentHost === info.hostname
         ) {
-            return info.hostname;
+            return info;
         }
     }
 
@@ -60,6 +60,7 @@ function pathToDomain(path, currentHost) {
 function prepareLogins(files, settings) {
     const logins = [];
     let index = 0;
+    let host = BrowserPassURL.parseHost(settings.host);
 
     for (let storeId in files) {
         for (let key in files[storeId]) {
@@ -70,9 +71,13 @@ function prepareLogins(files, settings) {
                 login: files[storeId][key].replace(/\.gpg$/i, ""),
                 allowFill: true
             };
-            login.domain = pathToDomain(storeId + "/" + login.login, settings.host);
+            let domainInfo = pathToDomainInfo(storeId + "/" + login.login, settings.host);
+            login.domain = domainInfo ? domainInfo.hostname : null;
             login.inCurrentDomain =
-                settings.host == login.domain || settings.host.endsWith("." + login.domain);
+                host.hostname == login.domain || host.hostname.endsWith("." + login.domain);
+            if (domainInfo && domainInfo.port && domainInfo.port !== host.port) {
+                login.inCurrentDomain = false;
+            }
             login.recent =
                 settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))];
             if (!login.recent) {

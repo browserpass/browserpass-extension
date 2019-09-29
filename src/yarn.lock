@@ -3,9 +3,9 @@
 
 
 "@browserpass/url@^1.1.0":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@browserpass/url/-/url-1.1.1.tgz#5307f503bcc6f42447ee7fa0ad51d7d80b6f00f9"
-  integrity sha512-yakyORkkcasqZ0Rz3oCNMCVCNxYcTByksUf8YJVLNS7mNZwUuYA1rsCoka914UQr7d3ThUPTGAsgKvOkHYRKmg==
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/@browserpass/url/-/url-1.1.2.tgz#f12b67861ab728011a40e52902e86c67bfeacae4"
+  integrity sha512-H0WA6nfd3CnlLXa0cExMb7iOoJYqfjLkitXkK4EMMiy/DD73PO8TONGQFmAIqSaoJ+X5SowOOZwGbm0nol/NKA==
   dependencies:
     punycode "^2.1.1"
 
