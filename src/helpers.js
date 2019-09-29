@@ -7,7 +7,6 @@ const ignore = require("ignore");
 const BrowserpassURL = require("@browserpass/url");
 
 module.exports = {
-    pathToDomainInfo,
     prepareLogins,
     filterSortLogins,
     ignoreFiles
@@ -24,7 +23,7 @@ module.exports = {
  * @param string currentHost Current hostname for the active tab
  * @return string|null Extracted domain info
  */
-function pathToDomainInfo(path, currentHost) {
+function pathToInfo(path, currentHost) {
     var parts = path.split(/\//).reverse();
     for (var key in parts) {
         if (parts[key].indexOf("@") >= 0) {
@@ -38,8 +37,8 @@ function pathToDomainInfo(path, currentHost) {
         // - it is or isn't a valid domain but the current host matches it EXACTLY (localhost, pi.hole)
         if (
             info.validDomain ||
-            currentHost.endsWith(`.${info.hostname}`) ||
-            currentHost === info.hostname
+            currentHost.hostname.endsWith(`.${info.hostname}`) ||
+            currentHost.hostname === info.hostname
         ) {
             return info;
         }
@@ -71,15 +70,35 @@ function prepareLogins(files, settings) {
                 login: files[storeId][key].replace(/\.gpg$/i, ""),
                 allowFill: true
             };
-            let domainInfo = pathToDomainInfo(storeId + "/" + login.login, settings.host);
-            login.domain = domainInfo ? domainInfo.hostname : "";
-            login.inCurrentHost =
-                host.hostname == login.domain || // host matches path component exactly
-                (login.domain.includes(".") && // path component is not a single level (e.g. com, net, local)...
-                    host.hostname.endsWith("." + login.domain)); // ...and the host ends with that path component
-            if (domainInfo && domainInfo.port && domainInfo.port !== host.port) {
+
+            // extract url info from path
+            let pathInfo = pathToInfo(storeId + "/" + login.login, host);
+            if (pathInfo) {
+                // set assumed host
+                login.host = pathInfo.port
+                    ? `${pathInfo.hostname}:${pathInfo.port}`
+                    : pathInfo.hostname;
+
+                // check whether extracted path info matches the current origin
+                login.inCurrentHost = host.hostname === pathInfo.hostname;
+
+                // check whether the current origin is subordinate to extracted path info, meaning:
+                //  - that the path info is not a single level (e.g. com, net, local)
+                //  - and that the host ends with that path info
+                if (pathInfo.hostname.includes(".") && host.hostname.endsWith(pathInfo.hostname)) {
+                    login.inCurrentHost = true;
+                }
+
+                // filter out entries with a non-matching port
+                if (pathInfo.port && pathInfo.port !== host.port) {
+                    login.inCurrentHost = false;
+                }
+            } else {
+                login.host = null;
                 login.inCurrentHost = false;
             }
+
+            // update recent counter
             login.recent =
                 settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))];
             if (!login.recent) {

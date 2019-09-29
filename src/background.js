@@ -772,7 +772,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "launch":
         case "launchInNewTab":
             try {
-                var url = message.login.fields.url || message.login.domain;
+                var url = message.login.fields.url || message.login.host;
                 if (!url) {
                     throw new Error("No URL is defined for this entry");
                 }
