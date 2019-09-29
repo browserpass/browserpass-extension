@@ -73,10 +73,10 @@ function prepareLogins(files, settings) {
             };
             let domainInfo = pathToDomainInfo(storeId + "/" + login.login, settings.host);
             login.domain = domainInfo ? domainInfo.hostname : null;
-            login.inCurrentDomain =
+            login.inCurrentHost =
                 host.hostname == login.domain || host.hostname.endsWith("." + login.domain);
             if (domainInfo && domainInfo.port && domainInfo.port !== host.port) {
-                login.inCurrentDomain = false;
+                login.inCurrentHost = false;
             }
             login.recent =
                 settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))];
@@ -129,7 +129,7 @@ function filterSortLogins(logins, searchQuery, currentDomainOnly) {
             return false;
         });
         var remainingInCurrentDomain = candidates.filter(
-            login => login.inCurrentDomain && !login.recent.count
+            login => login.inCurrentHost && !login.recent.count
         );
         candidates = recent.concat(remainingInCurrentDomain);
     }

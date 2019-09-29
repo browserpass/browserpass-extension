@@ -146,7 +146,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
         const files = helpers.ignoreFiles(badgeCache.files, badgeCache.settings);
         const logins = helpers.prepareLogins(files, badgeCache.settings);
         const matchedPasswordsCount = logins.reduce(
-            (acc, login) => acc + (login.recent.count || login.inCurrentDomain ? 1 : 0),
+            (acc, login) => acc + (login.recent.count || login.inCurrentHost ? 1 : 0),
             0
         );
 
@@ -234,7 +234,7 @@ async function saveRecent(settings, login, remove = false) {
     localStorage.setItem("recent", JSON.stringify(settings.recent));
 
     // a new entry was added to the popup matching list, need to refresh the count
-    if (!login.inCurrentDomain && login.recent.count === 1) {
+    if (!login.inCurrentHost && login.recent.count === 1) {
         updateMatchingPasswordsCount(settings.tab.id, true);
     }
 
