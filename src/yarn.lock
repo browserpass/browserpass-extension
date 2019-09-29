@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@browserpass/url@^1.1.0":
+"@browserpass/url@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@browserpass/url/-/url-1.1.2.tgz#f12b67861ab728011a40e52902e86c67bfeacae4"
   integrity sha512-H0WA6nfd3CnlLXa0cExMb7iOoJYqfjLkitXkK4EMMiy/DD73PO8TONGQFmAIqSaoJ+X5SowOOZwGbm0nol/NKA==

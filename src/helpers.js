@@ -4,7 +4,7 @@
 const FuzzySort = require("fuzzysort");
 const sha1 = require("sha1");
 const ignore = require("ignore");
-const BrowserPassURL = require("@browserpass/url");
+const BrowserpassURL = require("@browserpass/url");
 
 module.exports = {
     pathToDomainInfo,
@@ -30,7 +30,7 @@ function pathToDomainInfo(path, currentHost) {
         if (parts[key].indexOf("@") >= 0) {
             continue;
         }
-        var info = BrowserPassURL.parseHost(parts[key]);
+        var info = BrowserpassURL.parseHost(parts[key]);
 
         // Part is considered to be a domain component in one of the following cases:
         // - it is a valid domain with well-known TLD (github.com, login.github.com)
@@ -60,7 +60,7 @@ function pathToDomainInfo(path, currentHost) {
 function prepareLogins(files, settings) {
     const logins = [];
     let index = 0;
-    let host = BrowserPassURL.parseHost(settings.host);
+    let host = BrowserpassURL.parseHost(settings.host);
 
     for (let storeId in files) {
         for (let key in files[storeId]) {
