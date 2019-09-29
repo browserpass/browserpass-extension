@@ -20,8 +20,8 @@ module.exports = {
  * @since 3.2.3
  *
  * @param string path        Path to parse
- * @param string currentHost Current hostname for the active tab
- * @return string|null Extracted domain info
+ * @param object currentHost Current host info for the active tab
+ * @return object|null Extracted domain info
  */
 function pathToInfo(path, currentHost) {
     var parts = path.split(/\//).reverse();
@@ -33,12 +33,12 @@ function pathToInfo(path, currentHost) {
 
         // Part is considered to be a domain component in one of the following cases:
         // - it is a valid domain with well-known TLD (github.com, login.github.com)
-        // - it is or isn't a valid domain with unknown TLD but the current host is its subdomain (login.pi.hole)
-        // - it is or isn't a valid domain but the current host matches it EXACTLY (localhost, pi.hole)
+        // - it is or isn't a valid domain with any TLD but the current host matches it EXACTLY (localhost, pi.hole)
+        // - it is or isn't a valid domain with any TLD but the current host is its subdomain (login.pi.hole)
         if (
             info.validDomain ||
-            currentHost.hostname.endsWith(`.${info.hostname}`) ||
-            currentHost.hostname === info.hostname
+            currentHost.hostname === info.hostname ||
+            currentHost.hostname.endsWith(`.${info.hostname}`)
         ) {
             return info;
         }
@@ -83,9 +83,12 @@ function prepareLogins(files, settings) {
                 login.inCurrentHost = host.hostname === pathInfo.hostname;
 
                 // check whether the current origin is subordinate to extracted path info, meaning:
-                //  - that the path info is not a single level (e.g. com, net, local)
-                //  - and that the host ends with that path info
-                if (pathInfo.hostname.includes(".") && host.hostname.endsWith(pathInfo.hostname)) {
+                //  - that the path info is not a single level domain (e.g. com, net, local)
+                //  - and that the current origin is a subdomain of that path info
+                if (
+                    pathInfo.hostname.includes(".") &&
+                    host.hostname.endsWith(`.${pathInfo.hostname}`)
+                ) {
                     login.inCurrentHost = true;
                 }
 
