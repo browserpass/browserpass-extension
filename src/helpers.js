@@ -72,9 +72,11 @@ function prepareLogins(files, settings) {
                 allowFill: true
             };
             let domainInfo = pathToDomainInfo(storeId + "/" + login.login, settings.host);
-            login.domain = domainInfo ? domainInfo.hostname : null;
+            login.domain = domainInfo ? domainInfo.hostname : "";
             login.inCurrentHost =
-                host.hostname == login.domain || host.hostname.endsWith("." + login.domain);
+                host.hostname == login.domain || // host matches path component exactly
+                (login.domain.includes(".") && // path component is not a single level (e.g. com, net, local)...
+                    host.hostname.endsWith("." + login.domain)); // ...and the host ends with that path component
             if (domainInfo && domainInfo.port && domainInfo.port !== host.port) {
                 login.inCurrentHost = false;
             }
