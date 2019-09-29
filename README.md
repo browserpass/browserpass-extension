@@ -103,7 +103,7 @@ If not, repeat the installation instructions for the extension.
 
 Browserpass was designed with an assumption that certain conventions are being followed when organizing your password store.
 
-1. In order to benefit of phishing attack protection, a password entry file, or any of its parent folders, must contain a full domain name (including TLD like `.com`) in their name in order to automatically match a website. However, entries which do not contain such a domain in their name may still be manually selected.
+1. In order to benefit of phishing attack protection, a password entry file, or any of its parent folders, must contain a full domain name (including TLD like `.com`) and optionally port in their name in order to automatically match a website. However, entries which do not contain such a domain in their name may still be manually selected.
 
     File names are not allowed to contain `\` or `/` characters, because both of them are considered to be path separators.
 
@@ -161,15 +161,17 @@ Note: If the cursor is located in the search input field, every shortcut that wo
 
 ### Password matching and sorting
 
-When you first open the Browserpass popup, you will see a badge with the current domain name in the search input field:
+When you first open the Browserpass popup, you will see a badge with the current host in the search input field:
 
 ![image](https://user-images.githubusercontent.com/1177900/54785353-52046a00-4c26-11e9-8497-8dc50701ddc4.png)
 
-This means that phishing attack prevention is enabled, and Browserpass is only showing you entries from your password store that match this domain.
+This means that phishing attack prevention is enabled, and Browserpass is only showing you entries from your password store that match this host.
 
 In order for Browserpass to correctly determine matching entries, it is expected that your password store follows naming conventions (see [Organizing password store](#organizing-password-store)). In particular your file or folder name must contain a domain with a valid TLD, i.e. not `github.gpg`, but `github.com.gpg`. If an attacker directed you to `https://github.co/login` (notice `.co`), Browserpass will **not** present `github.com` entry in the popup. However if you intentionally want to re-use the same credentials on multiple domains (e.g. `amazon.com` and `amazon.co.uk`), see [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains).
 
 Browserpass will display entries for the current domain, as well as all parent entries, but not entries from different subdomains. Suppose you are currently on `https://v3.app.example.com`, Browserpass will present all the following entries in popup (if they exist): `v3.app.example.com`, `app.example.com`, `example.com`; but it will not present entries like `v2.app.example.com` or `wiki.example.com`.
+
+Browserpass can also distinguish credentials meant for different ports, so for example an entry `example.com.gpg` will show up in Browserpass popup when you browse `example.com` on any port, however an entry `example.com:8080.gpg` will only show up on `8080` port.
 
 Finally Browserpass will also present entries that you have recently used on this domain, even if they don't actually meet the usual matching requirements. Suppose you have a password for `amazon.com`, but you open `https://amazon.co.uk`, at first Browserpass will present no entries (because nothing matches `amazon.co.uk`), but if you hit <kbd>Backspace</kbd>, find `amazon.com` and use it to login, next time you visit `https://amazon.co.uk` and open Browserpass, `amazon.com` entry will already be present.
 
