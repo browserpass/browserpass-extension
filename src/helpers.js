@@ -2,9 +2,9 @@
 "use strict";
 
 const FuzzySort = require("fuzzysort");
-const TldJS = require("tldjs");
 const sha1 = require("sha1");
 const ignore = require("ignore");
+const BrowserPassURL = require("@browserpass/url");
 
 module.exports = {
     pathToDomain,
@@ -30,18 +30,18 @@ function pathToDomain(path, currentHost) {
         if (parts[key].indexOf("@") >= 0) {
             continue;
         }
-        var t = TldJS.parse(parts[key]);
+        var info = BrowserPassURL.parseHostname(parts[key]);
 
         // Part is considered to be a domain component in one of the following cases:
         // - it is a valid domain with well-known TLD (github.com, login.github.com)
-        // - it is a valid domain with unknown TLD but the current host is it's subdomain (login.pi.hole)
-        // - it is or isnt a valid domain but the current host matches it EXACTLY (localhost, pi.hole)
+        // - it is or isn't a valid domain with unknown TLD but the current host is its subdomain (login.pi.hole)
+        // - it is or isn't a valid domain but the current host matches it EXACTLY (localhost, pi.hole)
         if (
-            t.isValid &&
-            ((t.domain !== null && (t.tldExists || currentHost.endsWith(`.${t.hostname}`))) ||
-                currentHost === t.hostname)
+            info.validDomain ||
+            currentHost.endsWith(`.${info.hostname}`) ||
+            currentHost === info.hostname
         ) {
-            return t.hostname;
+            return info.hostname;
         }
     }
 
