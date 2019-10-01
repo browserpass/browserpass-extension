@@ -644,7 +644,7 @@ function handleModalAuth(requestDetails) {
     if (launchHost !== requestDetails.challenger.host) {
         var message =
             "You are about to send login credentials to a domain that is different than " +
-            "the one you lauched from the browserpass extension. Do you wish to proceed?\n\n" +
+            "the one you launched from the browserpass extension. Do you wish to proceed?\n\n" +
             "Realm: " +
             requestDetails.realm +
             "\n" +
