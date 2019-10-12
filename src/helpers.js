@@ -2,12 +2,11 @@
 "use strict";
 
 const FuzzySort = require("fuzzysort");
-const TldJS = require("tldjs");
 const sha1 = require("sha1");
 const ignore = require("ignore");
+const BrowserpassURL = require("@browserpass/url");
 
 module.exports = {
-    pathToDomain,
     prepareLogins,
     filterSortLogins,
     ignoreFiles
@@ -18,30 +17,30 @@ module.exports = {
 /**
  * Get the deepest available domain component of a path
  *
- * @since 3.0.0
+ * @since 3.2.3
  *
  * @param string path        Path to parse
- * @param string currentHost Current hostname for the active tab
- * @return string|null Extracted domain
+ * @param object currentHost Current host info for the active tab
+ * @return object|null Extracted domain info
  */
-function pathToDomain(path, currentHost) {
+function pathToInfo(path, currentHost) {
     var parts = path.split(/\//).reverse();
     for (var key in parts) {
         if (parts[key].indexOf("@") >= 0) {
             continue;
         }
-        var t = TldJS.parse(parts[key]);
+        var info = BrowserpassURL.parseHost(parts[key]);
 
         // Part is considered to be a domain component in one of the following cases:
         // - it is a valid domain with well-known TLD (github.com, login.github.com)
-        // - it is a valid domain with unknown TLD but the current host is it's subdomain (login.pi.hole)
-        // - it is or isnt a valid domain but the current host matches it EXACTLY (localhost, pi.hole)
+        // - it is or isn't a valid domain with any TLD but the current host matches it EXACTLY (localhost, pi.hole)
+        // - it is or isn't a valid domain with any TLD but the current host is its subdomain (login.pi.hole)
         if (
-            t.isValid &&
-            ((t.domain !== null && (t.tldExists || currentHost.endsWith(`.${t.hostname}`))) ||
-                currentHost === t.hostname)
+            info.validDomain ||
+            currentHost.hostname === info.hostname ||
+            currentHost.hostname.endsWith(`.${info.hostname}`)
         ) {
-            return t.hostname;
+            return info;
         }
     }
 
@@ -60,6 +59,7 @@ function pathToDomain(path, currentHost) {
 function prepareLogins(files, settings) {
     const logins = [];
     let index = 0;
+    let origin = new BrowserpassURL(settings.origin);
 
     for (let storeId in files) {
         for (let key in files[storeId]) {
@@ -70,11 +70,40 @@ function prepareLogins(files, settings) {
                 login: files[storeId][key].replace(/\.gpg$/i, ""),
                 allowFill: true
             };
-            login.domain = pathToDomain(storeId + "/" + login.login, settings.host);
-            login.inCurrentDomain =
-                settings.host == login.domain || settings.host.endsWith("." + login.domain);
+
+            // extract url info from path
+            let pathInfo = pathToInfo(storeId + "/" + login.login, origin);
+            if (pathInfo) {
+                // set assumed host
+                login.host = pathInfo.port
+                    ? `${pathInfo.hostname}:${pathInfo.port}`
+                    : pathInfo.hostname;
+
+                // check whether extracted path info matches the current origin
+                login.inCurrentHost = origin.hostname === pathInfo.hostname;
+
+                // check whether the current origin is subordinate to extracted path info, meaning:
+                //  - that the path info is not a single level domain (e.g. com, net, local)
+                //  - and that the current origin is a subdomain of that path info
+                if (
+                    pathInfo.hostname.includes(".") &&
+                    origin.hostname.endsWith(`.${pathInfo.hostname}`)
+                ) {
+                    login.inCurrentHost = true;
+                }
+
+                // filter out entries with a non-matching port
+                if (pathInfo.port && pathInfo.port !== origin.port) {
+                    login.inCurrentHost = false;
+                }
+            } else {
+                login.host = null;
+                login.inCurrentHost = false;
+            }
+
+            // update recent counter
             login.recent =
-                settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))];
+                settings.recent[sha1(settings.origin + sha1(login.store.id + sha1(login.login)))];
             if (!login.recent) {
                 login.recent = {
                     when: 0,
@@ -124,7 +153,7 @@ function filterSortLogins(logins, searchQuery, currentDomainOnly) {
             return false;
         });
         var remainingInCurrentDomain = candidates.filter(
-            login => login.inCurrentDomain && !login.recent.count
+            login => login.inCurrentHost && !login.recent.count
         );
         candidates = recent.concat(remainingInCurrentDomain);
     }

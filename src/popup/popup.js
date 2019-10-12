@@ -47,7 +47,7 @@ async function run() {
             throw new Error(settings.hostError.params.message);
         }
 
-        if (typeof settings.host === "undefined") {
+        if (typeof settings.origin === "undefined") {
             throw new Error("Unable to retrieve current tab information");
         }
 

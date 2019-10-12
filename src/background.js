@@ -4,6 +4,7 @@
 require("chrome-extension-async");
 const sha1 = require("sha1");
 const idb = require("idb");
+const BrowserpassURL = require("@browserpass/url");
 const helpers = require("./helpers");
 
 // native application id
@@ -137,7 +138,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
 
         try {
             const tab = await chrome.tabs.get(tabId);
-            badgeCache.settings.host = new URL(tab.url).hostname;
+            badgeCache.settings.origin = new URL(tab.url).origin;
         } catch (e) {
             throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
         }
@@ -146,7 +147,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
         const files = helpers.ignoreFiles(badgeCache.files, badgeCache.settings);
         const logins = helpers.prepareLogins(files, badgeCache.settings);
         const matchedPasswordsCount = logins.reduce(
-            (acc, login) => acc + (login.recent.count || login.inCurrentDomain ? 1 : 0),
+            (acc, login) => acc + (login.recent.count || login.inCurrentHost ? 1 : 0),
             0
         );
 
@@ -228,13 +229,14 @@ async function saveRecent(settings, login, remove = false) {
         login.recent.count++;
     }
     login.recent.when = Date.now();
-    settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))] = login.recent;
+    settings.recent[sha1(settings.origin + sha1(login.store.id + sha1(login.login)))] =
+        login.recent;
 
     // save to local storage
     localStorage.setItem("recent", JSON.stringify(settings.recent));
 
     // a new entry was added to the popup matching list, need to refresh the count
-    if (!login.inCurrentDomain && login.recent.count === 1) {
+    if (!login.inCurrentHost && login.recent.count === 1) {
         updateMatchingPasswordsCount(settings.tab.id, true);
     }
 
@@ -246,7 +248,7 @@ async function saveRecent(settings, login, remove = false) {
                 db.createObjectStore("log", { keyPath: "time" });
             }
         });
-        await db.add("log", { time: Date.now(), host: settings.host, login: login.login });
+        await db.add("log", { time: Date.now(), host: settings.origin, login: login.login });
     } catch {
         // ignore any errors and proceed without saving a log entry to Indexed DB
     }
@@ -266,7 +268,7 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
     request = Object.assign(deepCopy(request), {
         allowForeign: allowForeign,
         allowNoSecret: allowNoSecret,
-        foreignFills: settings.foreignFills[settings.host] || {}
+        foreignFills: settings.foreignFills[settings.origin] || {}
     });
 
     let perFrameResults = await chrome.tabs.executeScript(settings.tab.id, {
@@ -284,10 +286,10 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
     let foreignFillsChanged = false;
     for (let frame of perFrameResults) {
         if (typeof frame.foreignFill !== "undefined") {
-            if (typeof settings.foreignFills[settings.host] === "undefined") {
-                settings.foreignFills[settings.host] = {};
+            if (typeof settings.foreignFills[settings.origin] === "undefined") {
+                settings.foreignFills[settings.origin] = {};
             }
-            settings.foreignFills[settings.host][frame.foreignOrigin] = frame.foreignFill;
+            settings.foreignFills[settings.origin][frame.foreignOrigin] = frame.foreignFill;
             foreignFillsChanged = true;
         }
     }
@@ -310,7 +312,7 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
 async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign) {
     request = Object.assign(deepCopy(request), {
         allowForeign: allowForeign,
-        foreignFills: settings.foreignFills[settings.host] || {}
+        foreignFills: settings.foreignFills[settings.origin] || {}
     });
 
     let perFrameResults = await chrome.tabs.executeScript(settings.tab.id, {
@@ -417,7 +419,7 @@ async function fillFields(settings, login, fields) {
         // try again using all available frames if we couldn't fill an "important" field
         if (
             !filledFields.includes(importantFieldToFill) &&
-            settings.foreignFills[settings.host] !== false
+            settings.foreignFills[settings.origin] !== false
         ) {
             allowForeign = true;
             filledFields = filledFields.concat(
@@ -455,7 +457,7 @@ async function fillFields(settings, login, fields) {
             }
 
             // try again using all available frames
-            if (!filledFields.length && settings.foreignFills[settings.host] !== false) {
+            if (!filledFields.length && settings.foreignFills[settings.origin] !== false) {
                 allowForeign = true;
                 filledFields = filledFields.concat(
                     await dispatchFill(
@@ -581,7 +583,9 @@ async function getFullSettings() {
     // Fill current tab info
     try {
         settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-        settings.host = new URL(settings.tab.url).hostname;
+        let originInfo = new BrowserpassURL(settings.tab.url);
+        settings.host = originInfo.host; // TODO remove this after OTP extension is migrated
+        settings.origin = originInfo.origin;
     } catch (e) {}
 
     return settings;
@@ -772,7 +776,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "launch":
         case "launchInNewTab":
             try {
-                var url = message.login.fields.url || message.login.domain;
+                var url = message.login.fields.url || message.login.host;
                 if (!url) {
                     throw new Error("No URL is defined for this entry");
                 }
@@ -1084,6 +1088,7 @@ function triggerOTPExtension(settings, action, otp) {
                 otp: otp,
                 settings: {
                     host: settings.host,
+                    origin: settings.origin,
                     tab: settings.tab
                 }
             })
