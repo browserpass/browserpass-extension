@@ -29,6 +29,7 @@ function SearchInterface(popup) {
  */
 function view(ctl, params) {
     var self = this;
+    var host = new URL(this.popup.settings.origin).host;
     return m(
         "form.part.search",
         {
@@ -59,7 +60,7 @@ function view(ctl, params) {
         [
             this.popup.currentDomainOnly
                 ? m("div.hint.badge", [
-                      this.popup.settings.host,
+                      host,
                       m("div.remove-hint", {
                           onclick: function(e) {
                               var target = document.querySelector(

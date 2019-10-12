@@ -103,7 +103,7 @@ function prepareLogins(files, settings) {
 
             // update recent counter
             login.recent =
-                settings.recent[sha1(settings.host + sha1(login.store.id + sha1(login.login)))];
+                settings.recent[sha1(settings.origin + sha1(login.store.id + sha1(login.login)))];
             if (!login.recent) {
                 login.recent = {
                     when: 0,
