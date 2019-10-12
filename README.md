@@ -161,7 +161,7 @@ Note: If the cursor is located in the search input field, every shortcut that wo
 
 ### Password matching and sorting
 
-When you first open the Browserpass popup, you will see a badge with the current host in the search input field:
+When you first open the Browserpass popup, you will see a badge with the current domain in the search input field:
 
 ![image](https://user-images.githubusercontent.com/1177900/54785353-52046a00-4c26-11e9-8497-8dc50701ddc4.png)
 
