@@ -161,11 +161,11 @@ Note: If the cursor is located in the search input field, every shortcut that wo
 
 ### Password matching and sorting
 
-When you first open the Browserpass popup, you will see a badge with the current domain in the search input field:
+When you first open the Browserpass popup, you will see a badge with the current domain name in the search input field:
 
 ![image](https://user-images.githubusercontent.com/1177900/54785353-52046a00-4c26-11e9-8497-8dc50701ddc4.png)
 
-This means that phishing attack prevention is enabled, and Browserpass is only showing you entries from your password store that match this host.
+This means that phishing attack prevention is enabled, and Browserpass is only showing you entries from your password store that match this domain.
 
 In order for Browserpass to correctly determine matching entries, it is expected that your password store follows naming conventions (see [Organizing password store](#organizing-password-store)). In particular your file or folder name must contain a domain with a valid TLD, i.e. not `github.gpg`, but `github.com.gpg`. If an attacker directed you to `https://github.co/login` (notice `.co`), Browserpass will **not** present `github.com` entry in the popup. However if you intentionally want to re-use the same credentials on multiple domains (e.g. `amazon.com` and `amazon.co.uk`), see [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains).
 
