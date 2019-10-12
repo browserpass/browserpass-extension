@@ -59,7 +59,7 @@ function pathToInfo(path, currentHost) {
 function prepareLogins(files, settings) {
     const logins = [];
     let index = 0;
-    let host = BrowserpassURL.parseHost(settings.host);
+    let origin = new BrowserpassURL(settings.origin);
 
     for (let storeId in files) {
         for (let key in files[storeId]) {
@@ -72,7 +72,7 @@ function prepareLogins(files, settings) {
             };
 
             // extract url info from path
-            let pathInfo = pathToInfo(storeId + "/" + login.login, host);
+            let pathInfo = pathToInfo(storeId + "/" + login.login, origin);
             if (pathInfo) {
                 // set assumed host
                 login.host = pathInfo.port
@@ -80,20 +80,20 @@ function prepareLogins(files, settings) {
                     : pathInfo.hostname;
 
                 // check whether extracted path info matches the current origin
-                login.inCurrentHost = host.hostname === pathInfo.hostname;
+                login.inCurrentHost = origin.hostname === pathInfo.hostname;
 
                 // check whether the current origin is subordinate to extracted path info, meaning:
                 //  - that the path info is not a single level domain (e.g. com, net, local)
                 //  - and that the current origin is a subdomain of that path info
                 if (
                     pathInfo.hostname.includes(".") &&
-                    host.hostname.endsWith(`.${pathInfo.hostname}`)
+                    origin.hostname.endsWith(`.${pathInfo.hostname}`)
                 ) {
                     login.inCurrentHost = true;
                 }
 
                 // filter out entries with a non-matching port
-                if (pathInfo.port && pathInfo.port !== host.port) {
+                if (pathInfo.port && pathInfo.port !== origin.port) {
                     login.inCurrentHost = false;
                 }
             } else {

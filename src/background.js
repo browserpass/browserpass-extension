@@ -4,6 +4,7 @@
 require("chrome-extension-async");
 const sha1 = require("sha1");
 const idb = require("idb");
+const BrowserpassURL = require("@browserpass/url");
 const helpers = require("./helpers");
 
 // native application id
@@ -581,7 +582,9 @@ async function getFullSettings() {
     // Fill current tab info
     try {
         settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-        settings.host = new URL(settings.tab.url).host;
+        let originInfo = new BrowserpassURL(settings.tab.url);
+        settings.host = originInfo.host;
+        settings.origin = originInfo.origin;
     } catch (e) {}
 
     return settings;
@@ -1084,6 +1087,7 @@ function triggerOTPExtension(settings, action, otp) {
                 otp: otp,
                 settings: {
                     host: settings.host,
+                    origin: settings.origin,
                     tab: settings.tab
                 }
             })
