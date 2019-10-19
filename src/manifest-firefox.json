@@ -37,7 +37,7 @@
         "http://*/*",
         "https://*/*"
     ],
-    "content_security_policy": "default-src 'none'; font-src 'self'; img-src 'self'; script-src 'self'; style-src 'self'",
+    "content_security_policy": "default-src 'none'; font-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'",
     "applications": {
         "gecko": {
             "id": "browserpass@maximbaz.com",
