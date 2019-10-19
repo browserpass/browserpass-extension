@@ -1,0 +1,36 @@
+@import "colors.less";
+
+.colors-light {
+    .colors(
+        @bg-color: #f1f3f5,
+        @default-bg-color: #d8dee3,
+        @hover-bg-color: #ced4da,
+        @text-color: #343a40,
+        @error-text-color: #e03131,
+        @dim-text-color: #868e96,
+        @badge-color: #b8b8b8,
+        @input-bg-color: #eaeef1,
+        @active-input-bg-color: #e8ebee,
+        @input-text-color: #343a40,
+        @hint-bg-color: #1c7ed6,
+        @hint-color: #e7f5ff,
+        @match-text-bg-color: #cfecff,
+        @match-text-color: #1873ea
+    );
+
+    .part.login .name .line1 .recent,
+    .part.login .action.copy-password,
+    .part.login .action.copy-user {
+        filter: invert(85%);
+    }
+
+    .part.login .name .line1 .recent:focus,
+    .part.login .name .line1 .recent:hover,
+    .part.login .action.copy-password:focus,
+    .part.login .action.copy-password:hover,
+    .part.login .action.copy-user:focus,
+    .part.login .action.copy-user:hover {
+        // colour such that invert(85%) ~= @hover-bg-color
+        background-color: #0c0804;
+    }
+}

@@ -16,11 +16,11 @@ deps:
 prettier: $(PRETTIER) $(PRETTIER_FILES)
 	$(PRETTIER) --write $(PRETTIER_FILES)
 
-css/popup.dist.css: $(LESSC) popup/popup.less
+css/popup.dist.css: $(LESSC) popup/*.less
 	[ -d css ] || mkdir -p css
 	$(LESSC) popup/popup.less css/popup.dist.css
 
-css/options.dist.css: $(LESSC) options/options.less
+css/options.dist.css: $(LESSC) options/*.less
 	[ -d css ] || mkdir -p css
 	$(LESSC) options/options.less css/options.dist.css
 
