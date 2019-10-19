@@ -206,7 +206,11 @@ function keyHandler(e) {
             break;
         case "KeyC":
             if (e.ctrlKey) {
-                this.doAction(e.shiftKey ? "copyUsername" : "copyPassword");
+                if (e.shiftKey || document.activeElement.classList.contains("copy-user")) {
+                    this.doAction("copyUsername");
+                } else {
+                    this.doAction("copyPassword");
+                }
             }
             break;
         case "KeyG":
