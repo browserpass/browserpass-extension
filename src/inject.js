@@ -409,12 +409,20 @@
         }
 
         // Set the field value
+        let initialValue = el.value || el.getAttribute("value");
         el.setAttribute("value", value);
         el.value = value;
 
         // Send the keyboard events again indicating that value modification has finished (no associated keycode)
         for (let eventName of ["keydown", "keypress", "keyup", "input", "change"]) {
             el.dispatchEvent(new Event(eventName, { bubbles: true }));
+        }
+
+        // re-set value if unchanged after firing post-fill events
+        // (in case of sabotage by the site's own event handlers)
+        if ((el.value || el.getAttribute("value")) === initialValue) {
+            el.setAttribute("value", value);
+            el.value = value;
         }
 
         // Finally unfocus the element
