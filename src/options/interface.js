@@ -163,7 +163,7 @@ function createInput(key, title, placeholder) {
 /**
  * Generates vnode for a dropdown setting
  *
- * @since 3.0.13
+ * @since 3.3.1
  *
  * @param string key     Settings key
  * @param array options  Array of objects with value and text fields
