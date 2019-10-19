@@ -43,6 +43,10 @@ async function run() {
         }
         var settings = response.settings;
 
+        var root = document.getElementsByTagName("html")[0];
+        root.classList.remove("colors-dark");
+        root.classList.add(`colors-${settings.theme}`);
+
         if (settings.hasOwnProperty("hostError")) {
             throw new Error(settings.hostError.params.message);
         }
