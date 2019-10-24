@@ -218,5 +218,20 @@ function keyHandler(e) {
                 this.doAction(e.shiftKey ? "launchInNewTab" : "launch");
             }
             break;
+        case "Home": {
+            document.querySelector(".part.search input[type=text]").focus();
+            document.querySelector(".logins").scrollTo(0, 0);
+            window.scrollTo(0, 0);
+            break;
+        }
+        case "End": {
+            let logins = document.querySelectorAll(".login");
+            if (logins.length) {
+                let target = logins.item(logins.length - 1);
+                target.focus();
+                target.scrollIntoView();
+            }
+            break;
+        }
     }
 }

@@ -114,6 +114,17 @@ function view(ctl, params) {
                                 );
                             }
                             break;
+                        case "End": {
+                            if (e.target.selectionStart === e.target.value.length) {
+                                let logins = document.querySelectorAll(".login");
+                                if (logins.length) {
+                                    let target = logins.item(logins.length - 1);
+                                    target.focus();
+                                    target.scrollIntoView();
+                                }
+                            }
+                            break;
+                        }
                     }
                 }
             })
