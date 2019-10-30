@@ -412,9 +412,8 @@
         }
 
         // truncate the value if required by the field
-        let maxLength = el.getAttribute("maxlength");
-        if (maxLength) {
-            value = value.substr(0, maxLength);
+        if (el.maxLength > 0) {
+            value = value.substr(0, el.maxLength);
         }
 
         // Set the field value
