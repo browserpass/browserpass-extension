@@ -411,6 +411,12 @@
             el.dispatchEvent(new Event(eventName, { bubbles: true }));
         }
 
+        // truncate the value if required by the field
+        let maxLength = el.getAttribute("maxlength");
+        if (maxLength) {
+            value = value.substr(0, maxLength);
+        }
+
         // Set the field value
         let initialValue = el.value || el.getAttribute("value");
         el.setAttribute("value", value);
