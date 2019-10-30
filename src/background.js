@@ -327,14 +327,17 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
         for (let frame of perFrameResults) {
             if (frame.needPressEnter) {
                 chrome.debugger.attach({ tabId: settings.tab.id }, "1.2");
-                for (let type of ["keyDown", "keyUp"]) {
+                for (let type of ["keyDown", "char", "keyUp"]) {
                     chrome.debugger.sendCommand(
                         { tabId: settings.tab.id },
                         "Input.dispatchKeyEvent",
                         {
                             type: type,
+                            key: "Enter",
                             windowsVirtualKeyCode: 13,
-                            nativeVirtualKeyCode: 13
+                            nativeVirtualKeyCode: 13,
+                            unmodifiedText: "\r",
+                            text: "\r"
                         }
                     );
                 }
