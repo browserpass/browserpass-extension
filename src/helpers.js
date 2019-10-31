@@ -59,7 +59,7 @@ function pathToInfo(path, currentHost) {
 function prepareLogins(files, settings) {
     const logins = [];
     let index = 0;
-    let origin = new BrowserpassURL(settings.origin);
+    let origin = settings.origin && new BrowserpassURL(settings.origin);
 
     for (let storeId in files) {
         for (let key in files[storeId]) {
@@ -72,7 +72,7 @@ function prepareLogins(files, settings) {
             };
 
             // extract url info from path
-            let pathInfo = pathToInfo(storeId + "/" + login.login, origin);
+            let pathInfo = origin && pathToInfo(storeId + "/" + login.login, origin);
             if (pathInfo) {
                 // set assumed host
                 login.host = pathInfo.port

@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@browserpass/url@^1.1.3":
-  version "1.1.3"
-  resolved "https://registry.yarnpkg.com/@browserpass/url/-/url-1.1.3.tgz#8b94896198e7032b80c7d82e836d59e42b769669"
-  integrity sha512-XWhYNZo0BGcyFxkum8g1DeUkFw9QyqcaRTOEinyPSpIubh+aL2VQxbdItitVtS5qkkowqaA5Xt1H2pAqu8ic8w==
+"@browserpass/url@^1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@browserpass/url/-/url-1.1.5.tgz#5b94c13421a69fc58bcb9b9f214ad6dd8b544319"
+  integrity sha512-er+AQEOXXgEfJVp38SCVvV3noAvKs+07o8+cGXyexTV7AVpkUSm6jdtFBFn2ijxjomKEmdBJZ8pVajs2Nhm1GA==
   dependencies:
     punycode "^2.1.1"
 

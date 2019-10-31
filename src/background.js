@@ -139,7 +139,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
 
         try {
             const tab = await chrome.tabs.get(tabId);
-            badgeCache.settings.origin = new URL(tab.url).origin;
+            badgeCache.settings.origin = tab.url && new BrowserpassURL(tab.url).origin;
         } catch (e) {
             throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
         }
@@ -590,7 +590,10 @@ async function getFullSettings() {
         let originInfo = new BrowserpassURL(settings.tab.url);
         settings.host = originInfo.host; // TODO remove this after OTP extension is migrated
         settings.origin = originInfo.origin;
-    } catch (e) {}
+    } catch (e) {
+        settings.host = null;
+        settings.origin = null;
+    }
 
     return settings;
 }

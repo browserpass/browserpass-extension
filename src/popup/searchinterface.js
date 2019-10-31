@@ -29,7 +29,7 @@ function SearchInterface(popup) {
  */
 function view(ctl, params) {
     var self = this;
-    var host = new URL(this.popup.settings.origin).host;
+    var host = this.popup.settings.origin && new URL(this.popup.settings.origin).host;
     return m(
         "form.part.search",
         {
