@@ -20,6 +20,7 @@
             "input[class*=email i]",
             "input[class*=alias i]",
             "input[type=email i]",
+            "input[autocomplete=email i]",
             "input[type=text i]",
             "input[type=tel i]"
         ],
@@ -263,7 +264,8 @@
                 if (
                     rect.x + rect.width < 0 ||
                     rect.y + rect.height < 0 ||
-                    (rect.x > window.innerWidth || rect.y > window.innerHeight)
+                    rect.x > window.innerWidth ||
+                    rect.y > window.innerHeight
                 ) {
                     continue;
                 }
