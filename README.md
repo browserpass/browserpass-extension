@@ -309,7 +309,7 @@ First things first, make sure that `gpg` and some GUI `pinentry` are installed.
 
 `pinentry` is the application that asks you your password to unlock PGP key when you for example use `pass`.
 
-This application **must be** GUI app, not console-based like `pinentry-tty`.
+The selected `pinentry` **must have GUI**, console-based (like `pinentry-tty` or `pinentry-curses`) **are not supported** (unless you know what you are doing).
 
 Ensure that `gpg-agent` process is actually running, if not you need to investigate how to enable it.
 
