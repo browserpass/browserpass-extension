@@ -1,5 +1,6 @@
 module.exports = SearchInterface;
 
+const BrowserpassURL = require("@browserpass/url");
 const m = require("mithril");
 
 /**
@@ -29,7 +30,7 @@ function SearchInterface(popup) {
  */
 function view(ctl, params) {
     var self = this;
-    var host = new URL(this.popup.settings.origin).host;
+    var host = new BrowserpassURL(this.popup.settings.origin).host;
     return m(
         "form.part.search",
         {
