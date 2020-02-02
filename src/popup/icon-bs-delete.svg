@@ -1,12 +1,8 @@
 <?xml version="1.0"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32.025562 24.291258">
-    <path d="M 32,0 H 7.676162 L 0,11.793103 l 7.916042,12.464255 24.109522,0.0339 z"
-        style="fill:#b40000;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1.00038135px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-    <g transform="matrix(0.74244039,0,0,0.68917867,4.4293442,0.9133566)"
-        style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:4;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1">
-        <path d="M 12.471062,8.3881031 27.653541,23.611032"
-            style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:4;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-        <path d="M 27.620082,8.3808186 12.36939,23.630587"
-            style="fill:none;fill-opacity:1;fill-rule:evenodd;stroke:#ffffff;stroke-width:4;stroke-linecap:round;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    <path d="M 32,0 H 7.676162 L 0,11.793103 l 7.916042,12.464255 24.109522,0.0339 z" fill="#b40000" />
+    <g transform="matrix(0.74244039,0,0,0.68917867,4.4293442,0.9133566)" stroke="#ffffff" stroke-width="4" >
+        <path d="M 12.471062,8.3881031 27.653541,23.611032" />
+        <path d="M 27.620082,8.3808186 12.36939,23.630587" />
     </g>
 </svg>
