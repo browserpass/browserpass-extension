@@ -40,7 +40,7 @@
         "http://*/*",
         "https://*/*"
     ],
-    "content_security_policy": "default-src 'none'; font-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'",
+    "content_security_policy": "default-src 'none'; font-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'",
     "commands": {
         "_execute_browser_action": {
             "suggested_key": {
