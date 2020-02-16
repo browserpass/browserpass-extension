@@ -377,7 +377,7 @@ If you still want the OTP support, it is provided via a separate extension [brow
 
 Make sure you have the latest stable Yarn installed.
 
-The following `make` goals are available (check Makefile for more details):
+See below the list of available `make` goals (check Makefile for more details). Use `gmake` on FreeBSD in place of `make`.
 
 | Command              | Description                                                                             |
 | -------------------- | --------------------------------------------------------------------------------------- |
