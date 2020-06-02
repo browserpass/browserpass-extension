@@ -1100,7 +1100,10 @@ function triggerOTPExtension(settings, action, otp) {
             // the response, and if there's an error it just means the otp extension
             // is probably not installed. We can't detect that without requesting the
             // management permission, so this is an acceptable workaround.
-            .then(noop => null, noop => null);
+            .then(
+                noop => null,
+                noop => null
+            );
     }
 }
 
