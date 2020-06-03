@@ -81,7 +81,7 @@ function view(ctl, params) {
                         onkeydown: keyHandler.bind(result)
                     },
                     [
-                        m("div.name", [
+                        m("div.name", { title: "Fill username / password | <ENTER>" }, [
                             m("div.line1", [
                                 m(
                                     "div.store.badge",
@@ -108,12 +108,12 @@ function view(ctl, params) {
                         ]),
                         m("div.action.copy-password", {
                             tabindex: 0,
-                            title: "Copy password",
+                            title: "Copy password | <CTRL+C>",
                             action: "copyPassword"
                         }),
                         m("div.action.copy-user", {
                             tabindex: 0,
-                            title: "Copy username",
+                            title: "Copy username | <CTRL+SHIFT+C>",
                             action: "copyUsername"
                         })
                     ]
