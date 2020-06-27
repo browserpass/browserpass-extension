@@ -62,6 +62,7 @@ function view(ctl, params) {
                 ? m("div.hint.badge", [
                       host,
                       m("div.remove-hint", {
+                          title: "Clear domain filter | <Backspace>",
                           onclick: function(e) {
                               var target = document.querySelector(
                                   ".part.search > input[type=text]"
