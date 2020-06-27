@@ -139,7 +139,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
 
         try {
             const tab = await chrome.tabs.get(tabId);
-            badgeCache.settings.origin = new URL(tab.url).origin;
+            badgeCache.settings.origin = new BrowserpassURL(tab.url).origin;
         } catch (e) {
             throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
         }
@@ -395,7 +395,7 @@ async function fillFields(settings, login, fields) {
 
     // build fill request
     var fillRequest = {
-        origin: new URL(settings.tab.url).origin,
+        origin: new BrowserpassURL(settings.tab.url).origin,
         login: login,
         fields: fields
     };
@@ -482,7 +482,7 @@ async function fillFields(settings, login, fields) {
 
     // build focus or submit request
     let focusOrSubmitRequest = {
-        origin: new URL(settings.tab.url).origin,
+        origin: new BrowserpassURL(settings.tab.url).origin,
         autoSubmit: getSetting("autoSubmit", login, settings),
         filledFields: filledFields
     };
