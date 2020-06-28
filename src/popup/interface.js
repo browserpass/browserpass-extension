@@ -106,16 +106,16 @@ function view(ctl, params) {
                             ]),
                             m("div.line2", [m.trust(result.display)]),
                         ]),
-                        m("div.action.copy-password", {
-                            tabindex: 0,
-                            title: "Copy password | <Ctrl+C>",
-                            action: "copyPassword",
-                        }),
                         m("div.action.copy-user", {
                             tabindex: 0,
                             title: "Copy username | <Ctrl+Shift+C>",
-                            action: "copyUsername",
+                            action: "copyUsername"
                         }),
+                        m("div.action.copy-password", {
+                            tabindex: 0,
+                            title: "Copy password | <Ctrl+C>",
+                            action: "copyPassword"
+                        })
                     ]
                 );
             })
