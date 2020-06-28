@@ -22,12 +22,8 @@ function handleError(error, type = "error") {
     if (type == "error") {
         console.log(error);
     }
-    var errorNode = document.createElement("div");
-    errorNode.setAttribute("class", "part " + type);
-    errorNode.textContent = error.toString();
-    m.mount(document.body, null);
-    document.body.innerHTML = "";
-    document.body.appendChild(errorNode);
+    var node = { view: () => m(`div.part.${type}`, error.toString()) };
+    m.mount(document.body, node);
 }
 
 /**
