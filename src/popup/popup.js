@@ -4,6 +4,7 @@
 require("chrome-extension-async");
 const Interface = require("./interface");
 const helpers = require("../helpers");
+const m = require("mithril");
 
 run();
 
@@ -24,6 +25,7 @@ function handleError(error, type = "error") {
     var errorNode = document.createElement("div");
     errorNode.setAttribute("class", "part " + type);
     errorNode.textContent = error.toString();
+    m.mount(document.body, null);
     document.body.innerHTML = "";
     document.body.appendChild(errorNode);
 }
