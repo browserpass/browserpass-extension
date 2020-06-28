@@ -115,6 +115,11 @@ function view(ctl, params) {
                             tabindex: 0,
                             title: "Copy password | <Ctrl+C>",
                             action: "copyPassword"
+                        }),
+                        m("div.action.details", {
+                            tabindex: 0,
+                            title: "Open Details | <Ctrl+O>",
+                            action: "details"
                         })
                     ]
                 );
@@ -188,6 +193,8 @@ function keyHandler(e) {
                 e.target.querySelector(".action").focus();
             } else if (e.target.nextElementSibling) {
                 e.target.nextElementSibling.focus();
+            } else {
+                this.doAction("details");
             }
             break;
         case "ArrowLeft":
@@ -216,6 +223,11 @@ function keyHandler(e) {
         case "KeyG":
             if (e.ctrlKey) {
                 this.doAction(e.shiftKey ? "launchInNewTab" : "launch");
+            }
+            break;
+        case "KeyO":
+            if (e.ctrlKey) {
+                this.doAction("details");
             }
             break;
         case "Home": {
