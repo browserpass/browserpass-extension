@@ -20,6 +20,9 @@ function DetailsInterface(settings, login) {
     //fields
     this.settings = settings;
     this.login = login;
+
+    // get basename of entry
+    this.login.basename = this.login.login.substr(this.login.login.lastIndexOf("/") + 1);
 }
 
 /**
@@ -68,7 +71,7 @@ function view(ctl, params) {
                     },
                     login.store.name
                 ),
-                m("div.entry", [m("div.path", login.path), m("div.display", login.display)])
+                m("div.entry", [m("div.path", login.path), m("div.display", login.basename)])
             ]),
             m("div.part.snack.line-secret", [
                 m("div.label", "Secret"),
