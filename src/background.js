@@ -903,8 +903,8 @@ async function parseFields(settings, login) {
         secret: ["secret", "password", "pass"],
         login: ["login", "username", "user"],
         openid: ["openid"],
-        otp: ["otp", "totp", "hotp"],
-        url: ["url", "uri", "website", "site", "link", "launch"],
+        otp: ["otp", "totp"],
+        url: ["url", "uri", "website", "site", "link", "launch"]
     };
     login.settings = {
         autoSubmit: { name: "autosubmit", type: "bool" },
