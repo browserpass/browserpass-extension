@@ -1,6 +1,7 @@
 module.exports = DetailsInterface;
 
 const m = require("mithril");
+const Moment = require("moment");
 const helpers = require("../helpers");
 
 /**
@@ -62,18 +63,50 @@ function view(ctl, params) {
 
     var nodes = [];
     nodes.push(
+        m(
+            "div.part.login",
+            {
+                key: login.index,
+                tabindex: 0,
+                onclick: function(e) {
+                    var action = e.target.getAttribute("action");
+                    if (action) {
+                        login.doAction(action);
+                    } else {
+                        login.doAction("fill");
+                    }
+                }
+            },
+
+            [
+                m("div.name", [
+                    m("div.line1", [
+                        m(
+                            "div.store.badge",
+                            {
+                                style: `background-color: ${storeBgColor};
+                                                color: ${storeColor}`
+                            },
+                            login.store.name
+                        ),
+                        m("div.path", [m.trust(login.dirname)]),
+                        login.recent.when > 0
+                            ? m("div.recent", {
+                                  title:
+                                      "Used here " +
+                                      login.recent.count +
+                                      " time" +
+                                      (login.recent.count > 1 ? "s" : "") +
+                                      ", last " +
+                                      Moment(new Date(login.recent.when)).fromNow()
+                              })
+                            : null
+                    ]),
+                    m("div.line2", [m.trust(login.basename)])
+                ])
+            ]
+        ),
         m("div.part.details", [
-            m("div.part.header", [
-                m(
-                    "div.store.badge",
-                    {
-                        style: `background-color: ${storeBgColor};
-                                                    color: ${storeColor}`
-                    },
-                    login.store.name
-                ),
-                m("div.entry", [m("div.path", login.dirname), m("div.display", login.basename)])
-            ]),
             m("div.part.snack.line-secret", [
                 m("div.label", "Secret"),
                 m("div.chars", passChars),
