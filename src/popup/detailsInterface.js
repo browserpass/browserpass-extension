@@ -79,7 +79,7 @@ function view(ctl, params) {
             },
 
             [
-                m("div.name", [
+                m("div.name", { title: "Fill username / password" }, [
                     m("div.line1", [
                         m(
                             "div.store.badge",
