@@ -81,7 +81,7 @@ function view(ctl, params) {
                 m("div.action.copy", { onclick: () => login.doAction("copyUsername") })
             ]),
             (() => {
-                if (login.fields.otp) {
+                if (this.settings.enableOTP && login.fields.otp) {
                     // update progress
                     let progress = this.progress;
                     let updateProgress = vnode => {

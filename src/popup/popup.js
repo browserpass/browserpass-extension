@@ -99,6 +99,9 @@ async function withLogin(action) {
             case "copyUsername":
                 handleError("Copying username to clipboard...", "notice");
                 break;
+            case "copyOTP":
+                handleError("Copying OTP token to clipboard...", "notice");
+                break;
             case "details":
                 handleError("Loading entry details...", "notice");
                 break;

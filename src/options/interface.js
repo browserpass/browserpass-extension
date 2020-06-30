@@ -58,6 +58,18 @@ function view(ctl, params) {
     nodes.push(createInput.call(this, "username", "Default username", "john.smith"));
     nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary", "/path/to/gpg"));
 
+    nodes.push(m("h3", "OTP Support"));
+    nodes.push(
+        createCheckbox.call(this, "enableOTP", "Enable support for OTP tokens (not recommended).")
+    );
+    nodes.push(
+        createCheckbox.call(
+            this,
+            "copyOTP",
+            "Automatically copy tokens to the clipboard after fill."
+        )
+    );
+
     nodes.push(m("h3", "Theme"));
     nodes.push(
         createDropdown.call(this, "theme", [

@@ -10,14 +10,6 @@ const helpers = require("./helpers");
 // native application id
 var appID = "com.github.browserpass.native";
 
-// OTP extension id
-var otpID = [
-    "afjjoildnccgmjbblnklbohcbjehjaph", // webstore releases
-    "jbnpmhhgnchcoljeobafpinmchnpdpin", // github releases
-    "fcmmcnalhjjejhpnlfnddimcdlmpkbdf", // local unpacked
-    "browserpass-otp@maximbaz.com", // firefox
-];
-
 // default settings
 var defaultSettings = {
     autoSubmit: false,
@@ -26,6 +18,8 @@ var defaultSettings = {
     foreignFills: {},
     username: null,
     theme: "dark",
+    enableOTP: false,
+    copyOTP: false
 };
 
 var authListeners = {};
@@ -562,7 +556,6 @@ async function getFullSettings() {
     try {
         settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
         let originInfo = new BrowserpassURL(settings.tab.url);
-        settings.host = originInfo.host; // TODO remove this after OTP extension is migrated
         settings.origin = originInfo.origin;
     } catch (e) {}
 
@@ -751,18 +744,21 @@ async function handleMessage(settings, message, sendResponse) {
             }
             break;
         case "copyOTP":
-            try {
-                if (!message.login.fields.otp) {
-                    throw new Exception("No OTP seed available");
+            if (settings.enableOTP) {
+                try {
+                    if (!message.login.fields.otp) {
+                        throw new Exception("No OTP seed available");
+                    }
+                    copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
+                    sendResponse({ status: "ok" });
+                } catch (e) {
+                    sendResponse({
+                        status: "error",
+                        message: "Unable to copy OTP token"
+                    });
                 }
-                copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
-                sendResponse({ status: "ok" });
-            } catch (e) {
-                alert(e.toString());
-                sendResponse({
-                    status: "error",
-                    message: "Unable to copy OTP token"
-                });
+            } else {
+                sendResponse({ status: "error", message: "OTP support is disabled" });
             }
             break;
 
@@ -850,9 +846,14 @@ async function handleMessage(settings, message, sendResponse) {
             break;
     }
 
-    // trigger browserpass-otp
-    if (typeof message.login !== "undefined" && message.login.fields.hasOwnProperty("otp")) {
-        triggerOTPExtension(settings, message.action, message.login.fields.otp);
+    // copy OTP token after fill
+    if (
+        settings.enableOTP &&
+        settings.copyOTP &&
+        typeof message.login !== "undefined" &&
+        message.login.fields.hasOwnProperty("otp")
+    ) {
+        copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
     }
 }
 
@@ -1093,41 +1094,6 @@ async function saveSettings(settings) {
         if (settingsToSave.hasOwnProperty(key)) {
             localStorage.setItem(key, JSON.stringify(settingsToSave[key]));
         }
-    }
-}
-
-/**
- * Trigger OTP extension (browserpass-otp)
- *
- * @since 3.0.13
- *
- * @param object settings Settings object
- * @param string action   Browserpass action
- * @param object otp      OTP field data
- * @return void
- */
-function triggerOTPExtension(settings, action, otp) {
-    // trigger otp extension
-    for (let targetID of otpID) {
-        chrome.runtime
-            .sendMessage(targetID, {
-                version: chrome.runtime.getManifest().version,
-                action: action,
-                otp: otp,
-                settings: {
-                    host: settings.host,
-                    origin: settings.origin,
-                    tab: settings.tab,
-                },
-            })
-            // Both response & error are noop functions, because we don't care about
-            // the response, and if there's an error it just means the otp extension
-            // is probably not installed. We can't detect that without requesting the
-            // management permission, so this is an acceptable workaround.
-            .then(
-                (noop) => null,
-                (noop) => null
-            );
     }
 }
 
