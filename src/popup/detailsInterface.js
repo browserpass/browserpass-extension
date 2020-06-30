@@ -64,7 +64,7 @@ function view(ctl, params) {
     var nodes = [];
     nodes.push(
         m(
-            "div.part.login",
+            "div.part.login.details-header",
             {
                 key: login.index,
                 tabindex: 0,
