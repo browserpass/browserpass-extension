@@ -3,6 +3,7 @@
 
 require("chrome-extension-async");
 const Interface = require("./interface");
+const DetailsInterface = require("./detailsInterface");
 const helpers = require("../helpers");
 const m = require("mithril");
 
@@ -98,6 +99,9 @@ async function withLogin(action) {
             case "copyUsername":
                 handleError("Copying username to clipboard...", "notice");
                 break;
+            case "details":
+                handleError("Loading entry details...", "notice");
+                break;
             default:
                 handleError("Please wait...", "notice");
                 break;
@@ -115,7 +119,18 @@ async function withLogin(action) {
         if (response.status != "ok") {
             throw new Error(response.message);
         } else {
-            window.close();
+            if (response.login && typeof response.login === "object") {
+                response.login.doAction = withLogin.bind({
+                    settings: this.settings,
+                    login: response.login
+                });
+            }
+            if (action === "details") {
+                var details = new DetailsInterface(this.settings, response.login);
+                details.attach(document.body);
+            } else {
+                window.close();
+            }
         }
     } catch (e) {
         handleError(e);

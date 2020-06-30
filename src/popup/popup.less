@@ -66,6 +66,11 @@ body {
     padding: 1px 4px;
 }
 
+.details .header {
+    display: flex;
+    margin-bottom: 4px;
+}
+
 .part {
     box-sizing: border-box;
     display: flex;
@@ -89,6 +94,81 @@ body {
 .part.notice {
     white-space: normal;
     padding: 7px;
+}
+
+.part.details {
+    flex-direction: column;
+    padding: 4px;
+    & > .part {
+        display: flex;
+        &.header {
+            display: flex;
+            & > .store.badge {
+                align-items: center;
+                flex-grow: 0;
+                font-size: 1.8em;
+                justify-content: center;
+                padding: 0 12px;
+            }
+        }
+        &.snack {
+            border: 1px solid;
+            border-radius: 2px;
+            margin-bottom: 4px;
+            height: 26px;
+            padding: 4px;
+            & > .label {
+                display: flex;
+                flex-grow: 0;
+                font-weight: bold;
+                justify-content: flex-end;
+                margin: -4px 4px -4px -4px;
+                padding: 4px 8px 4px 4px;
+                width: 3.25em;
+            }
+            & > :not(.label) {
+                display: flex;
+                align-items: center;
+                font-family: monospace;
+            }
+            & > .copy {
+                flex-grow: 0;
+                padding: 0 24px 0 0;
+                background-image: url("/popup/icon-copy.svg");
+                background-position: top 4px right 4px;
+                background-repeat: no-repeat;
+                background-size: 16px;
+                margin: -4px;
+            }
+
+            & > .progress-container {
+                z-index: -1;
+                position: absolute;
+                margin: -4px 0 -4px calc(3.25em + 8px);
+                height: 24px;
+                width: calc(100% - 6.5em + 24px);
+                & > .progress {
+                    background-color: #1c7ed6;
+                    height: 100%;
+                    margin: 0 -1px;
+                }
+            }
+        }
+        &.raw textarea {
+            border: 1px solid;
+            border-radius: 2px;
+            flex-grow: 1;
+            font-family: monospace;
+            min-height: 140px;
+            min-width: 350px;
+            padding: 4px;
+            white-space: pre;
+        }
+        & > * {
+            flex-grow: 1;
+            align-items: center;
+        }
+    }
 }
 
 .part.search {

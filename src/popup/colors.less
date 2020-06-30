@@ -12,7 +12,9 @@
     @hint-bg-color,
     @hint-color,
     @match-text-bg-color,
-    @match-text-color) {
+    @match-text-color,
+    @invert-text-color,
+    @snack-color) {
     html,
     body {
         background-color: @bg-color;
@@ -25,6 +27,25 @@
 
     .part.error {
         color: @error-text-color;
+    }
+
+    .part.details {
+        .part {
+            &.snack {
+                border-color: @snack-color;
+                .label {
+                    background-color: @snack-color;
+                    color: @invert-text-color;
+                }
+                .char.num,
+                .char.punct {
+                    color: @match-text-color;
+                }
+            }
+            &.raw textarea {
+                border-color: @snack-color;
+            }
+        }
     }
 
     .part.search {
