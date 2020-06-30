@@ -909,12 +909,11 @@ async function parseFields(settings, login) {
     login.settings = {
         autoSubmit: { name: "autosubmit", type: "bool" },
     };
-    var lines = login.raw.split(/[\r\n]+/).filter((line) => line.trim().length > 0);
-    lines.forEach(function (line) {
-        // check for uri-encoded otp
-        if (line.match(/^otpauth:\/\/.+/)) {
-            login.fields.otp = { key: null, data: line };
-            return;
+    var lines = login.raw.split(/[\r\n]+/).filter(line => line.trim().length > 0);
+    lines.forEach(function(line) {
+        // check for uri-encoded otp without line prefix
+        if (line.match(/^otpauth:\/\/.+/i)) {
+            line = `otp: ${line}`;
         }
 
         // split key / value & ignore non-k/v lines
@@ -936,42 +935,7 @@ async function parseFields(settings, login) {
                 Array.isArray(login.fields[key]) &&
                 login.fields[key].includes(parts[0].toLowerCase())
             ) {
-                if (key === "otp") {
-                    // preprocess otp
-                    login.fields[key] = { key: parts[0].toLowerCase(), data: parts[1] };
-                    let otp = login.fields[key];
-                    if (otp.key === null) {
-                        // attempt to parse otp data as URI
-                        try {
-                            let url = new URL(otp.data.toLowerCase());
-                            let otpParts = url.pathname.split("/").filter(s => s.trim());
-                            otp["params"] = {
-                                type: otpParts[0],
-                                secret: url.searchParams.get("secret").toUpperCase(),
-                                algorithm: url.searchParams.get("algorithm") || "sha1",
-                                digits: parseInt(url.searchParams.get("digits") || "6"),
-                                period: parseInt(url.searchParams.get("period") || "30")
-                            };
-                        } catch (e) {
-                            throw new Exception(`Unable to parse URI: ${otp.data}`, e);
-                        }
-                    } else {
-                        // use default params for secret-only otp data
-                        otp["params"] = {
-                            type: otp.key.toLowerCase(),
-                            secret: otp.data.toUpperCase(),
-                            algorithm: "sha1",
-                            digits: 6,
-                            period: 30
-                        };
-                    }
-                    // fix default otp type
-                    if (otp.params.type === "otp") {
-                        otp.params.type = "totp";
-                    }
-                } else {
-                    login.fields[key] = parts[1];
-                }
+                login.fields[key] = parts[1];
                 break;
             }
         }
@@ -1009,6 +973,45 @@ async function parseFields(settings, login) {
     for (var key in login.settings) {
         if (typeof login.settings[key].type !== "undefined") {
             delete login.settings[key];
+        }
+    }
+
+    // preprocess otp
+    if (settings.enableOTP && login.fields.hasOwnProperty("otp")) {
+        if (login.fields.otp.match(/^otpauth:\/\/.+/i)) {
+            // attempt to parse otp data as URI
+            try {
+                let url = new URL(login.fields.otp.toLowerCase());
+                let otpParts = url.pathname.split("/").filter(s => s.trim());
+                login.fields.otp = {
+                    raw: login.fields.otp,
+                    params: {
+                        type: otpParts[0],
+                        secret: url.searchParams.get("secret").toUpperCase(),
+                        algorithm: url.searchParams.get("algorithm") || "sha1",
+                        digits: parseInt(url.searchParams.get("digits") || "6"),
+                        period: parseInt(url.searchParams.get("period") || "30")
+                    }
+                };
+            } catch (e) {
+                throw new Exception(`Unable to parse URI: ${otp.data}`, e);
+            }
+        } else {
+            // use default params for secret-only otp data
+            login.fields.otp = {
+                raw: login.fields.otp,
+                params: {
+                    type: "totp",
+                    secret: login.fields.otp.toUpperCase(),
+                    algorithm: "sha1",
+                    digits: 6,
+                    period: 30
+                }
+            };
+        }
+        // fix default otp type
+        if (login.fields.otp.params.type === "otp") {
+            login.fields.otp.params.type = "totp";
         }
     }
 }
