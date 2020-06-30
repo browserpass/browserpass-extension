@@ -36,6 +36,9 @@
             &.snack {
                 background-color: @edit-bg-color;
                 border-color: @snack-color;
+                &.line-otp {
+                    background: transparent;
+                }
                 .label {
                     background-color: @snack-color;
                     color: @invert-text-color;
@@ -44,8 +47,11 @@
                 .char.punct {
                     color: @match-text-color;
                 }
-                .progress-container .progress {
-                    background-color: @progress-color;
+                .progress-container {
+                    background-color: @edit-bg-color;
+                    .progress {
+                        background-color: @progress-color;
+                    }
                 }
             }
             &.raw textarea {
