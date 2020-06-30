@@ -86,11 +86,11 @@
         background-color: @default-bg-color;
     }
 
-    .part.login > .name:hover,
-    .part.login > .name:focus,
-    .part.login > .action:hover,
-    .part.login > .action:focus,
-    .part.login:focus > .name {
+    .part.login:not(.details-header) > .name:hover,
+    .part.login:not(.details-header) > .name:focus,
+    .part.login:not(.details-header) > .action:hover,
+    .part.login:not(.details-header) > .action:focus,
+    .part.login:not(.details-header):focus > .name {
         background-color: @hover-bg-color;
     }
 

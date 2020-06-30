@@ -219,13 +219,16 @@ body {
 
 .part.login {
     display: flex;
-    cursor: pointer;
     align-items: center;
     height: @login-height;
 
     &.details-header {
         border-bottom: 1px solid;
         outline: none;
+    }
+
+    &:not(.details-header) {
+        cursor: pointer;
     }
 
     &:hover,
