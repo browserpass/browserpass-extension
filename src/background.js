@@ -750,6 +750,25 @@ async function handleMessage(settings, message, sendResponse) {
                 });
             }
             break;
+        case "copyOTP":
+            try {
+                if (!message.login.fields.otp) {
+                    throw new Exception("No OTP seed available");
+                }
+                copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                alert(e.toString());
+                sendResponse({
+                    status: "error",
+                    message: "Unable to copy OTP token"
+                });
+            }
+            break;
+
+        case "details":
+            sendResponse({ status: "ok", login: message.login });
+            break;
 
         case "launch":
         case "launchInNewTab":
@@ -919,7 +938,38 @@ async function parseFields(settings, login) {
                 login.fields[key].includes(parts[0].toLowerCase())
             ) {
                 if (key === "otp") {
+                    // preprocess otp
                     login.fields[key] = { key: parts[0].toLowerCase(), data: parts[1] };
+                    let otp = login.fields[key];
+                    if (otp.key === null) {
+                        // attempt to parse otp data as URI
+                        try {
+                            let url = new URL(otp.data.toLowerCase());
+                            let otpParts = url.pathname.split("/").filter(s => s.trim());
+                            otp["params"] = {
+                                type: otpParts[0],
+                                secret: url.searchParams.get("secret").toUpperCase(),
+                                algorithm: url.searchParams.get("algorithm") || "sha1",
+                                digits: parseInt(url.searchParams.get("digits") || "6"),
+                                period: parseInt(url.searchParams.get("period") || "30")
+                            };
+                        } catch (e) {
+                            throw new Exception(`Unable to parse URI: ${otp.data}`, e);
+                        }
+                    } else {
+                        // use default params for secret-only otp data
+                        otp["params"] = {
+                            type: otp.key.toLowerCase(),
+                            secret: otp.data.toUpperCase(),
+                            algorithm: "sha1",
+                            digits: 6,
+                            period: 30
+                        };
+                    }
+                    // fix default otp type
+                    if (otp.params.type === "otp") {
+                        otp.params.type = "totp";
+                    }
                 } else {
                     login.fields[key] = parts[1];
                 }
