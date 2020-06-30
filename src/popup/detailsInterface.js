@@ -90,7 +90,6 @@ function view(ctl, params) {
                     let updateProgress = vnode => {
                         let period = login.fields.otp.params.period;
                         let remaining = period - ((Date.now() / 1000) % period);
-                        console.log(remaining, period);
                         vnode.dom.style.transition = "none";
                         vnode.dom.style.width = `${(remaining / period) * 100}%`;
                         setTimeout(function() {
