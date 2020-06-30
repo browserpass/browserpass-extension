@@ -18,8 +18,7 @@ var defaultSettings = {
     foreignFills: {},
     username: null,
     theme: "dark",
-    enableOTP: false,
-    copyOTP: false
+    enableOTP: false
 };
 
 var authListeners = {};
@@ -849,7 +848,6 @@ async function handleMessage(settings, message, sendResponse) {
     // copy OTP token after fill
     if (
         settings.enableOTP &&
-        settings.copyOTP &&
         typeof message.login !== "undefined" &&
         message.login.fields.hasOwnProperty("otp")
     ) {
