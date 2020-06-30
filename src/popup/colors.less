@@ -15,7 +15,8 @@
     @match-text-color,
     @invert-text-color,
     @snack-color,
-    @progress-color) {
+    @progress-color,
+    @edit-bg-color) {
     html,
     body {
         background-color: @bg-color;
@@ -33,6 +34,7 @@
     .part.details {
         .part {
             &.snack {
+                background-color: @edit-bg-color;
                 border-color: @snack-color;
                 .label {
                     background-color: @snack-color;
@@ -47,7 +49,9 @@
                 }
             }
             &.raw textarea {
+                background-color: @edit-bg-color;
                 border-color: @snack-color;
+                color: @text-color;
             }
         }
     }
