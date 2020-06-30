@@ -937,7 +937,6 @@ async function parseFields(settings, login) {
                 login.fields[key].includes(parts[0].toLowerCase())
             ) {
                 if (key === "otp") {
-                    console.log(login.fields);
                     // preprocess otp
                     login.fields[key] = { key: parts[0].toLowerCase(), data: parts[1] };
                     let otp = login.fields[key];
@@ -970,7 +969,6 @@ async function parseFields(settings, login) {
                     if (otp.params.type === "otp") {
                         otp.params.type = "totp";
                     }
-                    console.log(login.fields);
                 } else {
                     login.fields[key] = parts[1];
                 }
