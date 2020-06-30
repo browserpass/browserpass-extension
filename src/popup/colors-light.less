@@ -43,9 +43,15 @@
         background-color: #0c0804;
     }
 
-    .part.details .part.snack .progress-container {
-        z-index: -1;
-        margin-top: -4px;
-        height: 34px;
+    .part.details .part.snack {
+        &.line-otp {
+            background: transparent;
+        }
+        .progress-container {
+            background-color: #ffffff;
+            z-index: -1;
+            margin-top: -4px;
+            height: 34px;
+        }
     }
 }
