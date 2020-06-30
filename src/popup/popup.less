@@ -20,6 +20,13 @@
     src: local("Open Sans Light"), url("/fonts/OpenSans-Light.ttf") format("truetype");
 }
 
+@font-face {
+    font-family: "Source Code Pro";
+    font-style: normal;
+    font-weight: 400;
+    src: local("Source Code Pro"), url("/fonts/SourceCodePro-Regular.ttf") format("truetype");
+}
+
 html,
 body {
     font-family: "Open Sans";
@@ -133,7 +140,7 @@ body {
             & > :not(.label) {
                 display: flex;
                 align-items: center;
-                font-family: monospace;
+                font-family: Source Code Pro, monospace;
             }
             & > .copy {
                 cursor: pointer;
@@ -162,7 +169,7 @@ body {
             border: 1px solid;
             border-radius: 2px;
             flex-grow: 1;
-            font-family: monospace;
+            font-family: Source Code Pro, monospace;
             min-height: 110px;
             min-width: 340px;
             outline: none;
