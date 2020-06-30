@@ -14,7 +14,8 @@
     @match-text-bg-color,
     @match-text-color,
     @invert-text-color,
-    @snack-color) {
+    @snack-color,
+    @progress-color) {
     html,
     body {
         background-color: @bg-color;
@@ -40,6 +41,9 @@
                 .char.num,
                 .char.punct {
                     color: @match-text-color;
+                }
+                .progress-container .progress {
+                    background-color: @progress-color;
                 }
             }
             &.raw textarea {
