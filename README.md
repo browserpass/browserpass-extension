@@ -22,7 +22,7 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [Searching password entries](#searching-password-entries)
     -   [OpenID authentication](#openid-authentication)
     -   [Modal HTTP authentication](#modal-http-authentication)
-    -   [Password store locations](password-store-locations)
+    -   [Password store locations](#password-store-locations)
 -   [Options](#options)
 -   -   [A note about autosubmit](#a-note-about-autosubmit)
 -   [Usage data](#usage-data)
