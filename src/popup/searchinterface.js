@@ -34,7 +34,7 @@ function view(ctl, params) {
     return m(
         "form.part.search",
         {
-            onkeydown: function(e) {
+            onkeydown: function (e) {
                 switch (e.code) {
                     case "Tab":
                         e.preventDefault();
@@ -56,7 +56,7 @@ function view(ctl, params) {
                         }
                         break;
                 }
-            }
+            },
         },
         [
             this.popup.currentDomainOnly
@@ -64,27 +64,27 @@ function view(ctl, params) {
                       host,
                       m("div.remove-hint", {
                           title: "Clear domain filter | <Backspace>",
-                          onclick: function(e) {
+                          onclick: function (e) {
                               var target = document.querySelector(
                                   ".part.search > input[type=text]"
                               );
                               target.focus();
                               self.popup.currentDomainOnly = false;
                               self.popup.search(target.value);
-                          }
-                      })
+                          },
+                      }),
                   ])
                 : null,
             m("input[type=text]", {
                 focused: true,
                 placeholder: "Search logins...",
-                oncreate: function(e) {
+                oncreate: function (e) {
                     e.dom.focus();
                 },
-                oninput: function(e) {
+                oninput: function (e) {
                     self.popup.search(e.target.value);
                 },
-                onkeydown: function(e) {
+                onkeydown: function (e) {
                     switch (e.code) {
                         case "Backspace":
                             if (self.popup.currentDomainOnly) {
@@ -128,8 +128,8 @@ function view(ctl, params) {
                             break;
                         }
                     }
-                }
-            })
+                },
+            }),
         ]
     );
 }

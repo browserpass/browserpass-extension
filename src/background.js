@@ -15,7 +15,7 @@ var otpID = [
     "afjjoildnccgmjbblnklbohcbjehjaph", // webstore releases
     "jbnpmhhgnchcoljeobafpinmchnpdpin", // github releases
     "fcmmcnalhjjejhpnlfnddimcdlmpkbdf", // local unpacked
-    "browserpass-otp@maximbaz.com" // firefox
+    "browserpass-otp@maximbaz.com", // firefox
 ];
 
 // default settings
@@ -25,7 +25,7 @@ var defaultSettings = {
     stores: {},
     foreignFills: {},
     username: null,
-    theme: "dark"
+    theme: "dark",
 };
 
 var authListeners = {};
@@ -34,14 +34,14 @@ var badgeCache = {
     files: null,
     settings: null,
     expires: Date.now(),
-    isRefreshing: false
+    isRefreshing: false,
 };
 
 // the last text copied to the clipboard is stored here in order to be cleared after 60 seconds
 let lastCopiedText = null;
 
 chrome.browserAction.setBadgeBackgroundColor({
-    color: "#666"
+    color: "#666",
 });
 
 // watch for tab updates
@@ -59,7 +59,7 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
 });
 
 // handle incoming messages
-chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
     receiveMessage(message, sender, sendResponse);
 
     // allow async responses after this function returns
@@ -67,7 +67,7 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 });
 
 // handle keyboard shortcuts
-chrome.commands.onCommand.addListener(async command => {
+chrome.commands.onCommand.addListener(async (command) => {
     switch (command) {
         case "fillBest":
             try {
@@ -76,7 +76,7 @@ chrome.commands.onCommand.addListener(async command => {
                     // only fill on real domains
                     return;
                 }
-                handleMessage(settings, { action: "listFiles" }, listResults => {
+                handleMessage(settings, { action: "listFiles" }, (listResults) => {
                     const logins = helpers.prepareLogins(listResults.files, settings);
                     const bestLogin = helpers.filterSortLogins(logins, "", true)[0];
                     if (bestLogin) {
@@ -91,7 +91,7 @@ chrome.commands.onCommand.addListener(async command => {
 });
 
 // handle fired alarms
-chrome.alarms.onAlarm.addListener(alarm => {
+chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === "clearClipboard") {
         if (readFromClipboard() === lastCopiedText) {
             copyToClipboard("", false);
@@ -133,7 +133,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
                 files: response.data.files,
                 settings: settings,
                 expires: Date.now() + CACHE_TTL_MS,
-                isRefreshing: false
+                isRefreshing: false,
             };
         }
 
@@ -155,7 +155,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
         // Set badge for the current tab
         chrome.browserAction.setBadgeText({
             text: "" + (matchedPasswordsCount || ""),
-            tabId: tabId
+            tabId: tabId,
         });
     } catch (e) {
         console.log(e);
@@ -174,7 +174,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
 function copyToClipboard(text, clear = true) {
     document.addEventListener(
         "copy",
-        function(e) {
+        function (e) {
             e.clipboardData.setData("text/plain", text);
             e.preventDefault();
         },
@@ -247,7 +247,7 @@ async function saveRecent(settings, login, remove = false) {
         const db = await idb.openDB("browserpass", DB_VERSION, {
             upgrade(db) {
                 db.createObjectStore("log", { keyPath: "time" });
-            }
+            },
         });
         await db.add("log", { time: Date.now(), host: settings.origin, login: login.login });
     } catch {
@@ -269,12 +269,12 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
     request = Object.assign(deepCopy(request), {
         allowForeign: allowForeign,
         allowNoSecret: allowNoSecret,
-        foreignFills: settings.foreignFills[settings.origin] || {}
+        foreignFills: settings.foreignFills[settings.origin] || {},
     });
 
     let perFrameResults = await chrome.tabs.executeScript(settings.tab.id, {
         allFrames: allFrames,
-        code: `window.browserpass.fillLogin(${JSON.stringify(request)});`
+        code: `window.browserpass.fillLogin(${JSON.stringify(request)});`,
     });
 
     // merge filled fields into a single array
@@ -313,12 +313,12 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
 async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign) {
     request = Object.assign(deepCopy(request), {
         allowForeign: allowForeign,
-        foreignFills: settings.foreignFills[settings.origin] || {}
+        foreignFills: settings.foreignFills[settings.origin] || {},
     });
 
     let perFrameResults = await chrome.tabs.executeScript(settings.tab.id, {
         allFrames: allFrames,
-        code: `window.browserpass.focusOrSubmit(${JSON.stringify(request)});`
+        code: `window.browserpass.focusOrSubmit(${JSON.stringify(request)});`,
     });
 
     // if necessary, dispatch Enter keypress to autosubmit the form
@@ -337,7 +337,7 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
                             windowsVirtualKeyCode: 13,
                             nativeVirtualKeyCode: 13,
                             unmodifiedText: "\r",
-                            text: "\r"
+                            text: "\r",
                         }
                     );
                 }
@@ -362,7 +362,7 @@ async function injectScript(settings, allFrames) {
         const waitTimeout = setTimeout(reject, MAX_WAIT);
         await chrome.tabs.executeScript(settings.tab.id, {
             allFrames: allFrames,
-            file: "js/inject.dist.js"
+            file: "js/inject.dist.js",
         });
         clearTimeout(waitTimeout);
         resolve(true);
@@ -397,7 +397,7 @@ async function fillFields(settings, login, fields) {
     var fillRequest = {
         origin: new BrowserpassURL(settings.tab.url).origin,
         login: login,
-        fields: fields
+        fields: fields,
     };
 
     let allFrames = false;
@@ -484,7 +484,7 @@ async function fillFields(settings, login, fields) {
     let focusOrSubmitRequest = {
         origin: new BrowserpassURL(settings.tab.url).origin,
         autoSubmit: getSetting("autoSubmit", login, settings),
-        filledFields: filledFields
+        filledFields: filledFields,
     };
 
     // try to focus or submit form with the settings that were used to fill it
@@ -522,7 +522,7 @@ function getLocalSettings() {
 async function getFullSettings() {
     var settings = getLocalSettings();
     var configureSettings = Object.assign(deepCopy(settings), {
-        defaultStore: {}
+        defaultStore: {},
     });
     var response = await hostAction(configureSettings, "configure");
     if (response.status != "ok") {
@@ -553,7 +553,7 @@ async function getFullSettings() {
             settings.stores.default = {
                 id: "default",
                 name: "pass",
-                path: response.data.defaultStore.path
+                path: response.data.defaultStore.path,
             };
             var fileSettings = JSON.parse(response.data.defaultStore.settings);
             if (typeof settings.stores.default.settings !== "object") {
@@ -683,8 +683,8 @@ function handleModalAuth(requestDetails) {
     return {
         authCredentials: {
             username: this.login.fields.login,
-            password: this.login.fields.secret
-        }
+            password: this.login.fields.secret,
+        },
     };
 }
 
@@ -713,7 +713,7 @@ async function handleMessage(settings, message, sendResponse) {
     } catch (e) {
         sendResponse({
             status: "error",
-            message: "Unable to fetch and parse login fields: " + e.toString()
+            message: "Unable to fetch and parse login fields: " + e.toString(),
         });
         return;
     }
@@ -723,7 +723,7 @@ async function handleMessage(settings, message, sendResponse) {
         case "getSettings":
             sendResponse({
                 status: "ok",
-                settings: settings
+                settings: settings,
             });
             break;
         case "saveSettings":
@@ -733,7 +733,7 @@ async function handleMessage(settings, message, sendResponse) {
             } catch (e) {
                 sendResponse({
                     status: "error",
-                    message: e.message
+                    message: e.message,
                 });
             }
             break;
@@ -748,7 +748,7 @@ async function handleMessage(settings, message, sendResponse) {
             } catch (e) {
                 sendResponse({
                     status: "error",
-                    message: "Unable to enumerate password files" + e.toString()
+                    message: "Unable to enumerate password files" + e.toString(),
                 });
             }
             break;
@@ -760,7 +760,7 @@ async function handleMessage(settings, message, sendResponse) {
             } catch (e) {
                 sendResponse({
                     status: "error",
-                    message: "Unable to copy password"
+                    message: "Unable to copy password",
                 });
             }
             break;
@@ -772,7 +772,7 @@ async function handleMessage(settings, message, sendResponse) {
             } catch (e) {
                 sendResponse({
                     status: "error",
-                    message: "Unable to copy username"
+                    message: "Unable to copy username",
                 });
             }
             break;
@@ -799,7 +799,7 @@ async function handleMessage(settings, message, sendResponse) {
                 }
                 authListeners[tab.id] = handleModalAuth.bind({
                     url: url,
-                    login: message.login
+                    login: message.login,
                 });
                 chrome.webRequest.onAuthRequired.addListener(
                     authListeners[tab.id],
@@ -810,7 +810,7 @@ async function handleMessage(settings, message, sendResponse) {
             } catch (e) {
                 sendResponse({
                     status: "error",
-                    message: "Unable to launch URL: " + e.toString()
+                    message: "Unable to launch URL: " + e.toString(),
                 });
             }
             break;
@@ -828,7 +828,7 @@ async function handleMessage(settings, message, sendResponse) {
                 try {
                     sendResponse({
                         status: "error",
-                        message: e.toString()
+                        message: e.toString(),
                     });
                 } catch (e) {
                     // TODO An error here is typically a closed message port, due to a popup taking focus
@@ -845,14 +845,14 @@ async function handleMessage(settings, message, sendResponse) {
             } catch (e) {
                 sendResponse({
                     status: "error",
-                    message: e.message
+                    message: e.message,
                 });
             }
             break;
         default:
             sendResponse({
                 status: "error",
-                message: "Unknown action: " + message.action
+                message: "Unknown action: " + message.action,
             });
             break;
     }
@@ -876,7 +876,7 @@ async function handleMessage(settings, message, sendResponse) {
 function hostAction(settings, action, params = {}) {
     var request = {
         settings: settings,
-        action: action
+        action: action,
     };
     for (var key in params) {
         request[key] = params[key];
@@ -897,7 +897,7 @@ function hostAction(settings, action, params = {}) {
 async function parseFields(settings, login) {
     var response = await hostAction(settings, "fetch", {
         storeId: login.store.id,
-        file: login.login + ".gpg"
+        file: login.login + ".gpg",
     });
     if (response.status != "ok") {
         throw new Error(JSON.stringify(response)); // TODO handle host error
@@ -912,13 +912,13 @@ async function parseFields(settings, login) {
         login: ["login", "username", "user"],
         openid: ["openid"],
         otp: ["otp", "totp", "hotp"],
-        url: ["url", "uri", "website", "site", "link", "launch"]
+        url: ["url", "uri", "website", "site", "link", "launch"],
     };
     login.settings = {
-        autoSubmit: { name: "autosubmit", type: "bool" }
+        autoSubmit: { name: "autosubmit", type: "bool" },
     };
-    var lines = login.raw.split(/[\r\n]+/).filter(line => line.trim().length > 0);
-    lines.forEach(function(line) {
+    var lines = login.raw.split(/[\r\n]+/).filter((line) => line.trim().length > 0);
+    lines.forEach(function (line) {
         // check for uri-encoded otp
         if (line.match(/^otpauth:\/\/.+/)) {
             login.fields.otp = { key: null, data: line };
@@ -932,8 +932,8 @@ async function parseFields(settings, login) {
         }
         parts = parts
             .slice(1)
-            .map(value => value.trim())
-            .filter(value => value.length);
+            .map((value) => value.trim())
+            .filter((value) => value.length);
         if (parts.length != 2) {
             return;
         }
@@ -1028,7 +1028,7 @@ async function clearUsageData() {
     // clear local storage
     localStorage.removeItem("foreignFills");
     localStorage.removeItem("recent");
-    Object.keys(localStorage).forEach(key => {
+    Object.keys(localStorage).forEach((key) => {
         if (key.startsWith("recent:")) {
             localStorage.removeItem(key);
         }
@@ -1093,16 +1093,16 @@ function triggerOTPExtension(settings, action, otp) {
                 settings: {
                     host: settings.host,
                     origin: settings.origin,
-                    tab: settings.tab
-                }
+                    tab: settings.tab,
+                },
             })
             // Both response & error are noop functions, because we don't care about
             // the response, and if there's an error it just means the otp extension
             // is probably not installed. We can't detect that without requesting the
             // management permission, so this is an acceptable workaround.
             .then(
-                noop => null,
-                noop => null
+                (noop) => null,
+                (noop) => null
             );
     }
 }
@@ -1126,7 +1126,7 @@ function onExtensionInstalled(details) {
             title: title,
             message: message,
             iconUrl: "icon.png",
-            type: "basic"
+            type: "basic",
         });
     };
 
@@ -1145,10 +1145,10 @@ function onExtensionInstalled(details) {
             3002000: "New permissions added to clear copied credentials after 60 seconds.",
             3000000:
                 "New major update is out, please update the native host app to v3.\n" +
-                "Instructions here: https://github.com/browserpass/browserpass-native"
+                "Instructions here: https://github.com/browserpass/browserpass-native",
         };
 
-        var parseVersion = version => {
+        var parseVersion = (version) => {
             var [major, minor, patch] = version.split(".");
             return parseInt(major) * 1000000 + parseInt(minor) * 1000 + parseInt(patch);
         };
@@ -1157,7 +1157,7 @@ function onExtensionInstalled(details) {
 
         Object.keys(changelog)
             .sort()
-            .forEach(function(version) {
+            .forEach(function (version) {
                 if (prevVersion < version && newVersion >= version) {
                     show(version.toString(), "browserpass: Important changes", changelog[version]);
                 }

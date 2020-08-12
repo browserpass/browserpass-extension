@@ -57,7 +57,7 @@ async function getSettings() {
 async function saveSettings(settings) {
     var response = await chrome.runtime.sendMessage({
         action: "saveSettings",
-        settings: settings
+        settings: settings,
     });
     if (response.status != "ok") {
         throw new Error(response.message);
