@@ -62,7 +62,7 @@ function view(ctl, params) {
     nodes.push(
         createDropdown.call(this, "theme", [
             m("option", { value: "dark" }, "Dark"),
-            m("option", { value: "light" }, "Light")
+            m("option", { value: "light" }, "Light"),
         ])
     );
 
@@ -80,7 +80,7 @@ function view(ctl, params) {
                 onclick: () => {
                     addEmptyStore(this.settings.stores);
                     this.saveEnabled = true;
-                }
+                },
             },
             "Add store"
         )
@@ -108,7 +108,7 @@ function view(ctl, params) {
                     }
                     this.saveEnabled = false;
                     m.redraw();
-                }
+                },
             },
             "Save"
         )
@@ -126,7 +126,7 @@ function view(ctl, params) {
                         this.error = e;
                     }
                     m.redraw();
-                }
+                },
             },
             "Clear usage data"
         )
@@ -151,12 +151,12 @@ function createInput(key, title, placeholder) {
             m("input[type=text]", {
                 value: this.settings[key],
                 placeholder: placeholder,
-                onchange: e => {
+                onchange: (e) => {
                     this.settings[key] = e.target.value;
                     this.saveEnabled = true;
-                }
-            })
-        ])
+                },
+            }),
+        ]),
     ]);
 }
 
@@ -174,10 +174,10 @@ function createDropdown(key, options) {
         "select",
         {
             value: this.settings[key],
-            onchange: e => {
+            onchange: (e) => {
                 this.settings[key] = e.target.value;
                 this.saveEnabled = true;
-            }
+            },
         },
         options
     );
@@ -198,13 +198,13 @@ function createCheckbox(key, title) {
             m("input[type=checkbox]", {
                 title: title,
                 checked: this.settings[key],
-                onchange: e => {
+                onchange: (e) => {
                     this.settings[key] = e.target.checked;
                     this.saveEnabled = true;
-                }
+                },
             }),
-            title
-        ])
+            title,
+        ]),
     ]);
 }
 
@@ -224,37 +224,37 @@ function createCustomStore(storeId) {
             title: "The name for this password store",
             value: store.name,
             placeholder: "name",
-            onchange: e => {
+            onchange: (e) => {
                 store.name = e.target.value;
                 this.saveEnabled = true;
-            }
+            },
         }),
         m("input[type=text].path", {
             title: "The full path to this password store",
             value: store.path,
             placeholder: "/path/to/store",
-            onchange: e => {
+            onchange: (e) => {
                 store.path = e.target.value;
                 this.saveEnabled = true;
-            }
+            },
         }),
         m("input[type=text].bgColor", {
             title: "Badge background color",
             value: store.bgColor,
             placeholder: "#626262",
-            onchange: e => {
+            onchange: (e) => {
                 store.bgColor = e.target.value;
                 this.saveEnabled = true;
-            }
+            },
         }),
         m("input[type=text].color", {
             title: "Badge text color",
             value: store.color,
             placeholder: "#c4c4c4",
-            onchange: e => {
+            onchange: (e) => {
                 store.color = e.target.value;
                 this.saveEnabled = true;
-            }
+            },
         }),
         m(
             "a.remove",
@@ -263,10 +263,10 @@ function createCustomStore(storeId) {
                 onclick: () => {
                     delete this.settings.stores[storeId];
                     this.saveEnabled = true;
-                }
+                },
             },
             "[X]"
-        )
+        ),
     ]);
 }
 
@@ -278,9 +278,7 @@ function createCustomStore(storeId) {
  * @return string new store ID
  */
 function newId() {
-    return Math.random()
-        .toString(36)
-        .substr(2, 9);
+    return Math.random().toString(36).substr(2, 9);
 }
 
 /**

@@ -16,17 +16,17 @@
     ],
     "dependencies": {
         "@browserpass/url": "^1.1.6",
-        "chrome-extension-async": "^3.3.2",
+        "chrome-extension-async": "^3.4.1",
         "fuzzysort": "^1.1.4",
-        "idb": "^4.0.3",
-        "ignore": "^5.1.4",
-        "mithril": "^1.1.0",
-        "moment": "^2.24.0",
+        "idb": "^4.0.5",
+        "ignore": "^5.1.8",
+        "mithril": "^1.1.7",
+        "moment": "^2.27.0",
         "sha1": "^1.1.1"
     },
     "devDependencies": {
-        "browserify": "^16.2.3",
-        "less": "^3.9.0",
-        "prettier": "^1.16.4"
+        "browserify": "^16.5.2",
+        "less": "^3.12.2",
+        "prettier": "^2.0.5"
     }
 }

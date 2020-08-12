@@ -9,7 +9,7 @@ const BrowserpassURL = require("@browserpass/url");
 module.exports = {
     prepareLogins,
     filterSortLogins,
-    ignoreFiles
+    ignoreFiles,
 };
 
 //----------------------------------- Function definitions ----------------------------------//
@@ -68,7 +68,7 @@ function prepareLogins(files, settings) {
                 index: index++,
                 store: settings.stores[storeId],
                 login: files[storeId][key].replace(/\.gpg$/i, ""),
-                allowFill: true
+                allowFill: true,
             };
 
             // extract url info from path
@@ -107,7 +107,7 @@ function prepareLogins(files, settings) {
             if (!login.recent) {
                 login.recent = {
                     when: 0,
-                    count: 0
+                    count: 0,
                 };
             }
 
@@ -132,17 +132,17 @@ function filterSortLogins(logins, searchQuery, currentDomainOnly) {
     searchQuery = searchQuery.trim();
 
     // get candidate list
-    var candidates = logins.map(candidate => {
+    var candidates = logins.map((candidate) => {
         let lastSlashIndex = candidate.login.lastIndexOf("/") + 1;
         return Object.assign(candidate, {
             path: candidate.login.substr(0, lastSlashIndex),
-            display: candidate.login.substr(lastSlashIndex)
+            display: candidate.login.substr(lastSlashIndex),
         });
     });
 
     var mostRecent = null;
     if (currentDomainOnly) {
-        var recent = candidates.filter(function(login) {
+        var recent = candidates.filter(function (login) {
             if (login.recent.count > 0) {
                 // find most recently used login
                 if (!mostRecent || login.recent.when > mostRecent.recent.when) {
@@ -153,7 +153,7 @@ function filterSortLogins(logins, searchQuery, currentDomainOnly) {
             return false;
         });
         var remainingInCurrentDomain = candidates.filter(
-            login => login.inCurrentHost && !login.recent.count
+            (login) => login.inCurrentHost && !login.recent.count
         );
         candidates = recent.concat(remainingInCurrentDomain);
     }
@@ -189,11 +189,11 @@ function filterSortLogins(logins, searchQuery, currentDomainOnly) {
     if (searchQuery.length) {
         let filter = searchQuery.split(/\s+/);
         let fuzzyFilter = fuzzyFirstWord ? filter[0] : "";
-        let substringFilters = filter.slice(fuzzyFirstWord ? 1 : 0).map(w => w.toLowerCase());
+        let substringFilters = filter.slice(fuzzyFirstWord ? 1 : 0).map((w) => w.toLowerCase());
 
         // First reduce the list by running the substring search
-        substringFilters.forEach(function(word) {
-            candidates = candidates.filter(c => c.login.toLowerCase().indexOf(word) >= 0);
+        substringFilters.forEach(function (word) {
+            candidates = candidates.filter((c) => c.login.toLowerCase().indexOf(word) >= 0);
         });
 
         // Then run the fuzzy filter
@@ -201,19 +201,19 @@ function filterSortLogins(logins, searchQuery, currentDomainOnly) {
         if (fuzzyFilter) {
             candidates = FuzzySort.go(fuzzyFilter, candidates, {
                 keys: ["login", "store.name"],
-                allowTypo: false
-            }).map(result => {
+                allowTypo: false,
+            }).map((result) => {
                 fuzzyResults[result.obj.login] = result;
                 return result.obj;
             });
         }
 
         // Finally highlight all matches
-        candidates = candidates.map(c => highlightMatches(c, fuzzyResults, substringFilters));
+        candidates = candidates.map((c) => highlightMatches(c, fuzzyResults, substringFilters));
     }
 
     // Prefix root entries with slash to let them have some visible path
-    candidates.forEach(c => {
+    candidates.forEach((c) => {
         c.path = c.path || "/";
     });
 
@@ -292,7 +292,7 @@ function highlightMatches(entry, fuzzyResults, substringFilters) {
 
     return Object.assign(entry, {
         path: path,
-        display: display
+        display: display,
     });
 }
 
@@ -313,9 +313,7 @@ function ignoreFiles(files, settings) {
             if (typeof storeSettings.ignore === "string") {
                 storeSettings.ignore = [storeSettings.ignore];
             }
-            filteredFiles[store] = ignore()
-                .add(storeSettings.ignore)
-                .filter(files[store]);
+            filteredFiles[store] = ignore().add(storeSettings.ignore).filter(files[store]);
         } else {
             filteredFiles[store] = files[store];
         }

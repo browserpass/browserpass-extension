@@ -61,7 +61,7 @@ function view(ctl, params) {
     nodes.push(
         m(
             "div.logins",
-            this.results.map(function(result) {
+            this.results.map(function (result) {
                 const storeBgColor = result.store.bgColor || result.store.settings.bgColor;
                 const storeColor = result.store.color || result.store.settings.color;
 
@@ -70,7 +70,7 @@ function view(ctl, params) {
                     {
                         key: result.index,
                         tabindex: 0,
-                        onclick: function(e) {
+                        onclick: function (e) {
                             var action = e.target.getAttribute("action");
                             if (action) {
                                 result.doAction(action);
@@ -78,7 +78,7 @@ function view(ctl, params) {
                                 result.doAction("fill");
                             }
                         },
-                        onkeydown: keyHandler.bind(result)
+                        onkeydown: keyHandler.bind(result),
                     },
                     [
                         m("div.name", { title: "Fill username / password | <Enter>" }, [
@@ -87,7 +87,7 @@ function view(ctl, params) {
                                     "div.store.badge",
                                     {
                                         style: `background-color: ${storeBgColor};
-                                                color: ${storeColor}`
+                                                color: ${storeColor}`,
                                     },
                                     result.store.name
                                 ),
@@ -100,22 +100,22 @@ function view(ctl, params) {
                                               " time" +
                                               (result.recent.count > 1 ? "s" : "") +
                                               ", last " +
-                                              Moment(new Date(result.recent.when)).fromNow()
+                                              Moment(new Date(result.recent.when)).fromNow(),
                                       })
-                                    : null
+                                    : null,
                             ]),
-                            m("div.line2", [m.trust(result.display)])
+                            m("div.line2", [m.trust(result.display)]),
                         ]),
                         m("div.action.copy-password", {
                             tabindex: 0,
                             title: "Copy password | <Ctrl+C>",
-                            action: "copyPassword"
+                            action: "copyPassword",
                         }),
                         m("div.action.copy-user", {
                             tabindex: 0,
                             title: "Copy username | <Ctrl+Shift+C>",
-                            action: "copyUsername"
-                        })
+                            action: "copyUsername",
+                        }),
                     ]
                 );
             })
@@ -130,10 +130,10 @@ function view(ctl, params) {
                     "a",
                     {
                         href: "https://github.com/browserpass/browserpass-native#installation",
-                        target: "_blank"
+                        target: "_blank",
                     },
                     "instructions"
-                )
+                ),
             ])
         );
     }

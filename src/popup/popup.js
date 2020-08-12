@@ -112,7 +112,7 @@ async function withLogin(action) {
         // hand off action to background script
         var response = await chrome.runtime.sendMessage({
             action: action,
-            login: login
+            login: login,
         });
         if (response.status != "ok") {
             throw new Error(response.message);

@@ -1,8 +1,8 @@
-(function() {
+(function () {
     const FORM_MARKERS = ["login", "log-in", "log_in", "signin", "sign-in", "sign_in"];
     const OPENID_FIELDS = {
         selectors: ["input[name*=openid i]", "input[id*=openid i]", "input[class*=openid i]"],
-        types: ["text"]
+        types: ["text"],
     };
     const USERNAME_FIELDS = {
         selectors: [
@@ -22,20 +22,20 @@
             "input[type=email i]",
             "input[autocomplete=email i]",
             "input[type=text i]",
-            "input[type=tel i]"
+            "input[type=tel i]",
         ],
-        types: ["email", "text", "tel"]
+        types: ["email", "text", "tel"],
     };
     const PASSWORD_FIELDS = {
         selectors: [
             "input[type=password i][autocomplete=current-password i]",
-            "input[type=password i]"
-        ]
+            "input[type=password i]",
+        ],
     };
     const INPUT_FIELDS = {
         selectors: PASSWORD_FIELDS.selectors
             .concat(USERNAME_FIELDS.selectors)
-            .concat(OPENID_FIELDS.selectors)
+            .concat(OPENID_FIELDS.selectors),
     };
     const SUBMIT_FIELDS = {
         selectors: [
@@ -75,8 +75,8 @@
             "input[type=button i][class*=log_in i]",
             "input[type=button i][class*=signin i]",
             "input[type=button i][class*=sign-in i]",
-            "input[type=button i][class*=sign_in i]"
-        ]
+            "input[type=button i][class*=sign_in i]",
+        ],
     };
 
     /**
@@ -90,7 +90,7 @@
     function fillLogin(request) {
         var result = {
             filledFields: [],
-            foreignFill: undefined
+            foreignFill: undefined,
         };
 
         // get the login form
@@ -165,7 +165,7 @@
      */
     function focusOrSubmit(request) {
         var result = {
-            needPressEnter: false
+            needPressEnter: false,
         };
 
         // get the login form
@@ -443,6 +443,6 @@
     // set window object
     window.browserpass = {
         fillLogin: fillLogin,
-        focusOrSubmit: focusOrSubmit
+        focusOrSubmit: focusOrSubmit,
     };
 })();
