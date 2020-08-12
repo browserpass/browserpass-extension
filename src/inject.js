@@ -164,9 +164,7 @@
      * @return object result of focusing or submitting a form
      */
     function focusOrSubmit(request) {
-        var result = {
-            needPressEnter: false,
-        };
+        var result = {};
 
         // get the login form
         let loginForm = undefined;
@@ -202,11 +200,6 @@
                     submit.focus();
                 }
             } else {
-                // There is no submit button.
-                if (request.autoSubmit) {
-                    // signal background script that we want it to press Enter for us
-                    result.needPressEnter = true;
-                }
                 // We need to keep focus somewhere within the form, so that Enter hopefully submits the form.
                 for (let selectors of [OPENID_FIELDS, PASSWORD_FIELDS, USERNAME_FIELDS]) {
                     let field = find(selectors, loginForm);
