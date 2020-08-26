@@ -316,36 +316,10 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
         foreignFills: settings.foreignFills[settings.origin] || {},
     });
 
-    let perFrameResults = await chrome.tabs.executeScript(settings.tab.id, {
+    await chrome.tabs.executeScript(settings.tab.id, {
         allFrames: allFrames,
         code: `window.browserpass.focusOrSubmit(${JSON.stringify(request)});`,
     });
-
-    // if necessary, dispatch Enter keypress to autosubmit the form
-    // currently only works on Chromium and requires debugger permission
-    try {
-        for (let frame of perFrameResults) {
-            if (frame.needPressEnter) {
-                chrome.debugger.attach({ tabId: settings.tab.id }, "1.2");
-                for (let type of ["keyDown", "char", "keyUp"]) {
-                    chrome.debugger.sendCommand(
-                        { tabId: settings.tab.id },
-                        "Input.dispatchKeyEvent",
-                        {
-                            type: type,
-                            key: "Enter",
-                            windowsVirtualKeyCode: 13,
-                            nativeVirtualKeyCode: 13,
-                            unmodifiedText: "\r",
-                            text: "\r",
-                        }
-                    );
-                }
-                chrome.debugger.detach({ tabId: settings.tab.id });
-                break;
-            }
-        }
-    } catch (e) {}
 }
 
 /**
