@@ -27,7 +27,6 @@
         "open_in_tab": false
     },
     "permissions": [
-        "debugger",
         "activeTab",
         "alarms",
         "tabs",
