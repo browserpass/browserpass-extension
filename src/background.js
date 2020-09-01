@@ -18,7 +18,7 @@ var defaultSettings = {
     foreignFills: {},
     username: null,
     theme: "dark",
-    enableOTP: false
+    enableOTP: false,
 };
 
 var authListeners = {};
@@ -753,7 +753,7 @@ async function handleMessage(settings, message, sendResponse) {
                 } catch (e) {
                     sendResponse({
                         status: "error",
-                        message: "Unable to copy OTP token"
+                        message: "Unable to copy OTP token",
                     });
                 }
             } else {
@@ -904,13 +904,13 @@ async function parseFields(settings, login) {
         login: ["login", "username", "user"],
         openid: ["openid"],
         otp: ["otp", "totp"],
-        url: ["url", "uri", "website", "site", "link", "launch"]
+        url: ["url", "uri", "website", "site", "link", "launch"],
     };
     login.settings = {
         autoSubmit: { name: "autosubmit", type: "bool" },
     };
-    var lines = login.raw.split(/[\r\n]+/).filter(line => line.trim().length > 0);
-    lines.forEach(function(line) {
+    var lines = login.raw.split(/[\r\n]+/).filter((line) => line.trim().length > 0);
+    lines.forEach(function (line) {
         // check for uri-encoded otp without line prefix
         if (line.match(/^otpauth:\/\/.+/i)) {
             line = `otp: ${line}`;
@@ -982,7 +982,7 @@ async function parseFields(settings, login) {
             // attempt to parse otp data as URI
             try {
                 let url = new URL(login.fields.otp.toLowerCase());
-                let otpParts = url.pathname.split("/").filter(s => s.trim());
+                let otpParts = url.pathname.split("/").filter((s) => s.trim());
                 login.fields.otp = {
                     raw: login.fields.otp,
                     params: {
@@ -990,8 +990,8 @@ async function parseFields(settings, login) {
                         secret: url.searchParams.get("secret").toUpperCase(),
                         algorithm: url.searchParams.get("algorithm") || "sha1",
                         digits: parseInt(url.searchParams.get("digits") || "6"),
-                        period: parseInt(url.searchParams.get("period") || "30")
-                    }
+                        period: parseInt(url.searchParams.get("period") || "30"),
+                    },
                 };
             } catch (e) {
                 throw new Exception(`Unable to parse URI: ${otp.data}`, e);
@@ -1005,8 +1005,8 @@ async function parseFields(settings, login) {
                     secret: login.fields.otp.toUpperCase(),
                     algorithm: "sha1",
                     digits: 6,
-                    period: 30
-                }
+                    period: 30,
+                },
             };
         }
         // fix default otp type
@@ -1139,7 +1139,7 @@ function onExtensionInstalled(details) {
                 "Instructions here: https://github.com/browserpass/browserpass-native",
             3600000:
                 "This release adds OTP support, and deprecates the separate OTP extension.\n" +
-                "To continue using OTP, please enable it in the Browserpass settings screen."
+                "To continue using OTP, please enable it in the Browserpass settings screen.",
         };
 
         var parseVersion = (version) => {

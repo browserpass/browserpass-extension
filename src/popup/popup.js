@@ -125,7 +125,7 @@ async function withLogin(action) {
             if (response.login && typeof response.login === "object") {
                 response.login.doAction = withLogin.bind({
                     settings: this.settings,
-                    login: response.login
+                    login: response.login,
                 });
             }
             if (action === "details") {

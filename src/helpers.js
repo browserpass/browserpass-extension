@@ -12,7 +12,7 @@ module.exports = {
     prepareLogins,
     filterSortLogins,
     ignoreFiles,
-    makeTOTP
+    makeTOTP,
 };
 
 //----------------------------------- Function definitions ----------------------------------//
@@ -244,11 +244,11 @@ function makeTOTP(params) {
     var generator = new Authenticator();
     generator.options = {
         crypto: {
-            createHmac: (a, k) => hash.hmac(hash[a], k)
+            createHmac: (a, k) => hash.hmac(hash[a], k),
         },
         algorithm: params.algorithm,
         digits: params.digits,
-        step: params.period
+        step: params.period,
     };
 
     return generator.generate(params.secret);

@@ -109,18 +109,18 @@ function view(ctl, params) {
                         m("div.action.copy-user", {
                             tabindex: 0,
                             title: "Copy username | <Ctrl+Shift+C>",
-                            action: "copyUsername"
+                            action: "copyUsername",
                         }),
                         m("div.action.copy-password", {
                             tabindex: 0,
                             title: "Copy password | <Ctrl+C>",
-                            action: "copyPassword"
+                            action: "copyPassword",
                         }),
                         m("div.action.details", {
                             tabindex: 0,
                             title: "Open Details | <Ctrl+O>",
-                            action: "details"
-                        })
+                            action: "details",
+                        }),
                     ]
                 );
             })

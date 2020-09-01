@@ -52,7 +52,7 @@ function view(ctl, params) {
     const login = this.login;
     const storeBgColor = login.store.bgColor || login.store.settings.bgColor;
     const storeColor = login.store.color || login.store.settings.color;
-    const passChars = login.fields.secret.split("").map(c => {
+    const passChars = login.fields.secret.split("").map((c) => {
         if (c.match(/[0-9]/)) {
             return m("span.char.num", c);
         } else if (c.match(/[^\w\s]/)) {
@@ -70,7 +70,7 @@ function view(ctl, params) {
                         "div.store.badge",
                         {
                             style: `background-color: ${storeBgColor};
-                                                color: ${storeColor}`
+                                                color: ${storeColor}`,
                         },
                         login.store.name
                     ),
@@ -83,44 +83,44 @@ function view(ctl, params) {
                                   " time" +
                                   (login.recent.count > 1 ? "s" : "") +
                                   ", last " +
-                                  Moment(new Date(login.recent.when)).fromNow()
+                                  Moment(new Date(login.recent.when)).fromNow(),
                           })
-                        : null
+                        : null,
                 ]),
-                m("div.line2", [m.trust(login.basename)])
-            ])
+                m("div.line2", [m.trust(login.basename)]),
+            ]),
         ]),
         m("div.part.details", [
             m("div.part.snack.line-secret", [
                 m("div.label", "Secret"),
                 m("div.chars", passChars),
-                m("div.action.copy", { onclick: () => login.doAction("copyPassword") })
+                m("div.action.copy", { onclick: () => login.doAction("copyPassword") }),
             ]),
             m("div.part.snack.line-login", [
                 m("div.label", "Login"),
                 m("div", login.fields.login),
-                m("div.action.copy", { onclick: () => login.doAction("copyUsername") })
+                m("div.action.copy", { onclick: () => login.doAction("copyUsername") }),
             ]),
             (() => {
                 if (this.settings.enableOTP && login.fields.otp) {
                     // update progress
                     let progress = this.progress;
-                    let updateProgress = vnode => {
+                    let updateProgress = (vnode) => {
                         let period = login.fields.otp.params.period;
                         let remaining = period - ((Date.now() / 1000) % period);
                         vnode.dom.style.transition = "none";
                         vnode.dom.style.width = `${(remaining / period) * 100}%`;
-                        setTimeout(function() {
+                        setTimeout(function () {
                             vnode.dom.style.transition = `width linear ${remaining}s`;
                             vnode.dom.style.width = "0%";
                         }, 100);
-                        setTimeout(function() {
+                        setTimeout(function () {
                             m.redraw();
                         }, remaining);
                     };
                     let progressNode = m("div.progress", {
                         oncreate: updateProgress,
-                        onupdate: updateProgress
+                        onupdate: updateProgress,
                     });
 
                     // display otp snack
@@ -128,11 +128,11 @@ function view(ctl, params) {
                         m("div.label", "Token"),
                         m("div.progress-container", progressNode),
                         m("div", helpers.makeTOTP(login.fields.otp.params)),
-                        m("div.action.copy", { onclick: () => login.doAction("copyOTP") })
+                        m("div.action.copy", { onclick: () => login.doAction("copyOTP") }),
                     ]);
                 }
             })(),
-            m("div.part.raw", m("textarea", login.raw.trim()))
+            m("div.part.raw", m("textarea", login.raw.trim())),
         ])
     );
 
