@@ -1137,9 +1137,6 @@ function onExtensionInstalled(details) {
             3000000:
                 "New major update is out, please update the native host app to v3.\n" +
                 "Instructions here: https://github.com/browserpass/browserpass-native",
-            3600000:
-                "This release adds OTP support, and deprecates the separate OTP extension.\n" +
-                "To continue using OTP, please enable it in the Browserpass settings screen.",
         };
 
         var parseVersion = (version) => {
