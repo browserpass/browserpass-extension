@@ -56,7 +56,7 @@ function view(ctl, params) {
         )
     );
     nodes.push(
-        createCheckbox.call(this, "enableOTP", "Enable support for OTP tokens (not recommended).")
+        createCheckbox.call(this, "enableOTP", "Enable support for OTP tokens (not recommended)")
     );
     nodes.push(createInput.call(this, "username", "Default username", "john.smith"));
     nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary", "/path/to/gpg"));
