@@ -106,15 +106,20 @@ function view(ctl, params) {
                             ]),
                             m("div.line2", [m.trust(result.display)]),
                         ]),
+                        m("div.action.copy-user", {
+                            tabindex: 0,
+                            title: "Copy username | <Ctrl+Shift+C>",
+                            action: "copyUsername",
+                        }),
                         m("div.action.copy-password", {
                             tabindex: 0,
                             title: "Copy password | <Ctrl+C>",
                             action: "copyPassword",
                         }),
-                        m("div.action.copy-user", {
+                        m("div.action.details", {
                             tabindex: 0,
-                            title: "Copy username | <Ctrl+Shift+C>",
-                            action: "copyUsername",
+                            title: "Open Details | <Ctrl+O>",
+                            action: "getDetails",
                         }),
                     ]
                 );
@@ -188,6 +193,8 @@ function keyHandler(e) {
                 e.target.querySelector(".action").focus();
             } else if (e.target.nextElementSibling) {
                 e.target.nextElementSibling.focus();
+            } else {
+                this.doAction("getDetails");
             }
             break;
         case "ArrowLeft":
@@ -216,6 +223,11 @@ function keyHandler(e) {
         case "KeyG":
             if (e.ctrlKey) {
                 this.doAction(e.shiftKey ? "launchInNewTab" : "launch");
+            }
+            break;
+        case "KeyO":
+            if (e.ctrlKey) {
+                this.doAction("getDetails");
             }
             break;
         case "Home": {

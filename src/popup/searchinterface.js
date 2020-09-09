@@ -116,6 +116,12 @@ function view(ctl, params) {
                                 );
                             }
                             break;
+                        case "KeyO":
+                            if (e.ctrlKey && e.target.selectionStart == e.target.selectionEnd) {
+                                e.preventDefault();
+                                self.popup.results[0].doAction("getDetails");
+                            }
+                            break;
                         case "End": {
                             if (e.target.selectionStart === e.target.value.length) {
                                 let logins = document.querySelectorAll(".login");

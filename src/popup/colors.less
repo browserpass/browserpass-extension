@@ -12,7 +12,12 @@
     @hint-bg-color,
     @hint-color,
     @match-text-bg-color,
-    @match-text-color) {
+    @match-text-color,
+    @invert-text-color,
+    @snack-color,
+    @snack-label-color,
+    @progress-color,
+    @edit-bg-color) {
     html,
     body {
         background-color: @bg-color;
@@ -25,6 +30,34 @@
 
     .part.error {
         color: @error-text-color;
+    }
+
+    .part.details {
+        .part {
+            &.snack {
+                background-color: @edit-bg-color;
+                border-color: @snack-color;
+                .label {
+                    background-color: @snack-label-color;
+                    color: @invert-text-color;
+                }
+                .char.num,
+                .char.punct {
+                    color: @match-text-color;
+                }
+                .progress-container {
+                    background: transparent;
+                    .progress {
+                        background-color: @progress-color;
+                    }
+                }
+            }
+            &.raw textarea {
+                background-color: @edit-bg-color;
+                border-color: @snack-color;
+                color: @text-color;
+            }
+        }
     }
 
     .part.search {
@@ -53,11 +86,11 @@
         background-color: @default-bg-color;
     }
 
-    .part.login > .name:hover,
-    .part.login > .name:focus,
-    .part.login > .action:hover,
-    .part.login > .action:focus,
-    .part.login:focus > .name {
+    .part.login:not(.details-header) > .name:hover,
+    .part.login:not(.details-header) > .name:focus,
+    .part.login:not(.details-header) > .action:hover,
+    .part.login:not(.details-header) > .action:focus,
+    .part.login:not(.details-header):focus > .name {
         background-color: @hover-bg-color;
     }
 

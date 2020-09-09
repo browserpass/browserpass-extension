@@ -4,12 +4,15 @@
 const FuzzySort = require("fuzzysort");
 const sha1 = require("sha1");
 const ignore = require("ignore");
+const hash = require("hash.js");
+const Authenticator = require("otplib").authenticator.Authenticator;
 const BrowserpassURL = require("@browserpass/url");
 
 module.exports = {
     prepareLogins,
     filterSortLogins,
     ignoreFiles,
+    makeTOTP,
 };
 
 //----------------------------------- Function definitions ----------------------------------//
@@ -218,6 +221,37 @@ function filterSortLogins(logins, searchQuery, currentDomainOnly) {
     });
 
     return candidates;
+}
+
+/**
+ * Generate TOTP token
+ *
+ * @since 3.6.0
+ *
+ * @param object params OTP generation params
+ * @return string Generated OTP code
+ */
+function makeTOTP(params) {
+    switch (params.algorithm) {
+        case "sha1":
+        case "sha256":
+        case "sha512":
+            break;
+        default:
+            throw new Error(`Unsupported TOTP algorithm: ${params.algorithm}`);
+    }
+
+    var generator = new Authenticator();
+    generator.options = {
+        crypto: {
+            createHmac: (a, k) => hash.hmac(hash[a], k),
+        },
+        algorithm: params.algorithm,
+        digits: params.digits,
+        step: params.period,
+    };
+
+    return generator.generate(params.secret);
 }
 
 //----------------------------------- Private functions ----------------------------------//
