@@ -986,7 +986,7 @@ async function parseFields(settings, login) {
                 login.fields.otp = {
                     raw: login.fields.otp,
                     params: {
-                        type: otpParts[0],
+                        type: otpParts[0] === "otp" ? "totp" : otpParts[0],
                         secret: url.searchParams.get("secret").toUpperCase(),
                         algorithm: url.searchParams.get("algorithm") || "sha1",
                         digits: parseInt(url.searchParams.get("digits") || "6"),
@@ -1008,10 +1008,6 @@ async function parseFields(settings, login) {
                     period: 30,
                 },
             };
-        }
-        // fix default otp type
-        if (login.fields.otp.params.type === "otp") {
-            login.fields.otp.params.type = "totp";
         }
     }
 }
