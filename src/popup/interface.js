@@ -119,7 +119,7 @@ function view(ctl, params) {
                         m("div.action.details", {
                             tabindex: 0,
                             title: "Open Details | <Ctrl+O>",
-                            action: "details",
+                            action: "getDetails",
                         }),
                     ]
                 );
@@ -194,7 +194,7 @@ function keyHandler(e) {
             } else if (e.target.nextElementSibling) {
                 e.target.nextElementSibling.focus();
             } else {
-                this.doAction("details");
+                this.doAction("getDetails");
             }
             break;
         case "ArrowLeft":
@@ -227,7 +227,7 @@ function keyHandler(e) {
             break;
         case "KeyO":
             if (e.ctrlKey) {
-                this.doAction("details");
+                this.doAction("getDetails");
             }
             break;
         case "Home": {

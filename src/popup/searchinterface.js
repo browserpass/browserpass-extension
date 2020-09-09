@@ -119,7 +119,7 @@ function view(ctl, params) {
                         case "KeyO":
                             if (e.ctrlKey && e.target.selectionStart == e.target.selectionEnd) {
                                 e.preventDefault();
-                                self.popup.results[0].doAction("details");
+                                self.popup.results[0].doAction("getDetails");
                             }
                             break;
                         case "End": {

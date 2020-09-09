@@ -102,7 +102,7 @@ async function withLogin(action) {
             case "copyOTP":
                 handleError("Copying OTP token to clipboard...", "notice");
                 break;
-            case "details":
+            case "getDetails":
                 handleError("Loading entry details...", "notice");
                 break;
             default:
@@ -128,7 +128,7 @@ async function withLogin(action) {
                     login: response.login,
                 });
             }
-            if (action === "details") {
+            if (action === "getDetails") {
                 var details = new DetailsInterface(this.settings, response.login);
                 details.attach(document.body);
             } else {

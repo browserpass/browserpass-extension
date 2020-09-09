@@ -761,7 +761,7 @@ async function handleMessage(settings, message, sendResponse) {
             }
             break;
 
-        case "details":
+        case "getDetails":
             sendResponse({ status: "ok", login: message.login });
             break;
 
