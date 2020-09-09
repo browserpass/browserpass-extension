@@ -3,7 +3,9 @@
 
 require("chrome-extension-async");
 const Interface = require("./interface");
+const DetailsInterface = require("./detailsInterface");
 const helpers = require("../helpers");
+const m = require("mithril");
 
 run();
 
@@ -21,11 +23,8 @@ function handleError(error, type = "error") {
     if (type == "error") {
         console.log(error);
     }
-    var errorNode = document.createElement("div");
-    errorNode.setAttribute("class", "part " + type);
-    errorNode.textContent = error.toString();
-    document.body.innerHTML = "";
-    document.body.appendChild(errorNode);
+    var node = { view: () => m(`div.part.${type}`, error.toString()) };
+    m.mount(document.body, node);
 }
 
 /**
@@ -100,6 +99,12 @@ async function withLogin(action) {
             case "copyUsername":
                 handleError("Copying username to clipboard...", "notice");
                 break;
+            case "copyOTP":
+                handleError("Copying OTP token to clipboard...", "notice");
+                break;
+            case "getDetails":
+                handleError("Loading entry details...", "notice");
+                break;
             default:
                 handleError("Please wait...", "notice");
                 break;
@@ -117,7 +122,18 @@ async function withLogin(action) {
         if (response.status != "ok") {
             throw new Error(response.message);
         } else {
-            window.close();
+            if (response.login && typeof response.login === "object") {
+                response.login.doAction = withLogin.bind({
+                    settings: this.settings,
+                    login: response.login,
+                });
+            }
+            if (action === "getDetails") {
+                var details = new DetailsInterface(this.settings, response.login);
+                details.attach(document.body);
+            } else {
+                window.close();
+            }
         }
     } catch (e) {
         handleError(e);

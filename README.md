@@ -25,6 +25,7 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [Password store locations](#password-store-locations)
 -   [Options](#options)
 -   -   [A note about autosubmit](#a-note-about-autosubmit)
+-   -   [A note about OTP](#a-note-about-otp)
 -   [Usage data](#usage-data)
 -   [Security](#security)
 -   [Privacy](#privacy)
@@ -33,7 +34,6 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [Error: Unable to fetch and parse login fields](#error-unable-to-fetch-and-parse-login-fields)
     -   [How to use the same username and password pair on multiple domains](#how-to-use-the-same-username-and-password-pair-on-multiple-domains)
     -   [Why Browserpass on Firefox does not work on Mozilla domains?](#why-browserpass-on-firefox-does-not-work-on-mozilla-domains)
-    -   [Why is OTP not supported?](#why-is-otp-not-supported)
 -   [Building the extension](#building-the-extension)
     -   [Build locally](#build-locally)
     -   [Load an unpacked extension](#load-an-unpacked-extension)
@@ -217,15 +217,16 @@ Using the `Custom store locations` setting in the browser extension options, you
 
 The list of available options:
 
-| Name                                                            | Description                                                  |
-| --------------------------------------------------------------- | ------------------------------------------------------------ |
-| Automatically submit forms after filling (aka `autoSubmit`)     | Make Browserpass automatically submit the login form for you |
-| Default username (aka `username`)                               | Username to use when it's not defined in the password file   |
-| Custom gpg binary (aka `gpgPath`)                               | Path to a custom `gpg` binary to use                         |
-| Custom store locations                                          | List of password stores to use                               |
-| Custom store locations - badge background color (aka `bgColor`) | Badge background color for a given password store in popup   |
-| Custom store locations - badge text color (aka `color`)         | Badge text color for a given password store in popup         |
-| Ignore items (aka `ignore`)                                     | Ignore all matching logins                                   |
+| Name                                                            | Description                                                   |
+| --------------------------------------------------------------- | ------------------------------------------------------------- |
+| Automatically submit forms after filling (aka `autoSubmit`)     | Make Browserpass automatically submit the login form for you  |
+| Enable support for OTP tokens (aka `enableOTP`)                 | Generate TOTP codes if a TOTP seed is found in the pass entry |
+| Default username (aka `username`)                               | Username to use when it's not defined in the password file    |
+| Custom gpg binary (aka `gpgPath`)                               | Path to a custom `gpg` binary to use                          |
+| Custom store locations                                          | List of password stores to use                                |
+| Custom store locations - badge background color (aka `bgColor`) | Badge background color for a given password store in popup    |
+| Custom store locations - badge text color (aka `color`)         | Badge text color for a given password store in popup          |
+| Ignore items (aka `ignore`)                                     | Ignore all matching logins                                    |
 
 Browserpass allows configuring certain settings in different places places using the following priority, highest first:
 
@@ -233,6 +234,7 @@ Browserpass allows configuring certain settings in different places places using
     - `autoSubmit`
 1. Options defined in `.browserpass.json` file located in the root of a password store:
     - `autoSubmit`
+    - `enableOTP`
     - `gpgPath`
     - `username`
     - `bgColor`
@@ -240,6 +242,7 @@ Browserpass allows configuring certain settings in different places places using
     - `ignore`
 1. Options defined in browser extension options:
     - Automatically submit forms after filling (aka `autoSubmit`)
+    - Enable support for OTP tokens (aka `enableOTP`)
     - Default username (aka `username`)
     - Custom gpg binary (aka `gpgPath`)
     - Custom store locations
@@ -251,6 +254,16 @@ Browserpass allows configuring certain settings in different places places using
 While we provide autosubmit as an option for users, we do not recommend it. This is because, while Browserpass' fill logic is robust and usually reliable, it occasionally gets things wrong and fills something (typically the username) into a field or form where it doesn't belong. If autosubmit is enabled, then this can result in Browserpass _automatically submitting_ sensitive credentials into something that isn't a login form.
 
 As the demand for autosubmit is extremely high, we have decided to provide it anyway - however it is disabled by default, and we recommend that users do not enable it.
+
+### A note about OTP
+
+Tools like `pass-otp` make it possible to use `pass` for generating OTP codes, however keeping both passwords and OTP URI in the same location diminishes the major benefit that OTP is supposed to provide: two factor authentication. The purpose of multi-factor authentication is to protect your account even when attackers gain access to your password store, but if your OTP seed is stored in the same place, all auth factors will be compromised at once. In particular, Browserpass has access to the entire contents of your password entries, so if it is ever compromised, all your accounts will be at risk, even though you signed up for 2FA.
+
+Browserpass is opinionated, it does not promote `pass-otp` and by default does not generate OTP codes from OTP seeds in password entries, even though there are other password managers that provide such functionality out of the box.
+
+There are valid scenarios for using `pass-otp` (e.g. it gives protection against intercepting your password during transmission), but users are strongly advised to very carefully consider whether `pass-otp` is really an appropriate solution - and if so, come up with their own ways of accessing OTP codes that conforms to their security requirements. For the majority of people `pass-otp` is not recommended; using any phone app like Authy will be a much better and more secure alternative, because this way attackers would have to not only break into your password store, but they would _also_ have to break into your phone.
+
+If you still want the OTP support regardless, you may enable it in the Browserpass settings.
 
 ## Usage data
 
@@ -359,16 +372,6 @@ The full list of blocked domains at the time of writing is:
 -   support.mozilla.org
 -   sync.services.mozilla.com
 -   testpilot.firefox.com
-
-### Why is OTP not supported?
-
-Tools like `pass-otp` make it possible to use `pass` for generating OTP codes, however keeping both passwords and OTP URI in the same location diminishes the major benefit that OTP is supposed to provide: two factor authentication. The purpose of multi-factor authentication is to protect your account even when attackers gain access to your password store, but if your OTP seed is stored in the same place, all auth factors will be compromised at once. In particular, Browserpass has access to the entire contents of your password entries, so if it is ever compromised, all your accounts will be at risk, even though you signed up for 2FA.
-
-Browserpass is opinionated, it does not promote `pass-otp` and intentionally does not support generating OTP codes from OTP URIs in password entiries, even though there are other password managers that provide such functionality.
-
-There are valid scenarios for using `pass-otp` (e.g. it gives protection against intercepting your password during transmission), but users are strongly advised to very carefully consider whether `pass-otp` is really an appropriate solution - and if so, come up with their own ways of accessing OTP codes that conforms to their security requirements (for example by using dmenu/rofi scripts). For the majority of people `pass-otp` is not recommended; using any phone app like Authy will be a much better and more secure alternative, because this way attackers would have to not only break into your password store, but they would _also_ have to break into your phone.
-
-If you still want the OTP support, it is provided via a separate extension [browserpass-otp](https://github.com/browserpass/browserpass-otp). That extension integrates with Browserpass to ensure a streamlined workflow, for example if the OTP extension is installed, it will be automatically triggered when Browserpass fills an entry and an OTP token is present.
 
 ## Building the extension
 

@@ -20,6 +20,13 @@
     src: local("Open Sans Light"), url("/fonts/OpenSans-Light.ttf") format("truetype");
 }
 
+@font-face {
+    font-family: "Source Code Pro";
+    font-style: normal;
+    font-weight: 400;
+    src: local("Source Code Pro"), url("/fonts/SourceCodePro-Regular.ttf") format("truetype");
+}
+
 html,
 body {
     font-family: "Open Sans";
@@ -66,6 +73,11 @@ body {
     padding: 1px 4px;
 }
 
+.details .header {
+    display: flex;
+    margin-bottom: 4px;
+}
+
 .part {
     box-sizing: border-box;
     display: flex;
@@ -89,6 +101,80 @@ body {
 .part.notice {
     white-space: normal;
     padding: 7px;
+}
+
+.part.details {
+    flex-direction: column;
+    padding: 5px 10px 10px;
+    & > .part {
+        display: flex;
+        margin-bottom: 11px;
+        &:last-child {
+            margin-bottom: 0;
+        }
+        &.snack {
+            border: 1px solid;
+            border-radius: 2px;
+            height: 36px;
+            padding: 4px;
+            .char {
+                white-space: pre;
+            }
+            & > .label {
+                border-radius: 2px 0 0 2px;
+                cursor: default;
+                display: flex;
+                flex-grow: 0;
+                font-weight: bold;
+                justify-content: flex-end;
+                margin: -5px 8px -5px -5px;
+                padding: 4px 8px 4px 4px;
+                width: 3.25em;
+            }
+            & > :not(.label) {
+                display: flex;
+                align-items: center;
+                font-family: Source Code Pro, monospace;
+            }
+            & > .copy {
+                cursor: pointer;
+                flex-grow: 0;
+                padding: 0 24px 0 0;
+                background-image: url("/popup/icon-copy.svg");
+                background-position: top 4px right 4px;
+                background-repeat: no-repeat;
+                background-size: 16px;
+                margin: 2px;
+            }
+
+            & > .progress-container {
+                z-index: 2;
+                position: absolute;
+                margin: 30px 0 -4px calc(3.25em + 7px);
+                height: 1px;
+                width: calc(100% - 6.5em + 12px);
+                & > .progress {
+                    height: 100%;
+                    margin: 0;
+                }
+            }
+        }
+        &.raw textarea {
+            border: 1px solid;
+            border-radius: 2px;
+            flex-grow: 1;
+            font-family: Source Code Pro, monospace;
+            min-height: 110px;
+            min-width: 340px;
+            outline: none;
+            padding: 10px;
+            white-space: pre;
+        }
+        & > * {
+            flex-grow: 1;
+            align-items: center;
+        }
+    }
 }
 
 .part.search {
@@ -134,9 +220,18 @@ body {
 
 .part.login {
     display: flex;
-    cursor: pointer;
     align-items: center;
     height: @login-height;
+
+    &.details-header {
+        height: calc(@login-height + 6px);
+        padding: 0 4px;
+        outline: none;
+    }
+
+    &:not(.details-header) {
+        cursor: pointer;
+    }
 
     &:hover,
     &:focus {
@@ -185,6 +280,10 @@ body {
 
         &.copy-user {
             background-image: url("/popup/icon-user.svg");
+        }
+
+        &.details {
+            background-image: url("/popup/icon-details.svg");
         }
     }
 }

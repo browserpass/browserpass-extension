@@ -10,14 +10,6 @@ const helpers = require("./helpers");
 // native application id
 var appID = "com.github.browserpass.native";
 
-// OTP extension id
-var otpID = [
-    "afjjoildnccgmjbblnklbohcbjehjaph", // webstore releases
-    "jbnpmhhgnchcoljeobafpinmchnpdpin", // github releases
-    "fcmmcnalhjjejhpnlfnddimcdlmpkbdf", // local unpacked
-    "browserpass-otp@maximbaz.com", // firefox
-];
-
 // default settings
 var defaultSettings = {
     autoSubmit: false,
@@ -26,6 +18,7 @@ var defaultSettings = {
     foreignFills: {},
     username: null,
     theme: "dark",
+    enableOTP: false,
 };
 
 var authListeners = {};
@@ -562,7 +555,6 @@ async function getFullSettings() {
     try {
         settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
         let originInfo = new BrowserpassURL(settings.tab.url);
-        settings.host = originInfo.host; // TODO remove this after OTP extension is migrated
         settings.origin = originInfo.origin;
     } catch (e) {}
 
@@ -750,6 +742,28 @@ async function handleMessage(settings, message, sendResponse) {
                 });
             }
             break;
+        case "copyOTP":
+            if (settings.enableOTP) {
+                try {
+                    if (!message.login.fields.otp) {
+                        throw new Exception("No OTP seed available");
+                    }
+                    copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
+                    sendResponse({ status: "ok" });
+                } catch (e) {
+                    sendResponse({
+                        status: "error",
+                        message: "Unable to copy OTP token",
+                    });
+                }
+            } else {
+                sendResponse({ status: "error", message: "OTP support is disabled" });
+            }
+            break;
+
+        case "getDetails":
+            sendResponse({ status: "ok", login: message.login });
+            break;
 
         case "launch":
         case "launchInNewTab":
@@ -831,9 +845,13 @@ async function handleMessage(settings, message, sendResponse) {
             break;
     }
 
-    // trigger browserpass-otp
-    if (typeof message.login !== "undefined" && message.login.fields.hasOwnProperty("otp")) {
-        triggerOTPExtension(settings, message.action, message.login.fields.otp);
+    // copy OTP token after fill
+    if (
+        settings.enableOTP &&
+        typeof message.login !== "undefined" &&
+        message.login.fields.hasOwnProperty("otp")
+    ) {
+        copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
     }
 }
 
@@ -885,7 +903,7 @@ async function parseFields(settings, login) {
         secret: ["secret", "password", "pass"],
         login: ["login", "username", "user"],
         openid: ["openid"],
-        otp: ["otp", "totp", "hotp"],
+        otp: ["otp", "totp"],
         url: ["url", "uri", "website", "site", "link", "launch"],
     };
     login.settings = {
@@ -893,10 +911,9 @@ async function parseFields(settings, login) {
     };
     var lines = login.raw.split(/[\r\n]+/).filter((line) => line.trim().length > 0);
     lines.forEach(function (line) {
-        // check for uri-encoded otp
-        if (line.match(/^otpauth:\/\/.+/)) {
-            login.fields.otp = { key: null, data: line };
-            return;
+        // check for uri-encoded otp without line prefix
+        if (line.match(/^otpauth:\/\/.+/i)) {
+            line = `otp: ${line}`;
         }
 
         // split key / value & ignore non-k/v lines
@@ -918,11 +935,7 @@ async function parseFields(settings, login) {
                 Array.isArray(login.fields[key]) &&
                 login.fields[key].includes(parts[0].toLowerCase())
             ) {
-                if (key === "otp") {
-                    login.fields[key] = { key: parts[0].toLowerCase(), data: parts[1] };
-                } else {
-                    login.fields[key] = parts[1];
-                }
+                login.fields[key] = parts[1];
                 break;
             }
         }
@@ -960,6 +973,41 @@ async function parseFields(settings, login) {
     for (var key in login.settings) {
         if (typeof login.settings[key].type !== "undefined") {
             delete login.settings[key];
+        }
+    }
+
+    // preprocess otp
+    if (settings.enableOTP && login.fields.hasOwnProperty("otp")) {
+        if (login.fields.otp.match(/^otpauth:\/\/.+/i)) {
+            // attempt to parse otp data as URI
+            try {
+                let url = new URL(login.fields.otp.toLowerCase());
+                let otpParts = url.pathname.split("/").filter((s) => s.trim());
+                login.fields.otp = {
+                    raw: login.fields.otp,
+                    params: {
+                        type: otpParts[0] === "otp" ? "totp" : otpParts[0],
+                        secret: url.searchParams.get("secret").toUpperCase(),
+                        algorithm: url.searchParams.get("algorithm") || "sha1",
+                        digits: parseInt(url.searchParams.get("digits") || "6"),
+                        period: parseInt(url.searchParams.get("period") || "30"),
+                    },
+                };
+            } catch (e) {
+                throw new Exception(`Unable to parse URI: ${otp.data}`, e);
+            }
+        } else {
+            // use default params for secret-only otp data
+            login.fields.otp = {
+                raw: login.fields.otp,
+                params: {
+                    type: "totp",
+                    secret: login.fields.otp.toUpperCase(),
+                    algorithm: "sha1",
+                    digits: 6,
+                    period: 30,
+                },
+            };
         }
     }
 }
@@ -1043,41 +1091,6 @@ async function saveSettings(settings) {
         if (settingsToSave.hasOwnProperty(key)) {
             localStorage.setItem(key, JSON.stringify(settingsToSave[key]));
         }
-    }
-}
-
-/**
- * Trigger OTP extension (browserpass-otp)
- *
- * @since 3.0.13
- *
- * @param object settings Settings object
- * @param string action   Browserpass action
- * @param object otp      OTP field data
- * @return void
- */
-function triggerOTPExtension(settings, action, otp) {
-    // trigger otp extension
-    for (let targetID of otpID) {
-        chrome.runtime
-            .sendMessage(targetID, {
-                version: chrome.runtime.getManifest().version,
-                action: action,
-                otp: otp,
-                settings: {
-                    host: settings.host,
-                    origin: settings.origin,
-                    tab: settings.tab,
-                },
-            })
-            // Both response & error are noop functions, because we don't care about
-            // the response, and if there's an error it just means the otp extension
-            // is probably not installed. We can't detect that without requesting the
-            // management permission, so this is an acceptable workaround.
-            .then(
-                (noop) => null,
-                (noop) => null
-            );
     }
 }
 

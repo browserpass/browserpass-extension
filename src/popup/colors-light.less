@@ -15,12 +15,19 @@
         @hint-bg-color: #1c7ed6,
         @hint-color: #e7f5ff,
         @match-text-bg-color: #cfecff,
-        @match-text-color: #1873ea
+        @match-text-color: #1873ea,
+        @invert-text-color: #f1f3f5,
+        @snack-color: #7a7a7a,
+        @snack-label-color: #7a7a7a,
+        @progress-color: #c7d5ff,
+        @edit-bg-color: #ffffff
     );
 
     .part.login .name .line1 .recent,
     .part.login .action.copy-password,
-    .part.login .action.copy-user {
+    .part.login .action.copy-user,
+    .part.login .action.details,
+    .part.details .action.copy {
         filter: invert(85%);
     }
 
@@ -29,8 +36,22 @@
     .part.login .action.copy-password:focus,
     .part.login .action.copy-password:hover,
     .part.login .action.copy-user:focus,
-    .part.login .action.copy-user:hover {
+    .part.login .action.copy-user:hover,
+    .part.login .action.details:focus,
+    .part.login .action.details:hover {
         // colour such that invert(85%) ~= @hover-bg-color
         background-color: #0c0804;
+    }
+
+    .part.details .part.snack {
+        &.line-otp {
+            background: transparent;
+        }
+        .progress-container {
+            background-color: #ffffff;
+            z-index: -1;
+            margin-top: -4px;
+            height: 34px;
+        }
     }
 }
