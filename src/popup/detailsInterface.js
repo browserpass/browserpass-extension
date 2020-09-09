@@ -70,7 +70,7 @@ function view(ctl, params) {
                         "div.store.badge",
                         {
                             style: `background-color: ${storeBgColor};
-                                                color: ${storeColor}`,
+                                               color: ${storeColor}`,
                         },
                         login.store.name
                     ),
