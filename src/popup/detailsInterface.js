@@ -21,7 +21,11 @@ function DetailsInterface(settings, login) {
     //fields
     this.settings = settings;
     this.login = login;
+    this.secret = login.fields.secret;
     this.editing = false;
+
+    // raw data
+    this.rawText = m("textarea", { readonly: true }, login.raw.trim());
 
     // get basename & dirname of entry
     this.login.basename = this.login.login.substr(this.login.login.lastIndexOf("/") + 1);
@@ -41,6 +45,24 @@ function attach(element) {
 }
 
 /**
+ * Generate a highlighted version of the password for display
+ *
+ * @since 3.7.0
+ *
+ * @return []Vnode
+ */
+function passChars() {
+    return this.secret.split("").map((c) => {
+        if (c.match(/[0-9]/)) {
+            return m("span.char.num", c);
+        } else if (c.match(/[^\w\s]/)) {
+            return m("span.char.punct", c);
+        }
+        return m("span.char", c);
+    });
+}
+
+/**
  * Generates vnodes for render
  *
  * @since 3.6.0
@@ -50,17 +72,10 @@ function attach(element) {
  * @return []Vnode
  */
 function view(ctl, params) {
+    const self = this;
     const login = this.login;
     const storeBgColor = login.store.bgColor || login.store.settings.bgColor;
     const storeColor = login.store.color || login.store.settings.color;
-    const passChars = login.fields.secret.split("").map((c) => {
-        if (c.match(/[0-9]/)) {
-            return m("span.char.num", c);
-        } else if (c.match(/[^\w\s]/)) {
-            return m("span.char.punct", c);
-        }
-        return m("span.char", c);
-    });
 
     var nodes = [];
     nodes.push(
@@ -108,14 +123,25 @@ function view(ctl, params) {
                 ? m("div.action.edit", {
                       tabindex: 0,
                       title: "Edit",
-                      onclick: () => (this.editing = true),
+                      onclick: () => {
+                          this.editing = true;
+                          this.rawText = m(
+                              "textarea",
+                              {
+                                  oninput: (ev) => {
+                                      this.secret = ev.target.value.split("\n")[0].trim();
+                                  },
+                              },
+                              login.raw.trim()
+                          );
+                      },
                   })
                 : null,
         ]),
         m("div.part.details", [
             m("div.part.snack.line-secret", [
                 m("div.label", "Secret"),
-                m("div.chars", passChars),
+                m("div.chars", passChars.call(self)),
                 !this.editing
                     ? m("div.action.copy", {
                           title: "Copy password",
@@ -175,7 +201,7 @@ function view(ctl, params) {
                     ]);
                 }
             })(),
-            m("div.part.raw", m("textarea", login.raw.trim())),
+            m("div.part.raw", this.rawText),
         ])
     );
 
