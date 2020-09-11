@@ -136,15 +136,23 @@ body {
                 align-items: center;
                 font-family: Source Code Pro, monospace;
             }
-            & > .copy {
+            & > .copy,
+            & > .generate {
                 cursor: pointer;
                 flex-grow: 0;
                 padding: 0 24px 0 0;
-                background-image: url("/popup/icon-copy.svg");
                 background-position: top 4px right 4px;
                 background-repeat: no-repeat;
                 background-size: 16px;
                 margin: 2px;
+            }
+
+            & > .copy {
+                background-image: url("/popup/icon-copy.svg");
+            }
+
+            & > .generate {
+                background-image: url("/popup/icon-generate.svg");
             }
 
             & > .progress-container {
@@ -284,6 +292,18 @@ body {
 
         &.details {
             background-image: url("/popup/icon-details.svg");
+        }
+
+        &.edit {
+            background-image: url("/popup/icon-edit.svg");
+        }
+
+        &.save {
+            background-image: url("/popup/icon-save.svg");
+        }
+
+        &.delete {
+            background-image: url("/popup/icon-delete.svg");
         }
     }
 }

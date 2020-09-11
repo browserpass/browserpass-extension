@@ -21,6 +21,7 @@ function DetailsInterface(settings, login) {
     //fields
     this.settings = settings;
     this.login = login;
+    this.editing = false;
 
     // get basename & dirname of entry
     this.login.basename = this.login.login.substr(this.login.login.lastIndexOf("/") + 1);
@@ -89,20 +90,55 @@ function view(ctl, params) {
                 ]),
                 m("div.line2", [m.trust(login.basename)]),
             ]),
+            this.editing && this.settings.caps.delete
+                ? m("div.action.delete", {
+                      tabindex: 0,
+                      title: "Delete",
+                      onclick: () => login.doAction("delete"),
+                  })
+                : null,
+            this.editing
+                ? m("div.action.save", {
+                      tabindex: 0,
+                      title: "Save",
+                      onclick: () => login.doAction("save"),
+                  })
+                : null,
+            !this.editing && this.settings.caps.save
+                ? m("div.action.edit", {
+                      tabindex: 0,
+                      title: "Edit",
+                      onclick: () => (this.editing = true),
+                  })
+                : null,
         ]),
         m("div.part.details", [
             m("div.part.snack.line-secret", [
                 m("div.label", "Secret"),
                 m("div.chars", passChars),
-                m("div.action.copy", { onclick: () => login.doAction("copyPassword") }),
+                !this.editing
+                    ? m("div.action.copy", {
+                          title: "Copy password",
+                          onclick: () => login.doAction("copyPassword"),
+                      })
+                    : m("div.action.generate", {
+                          title: "Generate new password",
+                          onclick: () => null,
+                      }), // TODO
             ]),
-            m("div.part.snack.line-login", [
-                m("div.label", "Login"),
-                m("div", login.fields.login),
-                m("div.action.copy", { onclick: () => login.doAction("copyUsername") }),
-            ]),
+            !this.editing
+                ? m("div.part.snack.line-login", [
+                      m("div.label", "Login"),
+                      m("div", login.fields.login),
+                      m("div.action.copy", {
+                          title: "Copy username",
+                          onclick: () => login.doAction("copyUsername"),
+                      }),
+                  ])
+                : null,
             (() => {
                 if (
+                    !this.editing &&
                     this.settings.enableOTP &&
                     login.fields.otp &&
                     login.fields.otp.params.type === "totp"
@@ -132,7 +168,10 @@ function view(ctl, params) {
                         m("div.label", "Token"),
                         m("div.progress-container", progressNode),
                         m("div", helpers.makeTOTP(login.fields.otp.params)),
-                        m("div.action.copy", { onclick: () => login.doAction("copyOTP") }),
+                        m("div.action.copy", {
+                            title: "Copy token",
+                            onclick: () => login.doAction("copyOTP"),
+                        }),
                     ]);
                 }
             })(),
