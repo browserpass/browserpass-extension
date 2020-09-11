@@ -19,6 +19,9 @@ var defaultSettings = {
     username: null,
     theme: "dark",
     enableOTP: false,
+    caps: {
+        save: false,
+    },
 };
 
 var authListeners = {};
@@ -496,6 +499,10 @@ async function getFullSettings() {
         settings.hostError = response;
     }
     settings.version = response.version;
+
+    // host capabilities
+    settings.caps.save = settings.version >= 3000000; //TODO 3001000;
+    settings.caps.delete = settings.version >= 3000000; //TODO 3001000;
 
     // Fill store settings, only makes sense if 'configure' succeeded
     if (response.status === "ok") {
