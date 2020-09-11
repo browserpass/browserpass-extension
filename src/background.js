@@ -22,6 +22,7 @@ var defaultSettings = {
     caps: {
         save: false,
         delete: false,
+        tree,
     },
 };
 
@@ -504,6 +505,7 @@ async function getFullSettings() {
     // host capabilities
     settings.caps.save = settings.version >= 3000000; //TODO 3001000;
     settings.caps.delete = settings.version >= 3000000; //TODO 3001000;
+    settings.caps.tree = settings.version >= 3000000; //TODO 3001000;
 
     // Fill store settings, only makes sense if 'configure' succeeded
     if (response.status === "ok") {
