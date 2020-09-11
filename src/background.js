@@ -21,6 +21,7 @@ var defaultSettings = {
     enableOTP: false,
     caps: {
         save: false,
+        delete: false,
     },
 };
 
