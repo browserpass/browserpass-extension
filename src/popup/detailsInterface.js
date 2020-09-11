@@ -63,6 +63,30 @@ function passChars() {
 }
 
 /**
+ * Generate a new password
+ *
+ * @since 3.7.0
+ *
+ * @param int    length   New secret length
+ * @param string alphabet Allowed alphabet
+ * @return string
+ */
+function generateSecret(
+    length = 16,
+    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+) {
+    let secret = "";
+    let value = new Uint8Array(1);
+    while (secret.length < length) {
+        crypto.getRandomValues(value);
+        if (value[0] < alphabet.length) {
+            secret += alphabet[value[0]];
+        }
+    }
+    return secret;
+}
+
+/**
  * Generates vnodes for render
  *
  * @since 3.6.0
@@ -149,8 +173,14 @@ function view(ctl, params) {
                       })
                     : m("div.action.generate", {
                           title: "Generate new password",
-                          onclick: () => null,
-                      }), // TODO
+                          onclick: () => {
+                              this.rawText.dom.value = this.rawText.dom.value.replace(
+                                  /^.*((?:(<?\r)\n)|(?:\n\r?))/,
+                                  generateSecret() + "$1"
+                              );
+                              this.rawText.dom.dispatchEvent(new Event("input"));
+                          },
+                      }),
             ]),
             !this.editing
                 ? m("div.part.snack.line-login", [
