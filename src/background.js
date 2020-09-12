@@ -22,7 +22,7 @@ var defaultSettings = {
     caps: {
         save: false,
         delete: false,
-        tree,
+        tree: false,
     },
 };
 
