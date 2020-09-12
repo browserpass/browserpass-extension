@@ -728,6 +728,26 @@ async function handleMessage(settings, message, sendResponse) {
                 });
             }
             break;
+        case "save":
+            try {
+                var response = await hostAction(settings, "save", {
+                    storeId: message.login.store.id,
+                    file: `${message.login.login}.gpg`,
+                    contents: message.params.rawContents,
+                });
+                console.log(response);
+                if (response.status != "ok") {
+                    alert(`Save failed: ${response.params.message}`);
+                    throw new Error(JSON.stringify(response)); // TODO handle host error
+                }
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to save password file" + e.toString(),
+                });
+            }
+            break;
         case "copyPassword":
             try {
                 copyToClipboard(message.login.fields.secret);
