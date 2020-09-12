@@ -140,7 +140,8 @@ function view(ctl, params) {
                 ? m("div.action.save", {
                       tabindex: 0,
                       title: "Save",
-                      onclick: () => login.doAction("save"),
+                      onclick: () =>
+                          login.doAction("save", { rawContents: this.rawText.dom.value }),
                   })
                 : null,
             !this.editing && this.settings.caps.save
