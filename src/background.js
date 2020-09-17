@@ -812,6 +812,15 @@ async function handleMessage(settings, message, sendResponse) {
 
                 // no need to check filledFields, because fillFields() already throws an error if empty
                 sendResponse({ status: "ok", filledFields: filledFields });
+
+                // copy OTP token after fill
+                if (
+                    settings.enableOTP &&
+                    typeof message.login !== "undefined" &&
+                    message.login.fields.hasOwnProperty("otp")
+                ) {
+                    copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
+                }
             } catch (e) {
                 try {
                     sendResponse({
@@ -843,15 +852,6 @@ async function handleMessage(settings, message, sendResponse) {
                 message: "Unknown action: " + message.action,
             });
             break;
-    }
-
-    // copy OTP token after fill
-    if (
-        settings.enableOTP &&
-        typeof message.login !== "undefined" &&
-        message.login.fields.hasOwnProperty("otp")
-    ) {
-        copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
     }
 }
 
