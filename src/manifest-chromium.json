@@ -3,7 +3,7 @@
     "manifest_version": 2,
     "name": "Browserpass",
     "description": "Browser extension for zx2c4's pass (password manager)",
-    "version": "3.7.0",
+    "version": "3.7.1",
     "author": "Maxim Baz <browserpass@maximbaz.com>, Steve Gilberd <steve@erayd.net>",
     "homepage_url": "https://github.com/browserpass/browserpass-extension",
     "background": {
