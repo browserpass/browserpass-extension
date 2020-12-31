@@ -895,6 +895,8 @@ async function parseFields(settings, login) {
         throw new Error(JSON.stringify(response)); // TODO handle host error
     }
 
+    var allowEmpty = ["login"];
+
     // save raw data inside login
     login.raw = response.data.contents;
 
@@ -917,7 +919,7 @@ async function parseFields(settings, login) {
         }
 
         // split key / value & ignore non-k/v lines
-        var parts = line.match(/^(.+?):(.+)$/);
+        var parts = line.match(/^(.+?):(.*)$/);
         if (parts === null) {
             return;
         }
@@ -925,7 +927,7 @@ async function parseFields(settings, login) {
             .slice(1)
             .map((value) => value.trim())
             .filter((value) => value.length);
-        if (parts.length != 2) {
+        if (!parts.length) {
             return;
         }
 
@@ -935,6 +937,9 @@ async function parseFields(settings, login) {
                 Array.isArray(login.fields[key]) &&
                 login.fields[key].includes(parts[0].toLowerCase())
             ) {
+                if (parts.length < 2 && !allowEmpty.includes(key)) {
+                    return;
+                }
                 login.fields[key] = parts[1];
                 break;
             }
