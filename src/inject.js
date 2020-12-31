@@ -433,6 +433,11 @@
      * @return bool Whether the update succeeded
      */
     function update(field, value, form) {
+        if (value === undefined) {
+            // undefined values should not be filled, but are always considered successful
+            return true;
+        }
+
         if (!value.length) {
             return false;
         }
