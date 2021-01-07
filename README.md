@@ -25,7 +25,9 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [Password store locations](#password-store-locations)
 -   [Options](#options)
     -   [A note about autosubmit](#a-note-about-autosubmit)
-    -   [A note about OTP](#a-note-about-otp)
+    -   [OTP](#otp)
+        -   [A note about OTP](#a-note-about-otp)
+        -   [OTP Usage](#otp-usage)
 -   [Usage data](#usage-data)
 -   [Security](#security)
 -   [Privacy](#privacy)
@@ -255,7 +257,9 @@ While we provide autosubmit as an option for users, we do not recommend it. This
 
 As the demand for autosubmit is extremely high, we have decided to provide it anyway - however it is disabled by default, and we recommend that users do not enable it.
 
-### A note about OTP
+### OTP
+
+#### A note about OTP
 
 Tools like `pass-otp` make it possible to use `pass` for generating OTP codes, however keeping both passwords and OTP URI in the same location diminishes the major benefit that OTP is supposed to provide: two factor authentication. The purpose of multi-factor authentication is to protect your account even when attackers gain access to your password store, but if your OTP seed is stored in the same place, all auth factors will be compromised at once. In particular, Browserpass has access to the entire contents of your password entries, so if it is ever compromised, all your accounts will be at risk, even though you signed up for 2FA.
 
@@ -264,6 +268,12 @@ Browserpass is opinionated, it does not promote `pass-otp` and by default does n
 There are valid scenarios for using `pass-otp` (e.g. it gives protection against intercepting your password during transmission), but users are strongly advised to very carefully consider whether `pass-otp` is really an appropriate solution - and if so, come up with their own ways of accessing OTP codes that conforms to their security requirements. For the majority of people `pass-otp` is not recommended; using any phone app like Authy will be a much better and more secure alternative, because this way attackers would have to not only break into your password store, but they would _also_ have to break into your phone.
 
 If you still want the OTP support regardless, you may enable it in the Browserpass settings.
+
+#### OTP usage
+
+TOTP seeds may be provided either as an otpauth URL (e.g. `otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example`) or as a plain seed (e.g. `totp: JBSWY3DPEHPK3PXP`). Please note that the plain form is unsuitable for any TOTP implementation that does not use a period of 30 seconds and a length of 6 digits.
+
+The OTP code may be accessed by clicking on the Browserpass popup « Open Details ». In addition, the generated OTP code will be copied to the clipboard immediately after Browserpass is invoked, unless Browserpass is already using the clipboard for something else.
 
 ## Usage data
 
