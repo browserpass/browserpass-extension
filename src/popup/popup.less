@@ -250,13 +250,21 @@ body {
             flex-direction: row;
             font-size: 12px;
 
-            .recent {
+            .recent,
+            .clear-recent {
                 background-image: url("/popup/icon-history.svg");
                 background-repeat: no-repeat;
                 background-size: contain;
                 margin-left: 8px;
                 width: 9.5px;
                 margin-top: 4px;
+            }
+
+            .clear-recent {
+                background-image: url("/popup/icon-eraser.svg");
+                margin-left: 4px;
+                margin-top: 2px;
+                width: 12px;
             }
         }
 

@@ -105,6 +105,9 @@ async function withLogin(action) {
             case "getDetails":
                 handleError("Loading entry details...", "notice");
                 break;
+            case "clearRecent":
+                // do nothing
+                break;
             default:
                 handleError("Please wait...", "notice");
                 break;
@@ -131,9 +134,14 @@ async function withLogin(action) {
             if (action === "getDetails") {
                 var details = new DetailsInterface(this.settings, response.login);
                 details.attach(document.body);
-            } else {
-                window.close();
-            }
+            } else
+                switch (action) {
+                    case "clearRecent":
+                        // don't close the popup
+                        break;
+                    default:
+                        window.close();
+                }
         }
     } catch (e) {
         handleError(e);
