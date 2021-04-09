@@ -743,7 +743,7 @@ async function handleMessage(settings, message, sendResponse) {
             }
             break;
         case "copyOTP":
-            if (settings.enableOTP) {
+            if (settings.enableOTP || settings.stores[message.login.store.id].settings.enableOTP) {
                 try {
                     if (!message.login.fields.otp) {
                         throw new Exception("No OTP seed available");
@@ -982,7 +982,10 @@ async function parseFields(settings, login) {
     }
 
     // preprocess otp
-    if (settings.enableOTP && login.fields.hasOwnProperty("otp")) {
+    if (
+        (settings.enableOTP || settings.stores[login.store.id].settings.enableOTP) &&
+        login.fields.hasOwnProperty("otp")
+    ) {
         if (login.fields.otp.match(/^otpauth:\/\/.+/i)) {
             // attempt to parse otp data as URI
             try {
