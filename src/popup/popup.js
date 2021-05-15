@@ -78,9 +78,10 @@ async function run() {
  * @since 3.0.0
  *
  * @param string action Action to take
+ * @param object params Action parameters
  * @return void
  */
-async function withLogin(action) {
+async function withLogin(action, params = {}) {
     try {
         // replace popup with a "please wait" notice
         switch (action) {
@@ -105,6 +106,9 @@ async function withLogin(action) {
             case "getDetails":
                 handleError("Loading entry details...", "notice");
                 break;
+            case "save":
+                // no in-progress notice
+                break;
             default:
                 handleError("Please wait...", "notice");
                 break;
@@ -115,10 +119,9 @@ async function withLogin(action) {
         const login = JSON.parse(JSON.stringify(this.login));
 
         // hand off action to background script
-        var response = await chrome.runtime.sendMessage({
-            action: action,
-            login: login,
-        });
+        console.log(action, params);
+        var response = await chrome.runtime.sendMessage({ action, login, params });
+        console.log(response);
         if (response.status != "ok") {
             throw new Error(response.message);
         } else {
@@ -131,6 +134,9 @@ async function withLogin(action) {
             if (action === "getDetails") {
                 var details = new DetailsInterface(this.settings, response.login);
                 details.attach(document.body);
+            } else if (action === "save") {
+                handleError("Successfully saved password entry", "notice");
+                setTimeout(window.close, 1000);
             } else {
                 window.close();
             }

@@ -19,6 +19,11 @@ var defaultSettings = {
     username: null,
     theme: "dark",
     enableOTP: false,
+    caps: {
+        save: false,
+        delete: false,
+        tree: false,
+    },
 };
 
 var authListeners = {};
@@ -497,6 +502,11 @@ async function getFullSettings() {
     }
     settings.version = response.version;
 
+    // host capabilities
+    settings.caps.save = settings.version >= 3000000; //TODO 3001000;
+    settings.caps.delete = settings.version >= 3000000; //TODO 3001000;
+    settings.caps.tree = settings.version >= 3000000; //TODO 3001000;
+
     // Fill store settings, only makes sense if 'configure' succeeded
     if (response.status === "ok") {
         if (Object.keys(settings.stores).length > 0) {
@@ -715,6 +725,26 @@ async function handleMessage(settings, message, sendResponse) {
                 sendResponse({
                     status: "error",
                     message: "Unable to enumerate password files" + e.toString(),
+                });
+            }
+            break;
+        case "save":
+            try {
+                var response = await hostAction(settings, "save", {
+                    storeId: message.login.store.id,
+                    file: `${message.login.login}.gpg`,
+                    contents: message.params.rawContents,
+                });
+                console.log(response);
+                if (response.status != "ok") {
+                    alert(`Save failed: ${response.params.message}`);
+                    throw new Error(JSON.stringify(response)); // TODO handle host error
+                }
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to save password file" + e.toString(),
                 });
             }
             break;
