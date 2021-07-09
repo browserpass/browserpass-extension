@@ -43,8 +43,17 @@ async function run() {
         var settings = response.settings;
 
         var root = document.getElementsByTagName("html")[0];
-        root.classList.remove("colors-dark");
-        root.classList.add(`colors-${settings.theme}`);
+
+        if (settings.theme == "auto") {
+            const darkThemeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+            updateTheme(root, darkThemeMediaQuery.matches);
+
+            darkThemeMediaQuery.addEventListener("change", (e) => {
+                updateTheme(root, e.matches);
+            });
+        } else {
+            updateTheme(root, settings.theme == "dark");
+        }
 
         if (settings.hasOwnProperty("hostError")) {
             throw new Error(settings.hostError.params.message);
@@ -70,6 +79,17 @@ async function run() {
     } catch (e) {
         handleError(e);
     }
+}
+
+/**
+ * Update css theme attribute
+ *
+ * @param {HTMLElement} root HTML Element that should be updated
+ * @param {boolean} dark Flag whether to set dark of light mode
+ */
+function updateTheme(root, dark) {
+    root.classList.toggle("colors-light", !dark);
+    root.classList.toggle("colors-dark", dark);
 }
 
 /**

@@ -66,6 +66,7 @@ function view(ctl, params) {
         createDropdown.call(this, "theme", [
             m("option", { value: "dark" }, "Dark"),
             m("option", { value: "light" }, "Light"),
+            m("option", { value: "auto" }, "Auto"),
         ])
     );
 
