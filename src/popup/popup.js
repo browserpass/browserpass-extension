@@ -43,6 +43,17 @@ async function run() {
         root.classList.remove("colors-dark");
         root.classList.add(`colors-${settings.theme}`);
 
+        if (settings.theme == "auto") {
+            const darkThemeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+            updateTheme(root, darkThemeMediaQuery.matches);
+
+            darkThemeMediaQuery.addEventListener("change", (e) => {
+                updateTheme(root, e.matches);
+            });
+        } else {
+            updateTheme(root, settings.theme == "dark");
+        }
+
         // get list of logins
         logins = await Login.prototype.getAll(settings);
         layout.setSessionSettings(settings);
