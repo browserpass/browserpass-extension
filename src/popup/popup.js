@@ -2,10 +2,13 @@
 "use strict";
 
 require("chrome-extension-async");
+const Login = require("./models/Login");
+const Settings = require("./models/Settings");
 const Interface = require("./interface");
 const DetailsInterface = require("./detailsInterface");
 const helpers = require("../helpers");
 const m = require("mithril");
+const LoginForm = require("./views/LoginForm");
 
 run();
 
@@ -36,37 +39,25 @@ function handleError(error, type = "error") {
  */
 async function run() {
     try {
-        var response = await chrome.runtime.sendMessage({ action: "getSettings" });
-        if (response.status != "ok") {
-            throw new Error(response.message);
-        }
-        var settings = response.settings;
+        // get user settings
+        let settings = await Settings.get();
 
         var root = document.getElementsByTagName("html")[0];
         root.classList.remove("colors-dark");
         root.classList.add(`colors-${settings.theme}`);
 
-        if (settings.hasOwnProperty("hostError")) {
-            throw new Error(settings.hostError.params.message);
-        }
-
-        if (typeof settings.origin === "undefined") {
-            throw new Error("Unable to retrieve current tab information");
-        }
-
         // get list of logins
-        response = await chrome.runtime.sendMessage({ action: "listFiles" });
-        if (response.status != "ok") {
-            throw new Error(response.message);
-        }
+        await Login.loadList(settings);
 
-        const logins = helpers.prepareLogins(response.files, settings);
-        for (let login of logins) {
+        for (let login of Login.list) {
             login.doAction = withLogin.bind({ settings: settings, login: login });
         }
 
-        var popup = new Interface(settings, logins);
-        popup.attach(document.body);
+        m.route(document.body, "/list", {
+            "/list": new Interface(settings, Login.list),
+            "/details/:storeid": LoginForm,
+            "/add": LoginForm,
+        });
     } catch (e) {
         handleError(e);
     }
@@ -119,7 +110,7 @@ async function withLogin(action, params = {}) {
         const login = JSON.parse(JSON.stringify(this.login));
 
         // hand off action to background script
-        console.log(action, params);
+        console.log({ action, login, params });
         var response = await chrome.runtime.sendMessage({ action, login, params });
         console.log(response);
         if (response.status != "ok") {

@@ -3,6 +3,7 @@ module.exports = Interface;
 const m = require("mithril");
 const Moment = require("moment");
 const SearchInterface = require("./searchinterface");
+const AddEditInterface = require("./addeditinterface");
 const helpers = require("../helpers");
 
 const LATEST_NATIVE_APP_VERSION = 3000003;
@@ -20,11 +21,14 @@ function Interface(settings, logins) {
     // public methods
     this.attach = attach;
     this.view = view;
+    this.renderMainView = renderMainView;
     this.search = search;
 
     // fields
     this.settings = settings;
     this.logins = logins;
+    // console.log("Interface(settings, logins):", settings, logins);
+
     this.results = [];
     this.currentDomainOnly = !settings.tab.url.match(/^(chrome|about):/);
     this.searchPart = new SearchInterface(this);
@@ -55,6 +59,34 @@ function attach(element) {
  * @return []Vnode
  */
 function view(ctl, params) {
+    const nodes = [];
+
+    if (this.editing) {
+        nodes.push(m(new AddEditInterface(this)));
+    } else {
+        nodes.push(...this.renderMainView(ctl, params));
+    }
+
+    if (this.settings.version < LATEST_NATIVE_APP_VERSION) {
+        nodes.push(
+            m("div.updates", [
+                m("span", "Update native host app: "),
+                m(
+                    "a",
+                    {
+                        href: "https://github.com/browserpass/browserpass-native#installation",
+                        target: "_blank",
+                    },
+                    "instructions"
+                ),
+            ])
+        );
+    }
+
+    return nodes;
+}
+
+function renderMainView(ctl, params) {
     var nodes = [];
     nodes.push(m(this.searchPart));
 
@@ -70,15 +102,15 @@ function view(ctl, params) {
                     {
                         key: result.index,
                         tabindex: 0,
-                        onclick: function (e) {
-                            var action = e.target.getAttribute("action");
-                            if (action) {
-                                result.doAction(action);
-                            } else {
-                                result.doAction("fill");
-                            }
-                        },
-                        onkeydown: keyHandler.bind(result),
+                        // onclick: function (e) {
+                        //     var action = e.target.getAttribute("action");
+                        //     if (action) {
+                        //         result.doAction(action);
+                        //     } else {
+                        //         result.doAction("fill");
+                        //     }
+                        // },
+                        // onkeydown: keyHandler.bind(result),
                     },
                     [
                         m("div.name", { title: "Fill username / password | <Enter>" }, [
@@ -116,32 +148,33 @@ function view(ctl, params) {
                             title: "Copy password | <Ctrl+C>",
                             action: "copyPassword",
                         }),
+                        // m("div.action.details", {
+                        //     tabindex: 0,
+                        //     title: "Open Details | <Ctrl+O>",
+                        // }),
                         m("div.action.details", {
-                            tabindex: 0,
-                            title: "Open Details | <Ctrl+O>",
-                            action: "getDetails",
+                            oncreate: m.route.link,
+                            href:
+                                "/details/" +
+                                result.store.id +
+                                "?login=" +
+                                encodeURIComponent(result.login),
                         }),
                     ]
                 );
             })
+        ),
+        m(
+            "div.part.add",
+            {
+                onclick: (e) => {
+                    this.editing = true;
+                    this.new = true;
+                },
+            },
+            "Add credentials"
         )
     );
-
-    if (this.settings.version < LATEST_NATIVE_APP_VERSION) {
-        nodes.push(
-            m("div.updates", [
-                m("span", "Update native host app: "),
-                m(
-                    "a",
-                    {
-                        href: "https://github.com/browserpass/browserpass-native#installation",
-                        target: "_blank",
-                    },
-                    "instructions"
-                ),
-            ])
-        );
-    }
 
     return nodes;
 }
@@ -153,6 +186,7 @@ function view(ctl, params) {
  * @return void
  */
 function search(searchQuery) {
+    console.log("Interface.search: ", searchQuery, this.logins.length);
     this.results = helpers.filterSortLogins(this.logins, searchQuery, this.currentDomainOnly);
 }
 

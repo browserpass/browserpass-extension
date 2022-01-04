@@ -13,8 +13,9 @@ const helpers = require("../helpers");
  * @param array  login    Target login object
  * @return void
  */
-function DetailsInterface(settings, login) {
+function DetailsInterface(popup, settings, login) {
     // public methods
+    this.popup = popup;
     this.attach = attach;
     this.view = view;
 
@@ -22,7 +23,7 @@ function DetailsInterface(settings, login) {
     this.settings = settings;
     this.login = login;
     this.secret = login.fields.secret;
-    this.editing = false;
+    // this.editing = false;
 
     // raw data
     this.rawText = m("textarea", { readonly: true }, login.raw.trim());
@@ -129,14 +130,23 @@ function view(ctl, params) {
                 ]),
                 m("div.line2", [m.trust(login.basename)]),
             ]),
-            this.editing && this.settings.caps.delete
+            this.popup.editing
+                ? m("div.action.back", {
+                      tabindex: 0,
+                      title: "Cancel",
+                      onclick: () => {
+                          this.popup.editing = false;
+                      },
+                  })
+                : null,
+            this.popup.editing && this.settings.caps.delete
                 ? m("div.action.delete", {
                       tabindex: 0,
                       title: "Delete",
                       onclick: () => login.doAction("delete"),
                   })
                 : null,
-            this.editing
+            this.popup.editing
                 ? m("div.action.save", {
                       tabindex: 0,
                       title: "Save",
@@ -144,12 +154,21 @@ function view(ctl, params) {
                           login.doAction("save", { rawContents: this.rawText.dom.value }),
                   })
                 : null,
-            !this.editing && this.settings.caps.save
+            !this.popup.editing
+                ? m("div.action.back", {
+                      tabindex: 0,
+                      title: "Return to search",
+                      onclick: () => {
+                          //   this.popup.renderMainView();
+                      },
+                  })
+                : null,
+            !this.popup.editing && this.settings.caps.save
                 ? m("div.action.edit", {
                       tabindex: 0,
                       title: "Edit",
                       onclick: () => {
-                          this.editing = true;
+                          this.popup.editing = true;
                           this.rawText = m(
                               "textarea",
                               {
@@ -167,7 +186,7 @@ function view(ctl, params) {
             m("div.part.snack.line-secret", [
                 m("div.label", "Secret"),
                 m("div.chars", passChars.call(self)),
-                !this.editing
+                !this.popup.editing
                     ? m("div.action.copy", {
                           title: "Copy password",
                           onclick: () => login.doAction("copyPassword"),
@@ -183,7 +202,7 @@ function view(ctl, params) {
                           },
                       }),
             ]),
-            !this.editing
+            !this.popup.editing
                 ? m("div.part.snack.line-login", [
                       m("div.label", "Login"),
                       m("div", login.fields.login),
@@ -195,7 +214,7 @@ function view(ctl, params) {
                 : null,
             (() => {
                 if (
-                    !this.editing &&
+                    !this.popup.editing &&
                     this.settings.enableOTP &&
                     login.fields.otp &&
                     login.fields.otp.params.type === "totp"

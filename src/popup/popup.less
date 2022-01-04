@@ -283,6 +283,10 @@ body {
         height: @login-part-height;
         padding: @login-part-padding;
 
+        &.back {
+            background-image: url("/popup/icon-back.svg");
+        }
+
         &.copy-password {
             background-image: url("/popup/icon-key.svg");
         }
@@ -311,6 +315,156 @@ body {
 
 .part.login em {
     font-style: normal;
+}
+
+.part.add {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    background-color: #414141; // @default-bg-color;
+
+    &:hover {
+        background-color: #363636; // @hover-bg-color;
+    }
+}
+
+.addEdit {
+    .title {
+        display: flex;
+        box-sizing: border-box;
+        justify-content: space-between;
+
+        span {
+            align-self: center;
+        }
+    }
+
+    .btn {
+        cursor: pointer;
+        background-position: center;
+        background-repeat: no-repeat;
+        padding: 6px;
+        background-size: 19px;
+        height: 21px;
+
+        &:hover,
+        &:focus {
+            background-color: #363636; // @hover-bg-color;
+            outline: none;
+        }
+
+        &.back {
+            background-image: url("/popup/icon-back.svg");
+            width: 20px;
+        }
+
+        &.save {
+            background-image: url("/popup/icon-save.svg");
+            width: 25px;
+        }
+
+        &.generate {
+            background-size: 14px;
+            width: 15px;
+            height: 15px;
+            background-image: url("/popup/icon-generate.svg");
+        }
+    }
+
+    .location {
+        margin: 6px 6px 20px;
+
+        .store,
+        .path {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .storePath {
+            margin-left: 10px;
+        }
+
+        select {
+            background-color: #4a4a4a;
+            border: none;
+            outline: none;
+            color: #eee;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        input[disabled],
+        select[disabled] {
+            color: grey;
+            cursor: default;
+        }
+    }
+
+    .contents {
+        display: flex;
+        flex-direction: column;
+        margin: 0 6px 20px;
+
+        .password,
+        .options,
+        .details {
+            display: flex;
+            margin-bottom: 6px;
+        }
+
+        .options {
+            font-size: 12px;
+            align-items: center;
+            margin-bottom: 10px;
+
+            input[type="checkbox"] {
+                margin: 3px;
+            }
+
+            input[type="number"] {
+                font-size: 12px;
+                width: 40px;
+                margin-left: 10px;
+                margin-right: 3px;
+            }
+        }
+    }
+
+    .actions {
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        margin-bottom: 10px;
+
+        .delete {
+            cursor: pointer;
+            background-color: red;
+            border: none;
+            padding: 5px 10px;
+            background-color: #e42929;
+            color: #252525;
+        }
+    }
+
+    input[type="number"],
+    input[type="text"],
+    textarea {
+        background-color: #4a4a4a;
+        border: none;
+        outline: none;
+        width: 100%;
+        color: #eee;
+        font-family: "Open Sans";
+        padding: 5px 8px;
+    }
+
+    textarea {
+        resize: none;
+        height: 70px;
+    }
 }
 
 .updates {
