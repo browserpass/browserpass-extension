@@ -8,7 +8,6 @@ var Settings = {
         if (response.status != "ok") {
             throw new Error(response.message);
         }
-        console.log("Settings.get:", response.settings)
         let settings = response.settings;
 
         if (settings.hasOwnProperty("hostError")) {
@@ -19,7 +18,7 @@ var Settings = {
             throw new Error("Unable to retrieve current tab information");
         }
 
-        return response.settings;
+        return settings
     }
 }
 

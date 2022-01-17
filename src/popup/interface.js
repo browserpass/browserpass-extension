@@ -157,7 +157,7 @@ function renderMainView(ctl, params) {
                             href:
                                 "/details/" +
                                 result.store.id +
-                                "?login=" +
+                                "/" +
                                 encodeURIComponent(result.login),
                         }),
                     ]

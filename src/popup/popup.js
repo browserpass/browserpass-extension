@@ -40,22 +40,22 @@ function handleError(error, type = "error") {
 async function run() {
     try {
         // get user settings
-        let settings = await Settings.get();
-
-        var root = document.getElementsByTagName("html")[0];
+        var logins = [],
+            settings = await Settings.get(),
+            root = document.getElementsByTagName("html")[0];
         root.classList.remove("colors-dark");
         root.classList.add(`colors-${settings.theme}`);
 
         // get list of logins
-        await Login.loadList(settings);
+        logins = await Login.loadList(settings);
 
-        for (let login of Login.list) {
+        for (let login of logins) {
             login.doAction = withLogin.bind({ settings: settings, login: login });
         }
 
         m.route(document.body, "/list", {
-            "/list": new Interface(settings, Login.list),
-            "/details/:storeid": LoginForm,
+            "/list": new Interface(settings, logins),
+            "/details/:storeid/:login": LoginForm,
             "/add": LoginForm,
         });
     } catch (e) {
@@ -110,9 +110,9 @@ async function withLogin(action, params = {}) {
         const login = JSON.parse(JSON.stringify(this.login));
 
         // hand off action to background script
-        console.log({ action, login, params });
+        // console.log({ action, login, params });
         var response = await chrome.runtime.sendMessage({ action, login, params });
-        console.log(response);
+        // console.log(response);
         if (response.status != "ok") {
             throw new Error(response.message);
         } else {

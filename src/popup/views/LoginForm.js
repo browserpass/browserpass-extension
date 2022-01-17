@@ -4,25 +4,100 @@ const Login = require("../models/Login");
 const Settings = require("../models/Settings");
 const helpers = require("../../helpers");
 
-var LoginForm = {
-    settings: {},
-    oninit: async function(vnode) {
-        console.log("LoginForm.oninit():", vnode);
-        LoginForm.settings = await Settings.get();
+function LoginForm(ctl) {
+    var
+        editing = false,
+        login = {},
+        settings = {},
+        stores = []
+    ;
 
-        // Show existing login
-        if (vnode.attrs.login !== undefined) {
-            await Login.load(LoginForm.settings, vnode.attrs.storeid, vnode.attrs.login);
+    return {
+        oninit: async function(vnode, params) {
+            settings = await Settings.get();
+
+            Object.keys(settings.stores).forEach(k => {
+                stores.push(settings.stores[k])
+            });
+
+            // Show existing login
+            if (vnode.attrs.login !== undefined) {
+                login = await Login.load(settings, vnode.attrs.storeid, vnode.attrs.login);
+                editing = true
+                m.redraw()
+            }
+        },
+        view: function(vnode) {
+            var
+                nodes = []
+            ;
+
+            nodes.push(
+                m("div.title", [
+                    m("div.btn.back", {
+                        onclick: (e) => {
+                            m.route.set('/list')
+                        },
+                    }),
+                    m("span", editing ? "Edit credentials" : "Add credentials"),
+                    m("div.btn.save"),
+                ]),
+                m("div.location", [
+                    m("div.store", [
+                        m(
+                            "select",
+                            { disabled: editing },
+                            stores.map(
+                                function(store) {
+                                   return m("option", { value: store.id }, store.name)
+                            }),
+                        ),
+                        m("div.storePath", "~/.password-store/"),
+                    ]),
+                    m("div.path", [
+                        m("input[type=text]", {
+                            placeholder: "filename",
+                            disabled: editing,
+                            value: editing ? "personal/github.com" : "",
+                        }),
+                        m("div", ".gpg"),
+                    ]),
+                ]),
+                m("div.contents", [
+                    m("div.password", [
+                        m("input[type=text]", {
+                            placeholder: "password",
+                            value: editing ? "p@ssw0rd" : "",
+                        }),
+                        m("div.btn.generate"),
+                    ]),
+                    m("div.options", [
+                        m("input[type=checkbox]", {
+                            id: "include_symbols",
+                            checked: true,
+                        }),
+                        m("label", { for: "include_symbols" }, "symbols"),
+                        m("input[type=number]", {
+                            value: "40",
+                        }),
+                        m("span", "length"),
+                    ]),
+                    m(
+                        "div.details",
+                        m("textarea", {
+                            placeholder: "user: johnsmith",
+                            value: editing ? "user: maximbaz" : "",
+                        })
+                    ),
+                ]),
+            )
+
+            if (editing) {
+                nodes.push(m("div.actions", m("button.delete", "Delete")));
+            }
+
+            return m("div.addEdit", nodes);
         }
-    },
-    view: function(vnode) {
-        console.log("LoginForm.view():", vnode);
-        var nodes = [];
-
-        return m("form", [
-            m("label.label", "First Name"),
-            m("label.label", "Last Name"),
-        ])
     }
 }
 
