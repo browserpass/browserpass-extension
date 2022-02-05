@@ -41,6 +41,8 @@ chrome.browserAction.setBadgeBackgroundColor({
 chrome.tabs.onUpdated.addListener((tabId, info) => {
     // unregister any auth listeners for this tab
     if (info.status === "complete") {
+        createContextMenu();
+
         if (authListeners[tabId]) {
             chrome.webRequest.onAuthRequired.removeListener(authListeners[tabId]);
             delete authListeners[tabId];
@@ -49,6 +51,10 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
 
     // redraw badge counter
     updateMatchingPasswordsCount(tabId);
+});
+
+chrome.tabs.onActivated.addListener(() => {
+    createContextMenu();
 });
 
 // handle incoming messages
@@ -1155,4 +1161,43 @@ function onExtensionInstalled(details) {
                 }
             });
     }
+}
+
+async function createContextMenu() {
+    await chrome.contextMenus.removeAll();
+
+    const menuEntryProps = {
+        contexts: ["all"],
+        type: "normal",
+    };
+    const menuEntryId = "menuEntry";
+
+    await chrome.contextMenus.create({
+        ...menuEntryProps,
+        title: "browserpass - entries",
+        id: menuEntryId,
+    });
+    const settings = await getFullSettings();
+    const response = await hostAction(settings, "list");
+
+    if (response.status != "ok") {
+        throw new Error(JSON.stringify(response));
+    }
+    const files = helpers.ignoreFiles(response.data.files, settings);
+    const logins = helpers.prepareLogins(files, settings);
+    const loginsForThisHost = helpers.filterSortLogins(logins, "", true);
+
+    for (let i = 0; i < loginsForThisHost.length; i++) {
+        await chrome.contextMenus.create({
+            ...menuEntryProps,
+            parentId: menuEntryId,
+            id: "login" + i,
+            title: loginsForThisHost[i].login,
+            onclick: () => clickMenuEntry(settings, loginsForThisHost[i]),
+        });
+    }
+}
+
+async function clickMenuEntry(settings, login) {
+    await handleMessage(settings, { action: "fill", login }, () => {});
 }
