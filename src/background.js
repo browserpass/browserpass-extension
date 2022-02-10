@@ -1163,6 +1163,13 @@ function onExtensionInstalled(details) {
     }
 }
 
+/**
+ * Create a context menu menu, also called right-click menu
+ *
+ * @since 3.8.0
+ *
+ * @return void
+ */
 async function createContextMenu() {
     await chrome.contextMenus.removeAll();
 
@@ -1172,11 +1179,6 @@ async function createContextMenu() {
     };
     const menuEntryId = "menuEntry";
 
-    await chrome.contextMenus.create({
-        ...menuEntryProps,
-        title: "browserpass - entries",
-        id: menuEntryId,
-    });
     const settings = await getFullSettings();
     const response = await hostAction(settings, "list");
 
@@ -1186,8 +1188,16 @@ async function createContextMenu() {
     const files = helpers.ignoreFiles(response.data.files, settings);
     const logins = helpers.prepareLogins(files, settings);
     const loginsForThisHost = helpers.filterSortLogins(logins, "", true);
+    const numberOfLoginsForThisHost = loginsForThisHost.length;
+    const singularOrPlural = numberOfLoginsForThisHost === 1 ? 'entry' : 'entries'
 
-    for (let i = 0; i < loginsForThisHost.length; i++) {
+    await chrome.contextMenus.create({
+        ...menuEntryProps,
+        title: `browserpass - ${numberOfLoginsForThisHost} ${singularOrPlural}`,
+        id: menuEntryId,
+    });
+
+    for (let i = 0; i < numberOfLoginsForThisHost; i++) {
         await chrome.contextMenus.create({
             ...menuEntryProps,
             parentId: menuEntryId,
@@ -1198,6 +1208,15 @@ async function createContextMenu() {
     }
 }
 
+/**
+ * Handle the click of a context menu item
+ *
+ * @since 3.8.0
+ *
+ * @param object    settings    Full settings object
+ * @param array     login       Filtered and sorted list of logins
+ * @return void
+ */
 async function clickMenuEntry(settings, login) {
     await handleMessage(settings, { action: "fill", login }, () => {});
 }
