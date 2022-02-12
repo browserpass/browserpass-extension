@@ -1189,22 +1189,24 @@ async function createContextMenu() {
     const logins = helpers.prepareLogins(files, settings);
     const loginsForThisHost = helpers.filterSortLogins(logins, "", true);
     const numberOfLoginsForThisHost = loginsForThisHost.length;
-    const singularOrPlural = numberOfLoginsForThisHost === 1 ? 'entry' : 'entries'
+    const singularOrPlural = numberOfLoginsForThisHost === 1 ? "entry" : "entries";
 
-    await chrome.contextMenus.create({
-        ...menuEntryProps,
-        title: `Browserpass - ${numberOfLoginsForThisHost} ${singularOrPlural}`,
-        id: menuEntryId,
-    });
-
-    for (let i = 0; i < numberOfLoginsForThisHost; i++) {
+    if (numberOfLoginsForThisHost > 0) {
         await chrome.contextMenus.create({
             ...menuEntryProps,
-            parentId: menuEntryId,
-            id: "login" + i,
-            title: loginsForThisHost[i].login,
-            onclick: () => clickMenuEntry(settings, loginsForThisHost[i]),
+            title: `Browserpass - ${numberOfLoginsForThisHost} ${singularOrPlural}`,
+            id: menuEntryId,
         });
+
+        for (let i = 0; i < numberOfLoginsForThisHost; i++) {
+            await chrome.contextMenus.create({
+                ...menuEntryProps,
+                parentId: menuEntryId,
+                id: "login" + i,
+                title: loginsForThisHost[i].login,
+                onclick: () => clickMenuEntry(settings, loginsForThisHost[i]),
+            });
+        }
     }
 }
 
