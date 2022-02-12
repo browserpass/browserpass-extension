@@ -41,6 +41,8 @@ chrome.browserAction.setBadgeBackgroundColor({
 chrome.tabs.onUpdated.addListener((tabId, info) => {
     // unregister any auth listeners for this tab
     if (info.status === "complete") {
+        createContextMenu();
+
         if (authListeners[tabId]) {
             chrome.webRequest.onAuthRequired.removeListener(authListeners[tabId]);
             delete authListeners[tabId];
@@ -49,6 +51,10 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
 
     // redraw badge counter
     updateMatchingPasswordsCount(tabId);
+});
+
+chrome.tabs.onActivated.addListener(() => {
+    createContextMenu();
 });
 
 // handle incoming messages
@@ -1155,4 +1161,62 @@ function onExtensionInstalled(details) {
                 }
             });
     }
+}
+
+/**
+ * Create a context menu, also called right-click menu
+ *
+ * @since 3.8.0
+ *
+ * @return void
+ */
+async function createContextMenu() {
+    await chrome.contextMenus.removeAll();
+
+    const menuEntryProps = {
+        contexts: ["all"],
+        type: "normal",
+    };
+    const menuEntryId = "menuEntry";
+
+    const settings = await getFullSettings();
+    const response = await hostAction(settings, "list");
+
+    if (response.status != "ok") {
+        throw new Error(JSON.stringify(response));
+    }
+    const files = helpers.ignoreFiles(response.data.files, settings);
+    const logins = helpers.prepareLogins(files, settings);
+    const loginsForThisHost = helpers.filterSortLogins(logins, "", true);
+    const numberOfLoginsForThisHost = loginsForThisHost.length;
+    const singularOrPlural = numberOfLoginsForThisHost === 1 ? 'entry' : 'entries'
+
+    await chrome.contextMenus.create({
+        ...menuEntryProps,
+        title: `Browserpass - ${numberOfLoginsForThisHost} ${singularOrPlural}`,
+        id: menuEntryId,
+    });
+
+    for (let i = 0; i < numberOfLoginsForThisHost; i++) {
+        await chrome.contextMenus.create({
+            ...menuEntryProps,
+            parentId: menuEntryId,
+            id: "login" + i,
+            title: loginsForThisHost[i].login,
+            onclick: () => clickMenuEntry(settings, loginsForThisHost[i]),
+        });
+    }
+}
+
+/**
+ * Handle the click of a context menu item
+ *
+ * @since 3.8.0
+ *
+ * @param object    settings    Full settings object
+ * @param array     login       Filtered and sorted list of logins
+ * @return void
+ */
+async function clickMenuEntry(settings, login) {
+    await handleMessage(settings, { action: "fill", login }, () => {});
 }

@@ -35,7 +35,8 @@
         "webRequest",
         "webRequestBlocking",
         "http://*/*",
-        "https://*/*"
+        "https://*/*",
+        "contextMenus"
     ],
     "content_security_policy": "default-src 'none'; font-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'",
     "applications": {

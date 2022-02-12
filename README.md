@@ -18,6 +18,7 @@ In order to use Browserpass you must also install a [companion native messaging 
     -   [Organizing password store](#organizing-password-store)
     -   [First steps in browser extension](#first-steps-in-browser-extension)
     -   [Available keyboard shortcuts](#available-keyboard-shortcuts)
+    -   [Usage via right-click menu](#usage-via-right-click-menu)
     -   [Password matching and sorting](#password-matching-and-sorting)
     -   [Searching password entries](#searching-password-entries)
     -   [OpenID authentication](#openid-authentication)
@@ -160,6 +161,12 @@ Note: If the cursor is located in the search input field, every shortcut that wo
 | <kbd>Ctrl+Shift+G</kbd>                              | Open URL in the new tab                               |
 | <kbd>Backspace</kbd> (with no search text entered)   | Search passwords in the entire password store         |
 
+### Usage via right-click menu
+
+You can right-click anywhere a visited website and there will appear a menu with an option `Browserpass - <n> entries`, where `n` is the number of entries that match the host of the visited website. When you select an entry, that one gets automatically filled in, equivalent to the behavior when an entry is selected from the Browserpass popup. This can be helpful if you want to fill credentials in a browser popup window without extension buttons. Selecting single form fields and choosing values to fill in is currently not supported
+
+![The right-click menu of browserpass](https://user-images.githubusercontent.com/15818773/153720814-66b99653-3b8a-456d-a55a-8dd208e66028.gif)
+
 ### Password matching and sorting
 
 When you first open the Browserpass popup, you will see a badge with the current domain name in the search input field:
@@ -300,6 +307,7 @@ Browserpass extension requests the following permissions:
 | `tabs`               | To get URL of a given tab, used for example to set count of the matching passwords for a given tab               |
 | `clipboardRead`      | To ensure only copied credentials and not other content is cleared from the clipboard after 60 seconds           |
 | `clipboardWrite`     | For "Copy password" and "Copy username" functionality                                                            |
+| `contextMenus`       | To create a context menu, also called right-click menu                                                           |
 | `nativeMessaging`    | To allow communication with the native app                                                                       |
 | `notifications`      | To show browser notifications on install or update                                                               |
 | `webRequest`         | For modal HTTP authentication                                                                                    |
