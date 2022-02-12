@@ -1215,9 +1215,13 @@ async function createContextMenu() {
  * @since 3.8.0
  *
  * @param object    settings    Full settings object
- * @param array     login       Filtered and sorted list of logins
+ * @param object    login       Login object
  * @return void
  */
 async function clickMenuEntry(settings, login) {
-    await handleMessage(settings, { action: "fill", login }, () => {});
+    await handleMessage(settings, { action: "fill", login }, (response) => {
+        if (response.status != "ok") {
+            throw new Error(JSON.stringify(response));
+        }
+    });
 }
