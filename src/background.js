@@ -1189,12 +1189,11 @@ async function createContextMenu() {
     const logins = helpers.prepareLogins(files, settings);
     const loginsForThisHost = helpers.filterSortLogins(logins, "", true);
     const numberOfLoginsForThisHost = loginsForThisHost.length;
-    const singularOrPlural = numberOfLoginsForThisHost === 1 ? "entry" : "entries";
 
     if (numberOfLoginsForThisHost > 0) {
         await chrome.contextMenus.create({
             ...menuEntryProps,
-            title: `Browserpass - ${numberOfLoginsForThisHost} ${singularOrPlural}`,
+            title: `Browserpass`,
             id: menuEntryId,
         });
 
