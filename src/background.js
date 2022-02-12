@@ -1164,7 +1164,7 @@ function onExtensionInstalled(details) {
 }
 
 /**
- * Create a context menu menu, also called right-click menu
+ * Create a context menu, also called right-click menu
  *
  * @since 3.8.0
  *
@@ -1193,7 +1193,7 @@ async function createContextMenu() {
 
     await chrome.contextMenus.create({
         ...menuEntryProps,
-        title: `browserpass - ${numberOfLoginsForThisHost} ${singularOrPlural}`,
+        title: `Browserpass - ${numberOfLoginsForThisHost} ${singularOrPlural}`,
         id: menuEntryId,
     });
 
