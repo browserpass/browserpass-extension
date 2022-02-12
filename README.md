@@ -165,7 +165,7 @@ Note: If the cursor is located in the search input field, every shortcut that wo
 
 You can right-click anywhere a visited website and there will appear a menu with an option `Browserpass - <n> entries`, where `n` is the number of entries that match the host of the visited website. When you select an entry, that one gets automatically filled in, equivalent to the behavior when an entry is selected from the Browserpass popup. This can be helpful if you want to fill credentials in a browser popup window without extension buttons. Selecting single form fields and choosing values to fill in is currently not supported
 
-![The right-click menu of browserpass](https://i.imgur.com/X2Q5LZn.png)
+![The right-click menu of browserpass](https://user-images.githubusercontent.com/15818773/153720814-66b99653-3b8a-456d-a55a-8dd208e66028.gif)
 
 ### Password matching and sorting
 
