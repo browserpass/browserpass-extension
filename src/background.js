@@ -30,6 +30,11 @@ var badgeCache = {
     isRefreshing: false,
 };
 
+let contextMenu = {
+    activeTabId: null,
+    isRefreshing: false,
+};
+
 // the last text copied to the clipboard is stored here in order to be cleared after 60 seconds
 let lastCopiedText = null;
 
@@ -41,8 +46,6 @@ chrome.browserAction.setBadgeBackgroundColor({
 chrome.tabs.onUpdated.addListener((tabId, info) => {
     // unregister any auth listeners for this tab
     if (info.status === "complete") {
-        createContextMenu();
-
         if (authListeners[tabId]) {
             chrome.webRequest.onAuthRequired.removeListener(authListeners[tabId]);
             delete authListeners[tabId];
@@ -51,10 +54,14 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
 
     // redraw badge counter
     updateMatchingPasswordsCount(tabId);
+
+    // create right-click menu
+    createContextMenu(tabId);
 });
 
-chrome.tabs.onActivated.addListener(() => {
-    createContextMenu();
+chrome.tabs.onActivated.addListener((parameters) => {
+    contextMenu.activeTabId = parameters.tabId;
+    createContextMenu(parameters.tabId);
 });
 
 // handle incoming messages
@@ -1170,21 +1177,27 @@ function onExtensionInstalled(details) {
  *
  * @return void
  */
-async function createContextMenu() {
+async function createContextMenu(tabId) {
+    if (
+        (contextMenu.isRefreshing && tabId === contextMenu.activeTabId) ||
+        contextMenu.activeTabId !== tabId
+    ) {
+        return;
+    }
+    contextMenu.isRefreshing = true;
     await chrome.contextMenus.removeAll();
-
     const menuEntryProps = {
         contexts: ["all"],
         type: "normal",
     };
-    const menuEntryId = "menuEntry";
-
+    const parentId = "parent";
     const settings = await getFullSettings();
     const response = await hostAction(settings, "list");
 
     if (response.status != "ok") {
         throw new Error(JSON.stringify(response));
     }
+
     const files = helpers.ignoreFiles(response.data.files, settings);
     const logins = helpers.prepareLogins(files, settings);
     const loginsForThisHost = helpers.filterSortLogins(logins, "", true);
@@ -1193,20 +1206,21 @@ async function createContextMenu() {
     if (numberOfLoginsForThisHost > 0) {
         await chrome.contextMenus.create({
             ...menuEntryProps,
-            title: `Browserpass`,
-            id: menuEntryId,
+            title: "Browserpass",
+            id: parentId,
         });
 
         for (let i = 0; i < numberOfLoginsForThisHost; i++) {
             await chrome.contextMenus.create({
                 ...menuEntryProps,
-                parentId: menuEntryId,
-                id: "login" + i,
+                parentId: parentId,
+                id: "child" + i,
                 title: loginsForThisHost[i].login,
                 onclick: () => clickMenuEntry(settings, loginsForThisHost[i]),
             });
         }
     }
+    contextMenu.isRefreshing = false;
 }
 
 /**
