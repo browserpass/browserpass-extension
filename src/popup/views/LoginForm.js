@@ -1,107 +1,118 @@
 const m = require("mithril");
 const Moment = require("moment");
 const Login = require("../models/Login");
-const Settings = require("../models/Settings");
 const helpers = require("../../helpers");
 
-function LoginForm(ctl) {
-    var
-        editing = false,
-        login = {},
-        settings = {},
-        stores = []
-    ;
+module.exports = LoginForm;
 
-    return {
-        oninit: async function(vnode, params) {
-            settings = await Settings.get();
+var sets = {};
 
-            Object.keys(settings.stores).forEach(k => {
-                stores.push(settings.stores[k])
-            });
+function LoginForm(sts) {
 
-            // Show existing login
-            if (vnode.attrs.login !== undefined) {
-                login = await Login.load(settings, vnode.attrs.storeid, vnode.attrs.login);
-                editing = true
-                m.redraw()
-            }
-        },
-        view: function(vnode) {
-            var
-                nodes = []
-            ;
+    sets = sts;
 
-            nodes.push(
-                m("div.title", [
-                    m("div.btn.back", {
-                        onclick: (e) => {
-                            m.route.set('/list')
-                        },
-                    }),
-                    m("span", editing ? "Edit credentials" : "Add credentials"),
-                    m("div.btn.save"),
-                ]),
-                m("div.location", [
-                    m("div.store", [
-                        m(
-                            "select",
-                            { disabled: editing },
-                            stores.map(
-                                function(store) {
-                                   return m("option", { value: store.id }, store.name)
+    return function(ctl) {
+        var
+            editing = false,
+            obj = {},
+            _sets = sets,
+            stores = []
+        ;
+
+        return {
+            oninit: async function(vnode, params) {
+                settings = await _sets.get();
+                console.log("LoginForm.oninit(), settings:", settings);
+
+                Object.keys(settings.stores).forEach(k => {
+                    stores.push(settings.stores[k])
+                });
+
+                // Show existing login
+                if (vnode.attrs.login !== undefined) {
+                    obj = await Login.load(settings, vnode.attrs.storeid, vnode.attrs.login);
+                    console.log("LoginForm.oninit(), login:", obj);
+                    editing = true
+                }
+
+                if (editing || settings.hasOwnProperty("theme")) {
+                    m.redraw()
+                }
+            },
+            view: function(vnode) {
+                var
+                    nodes = []
+                ;
+
+                nodes.push(
+                    m("div.title", [
+                        m("div.btn.back", {
+                            onclick: (e) => {
+                                m.route.set('/list')
+                            },
+                        }),
+                        m("span", editing ? "Edit credentials" : "Add credentials"),
+                        m("div.btn.save"),
+                    ]),
+                    m("div.location", [
+                        m("div.store", [
+                            m(
+                                "select",
+                                {disabled: editing},
+                                stores.map(
+                                    function(store) {
+                                       return m("option", {value: store.id}, store.name)
+                                }),
+                            ),
+                            m("div.storePath", "~/.password-store/"),
+                        ]),
+                        m("div.path", [
+                            m("input[type=text]", {
+                                placeholder: "filename",
+                                disabled: editing,
+                                value: editing ? obj.login : "",
                             }),
+                            m("div", ".gpg"),
+                        ]),
+                    ]),
+                    m("div.contents", [
+                        m("div.password", [
+                            m("input[type=text]", {
+                                placeholder: "password",
+                                value: editing ? obj.fields.secret : "",
+                            }),
+                            m("div.btn.generate"),
+                        ]),
+                        m("div.options", [
+                            m("input[type=checkbox]", {
+                                id: "include_symbols",
+                                checked: true,
+                            }),
+                            m("label", { for: "include_symbols" }, "symbols"),
+                            m("input[type=number]", {
+                                value: "40",
+                            }),
+                            m("span", "length"),
+                        ]),
+                        m(
+                            "div.details",
+                            m("textarea", {
+                                placeholder: "user: johnsmith",
+                                value: editing ? obj.raw : "",
+                            })
                         ),
-                        m("div.storePath", "~/.password-store/"),
                     ]),
-                    m("div.path", [
-                        m("input[type=text]", {
-                            placeholder: "filename",
-                            disabled: editing,
-                            value: editing ? "personal/github.com" : "",
-                        }),
-                        m("div", ".gpg"),
-                    ]),
-                ]),
-                m("div.contents", [
-                    m("div.password", [
-                        m("input[type=text]", {
-                            placeholder: "password",
-                            value: editing ? "p@ssw0rd" : "",
-                        }),
-                        m("div.btn.generate"),
-                    ]),
-                    m("div.options", [
-                        m("input[type=checkbox]", {
-                            id: "include_symbols",
-                            checked: true,
-                        }),
-                        m("label", { for: "include_symbols" }, "symbols"),
-                        m("input[type=number]", {
-                            value: "40",
-                        }),
-                        m("span", "length"),
-                    ]),
-                    m(
-                        "div.details",
-                        m("textarea", {
-                            placeholder: "user: johnsmith",
-                            value: editing ? "user: maximbaz" : "",
-                        })
-                    ),
-                ]),
-            )
+                )
 
-            if (editing) {
-                nodes.push(m("div.actions", m("button.delete", "Delete")));
+                if (editing) {
+                    nodes.push(m("div.actions", m("button.delete", "Delete")));
+                }
+
+                return m("div.addEdit", nodes);
             }
-
-            return m("div.addEdit", nodes);
         }
     }
 }
-
-module.exports = LoginForm;
 
 /**
  * Generate a highlighted version of the password for display

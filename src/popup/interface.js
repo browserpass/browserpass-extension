@@ -154,11 +154,7 @@ function renderMainView(ctl, params) {
                         // }),
                         m("div.action.details", {
                             oncreate: m.route.link,
-                            href:
-                                "/details/" +
-                                result.store.id +
-                                "/" +
-                                encodeURIComponent(result.login),
+                            href: `/details/${result.store.id}/${encodeURIComponent(result.login)}`,
                         }),
                     ]
                 );
@@ -168,8 +164,7 @@ function renderMainView(ctl, params) {
             "div.part.add",
             {
                 onclick: (e) => {
-                    this.editing = true;
-                    this.new = true;
+                    m.route.set("/add");
                 },
             },
             "Add credentials"
