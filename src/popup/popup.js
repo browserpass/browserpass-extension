@@ -2,7 +2,6 @@
 "use strict";
 
 require("chrome-extension-async");
-// const LoginModel = require("./models/Login");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
 const Interface = require("./interface");
@@ -41,7 +40,7 @@ function handleError(error, type = "error") {
 async function run() {
     try {
         let sets = new Settings();
-        console.log("run():", sets);
+        // console.log("run():", sets);
 
         // get user settings
         var logins = [],
@@ -51,10 +50,8 @@ async function run() {
         root.classList.add(`colors-${settings.theme}`);
 
         // get list of logins
-        // let Login = new LoginModel(settings);
-        // logins = await Login.getAll(settings);
-        console.log("run():", settings);
-        logins = await Login.loadList(settings);
+        // console.log("run():", settings);
+        logins = await Login.prototype.getAll(settings);
 
         for (let login of logins) {
             login.doAction = withLogin.bind({ settings: settings, login: login });

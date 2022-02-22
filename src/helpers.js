@@ -10,6 +10,7 @@ const BrowserpassURL = require("@browserpass/url");
 
 module.exports = {
     prepareLogins,
+    prepareLogin,
     filterSortLogins,
     ignoreFiles,
     makeTOTP,
@@ -67,58 +68,60 @@ function prepareLogins(files, settings) {
     for (let storeId in files) {
         for (let key in files[storeId]) {
             // set login fields
-            const login = {
-                index: index++,
-                store: settings.stores[storeId],
-                login: files[storeId][key].replace(/\.gpg$/i, ""),
-                allowFill: true,
-            };
-
-            // extract url info from path
-            let pathInfo = pathToInfo(storeId + "/" + login.login, origin);
-            if (pathInfo) {
-                // set assumed host
-                login.host = pathInfo.port
-                    ? `${pathInfo.hostname}:${pathInfo.port}`
-                    : pathInfo.hostname;
-
-                // check whether extracted path info matches the current origin
-                login.inCurrentHost = origin.hostname === pathInfo.hostname;
-
-                // check whether the current origin is subordinate to extracted path info, meaning:
-                //  - that the path info is not a single level domain (e.g. com, net, local)
-                //  - and that the current origin is a subdomain of that path info
-                if (
-                    pathInfo.hostname.includes(".") &&
-                    origin.hostname.endsWith(`.${pathInfo.hostname}`)
-                ) {
-                    login.inCurrentHost = true;
-                }
-
-                // filter out entries with a non-matching port
-                if (pathInfo.port && pathInfo.port !== origin.port) {
-                    login.inCurrentHost = false;
-                }
-            } else {
-                login.host = null;
-                login.inCurrentHost = false;
-            }
-
-            // update recent counter
-            login.recent =
-                settings.recent[sha1(settings.origin + sha1(login.store.id + sha1(login.login)))];
-            if (!login.recent) {
-                login.recent = {
-                    when: 0,
-                    count: 0,
-                };
-            }
+            const login = prepareLogin(index++, settings, storeId, files[storeId][key], origin);
 
             logins.push(login);
         }
     }
 
     return logins;
+}
+
+// @TODO: This separation may no longer be needed
+function prepareLogin(index, settings, storeId, file, origin) {
+    const login = {
+        index: index,
+        store: settings.stores[storeId],
+        login: file.replace(/\.gpg$/i, ""),
+        allowFill: true,
+    };
+
+    // extract url info from path
+    let pathInfo = pathToInfo(storeId + "/" + login.login, origin);
+    if (pathInfo) {
+        // set assumed host
+        login.host = pathInfo.port ? `${pathInfo.hostname}:${pathInfo.port}` : pathInfo.hostname;
+
+        // check whether extracted path info matches the current origin
+        login.inCurrentHost = origin.hostname === pathInfo.hostname;
+
+        // check whether the current origin is subordinate to extracted path info, meaning:
+        //  - that the path info is not a single level domain (e.g. com, net, local)
+        //  - and that the current origin is a subdomain of that path info
+        if (pathInfo.hostname.includes(".") && origin.hostname.endsWith(`.${pathInfo.hostname}`)) {
+            login.inCurrentHost = true;
+        }
+
+        // filter out entries with a non-matching port
+        if (pathInfo.port && pathInfo.port !== origin.port) {
+            login.inCurrentHost = false;
+        }
+    } else {
+        login.host = null;
+        login.inCurrentHost = false;
+    }
+
+    // update recent counter
+    login.recent =
+        settings.recent[sha1(settings.origin + sha1(login.store.id + sha1(login.login)))];
+    if (!login.recent) {
+        login.recent = {
+            when: 0,
+            count: 0,
+        };
+    }
+
+    return login;
 }
 
 /**

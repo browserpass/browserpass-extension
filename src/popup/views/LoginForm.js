@@ -5,24 +5,24 @@ const helpers = require("../../helpers");
 
 module.exports = LoginForm;
 
-var sets = {};
+var _sets_ = {};
 
 function LoginForm(sts) {
 
-    sets = sts;
+    _sets_ = sts;
 
     return function(ctl) {
         var
             editing = false,
             obj = {},
-            _sets = sets,
+            sets = _sets_,
             stores = []
         ;
 
         return {
             oninit: async function(vnode, params) {
-                settings = await _sets.get();
-                console.log("LoginForm.oninit(), settings:", settings);
+                settings = await sets.get();
+                // console.log("LoginForm.oninit(), settings:", settings);
 
                 Object.keys(settings.stores).forEach(k => {
                     stores.push(settings.stores[k])
@@ -30,12 +30,13 @@ function LoginForm(sts) {
 
                 // Show existing login
                 if (vnode.attrs.login !== undefined) {
-                    obj = await Login.load(settings, vnode.attrs.storeid, vnode.attrs.login);
-                    console.log("LoginForm.oninit(), login:", obj);
+                    obj = await Login.prototype.get(settings, vnode.attrs.storeid, vnode.attrs.login);
+                    // console.log("LoginForm.oninit(), login:", obj);
                     editing = true
                 }
 
                 if (editing || settings.hasOwnProperty("theme")) {
+                    Login.prototype.isLogin(obj)
                     m.redraw()
                 }
             },
