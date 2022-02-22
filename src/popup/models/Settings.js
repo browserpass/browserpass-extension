@@ -8,7 +8,7 @@ function Settings() {
 
 Settings.prototype.get = async function() {
     if (this.sets.hasOwnProperty("theme")) {
-        console.log("Settings.get(): return this.sets", this.sets)
+        // console.log("Settings.get(): return this.sets", this.sets)
         return this.sets
     }
 
@@ -27,7 +27,7 @@ Settings.prototype.get = async function() {
     }
 
     this.sets = _sets
-    console.log("Settings.get(): return response.settings", _sets)
+    // console.log("Settings.get(): return response.settings", _sets)
     return _sets
 }
 
