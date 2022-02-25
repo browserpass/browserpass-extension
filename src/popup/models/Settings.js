@@ -8,6 +8,7 @@ function Settings() {
 
 Settings.prototype.get = async function() {
     if (this.isSettings(this.settings)) {
+        // console.log("Settings.proto.get(): return this.settings", this.settings);
         return this.settings
     }
 
@@ -29,6 +30,7 @@ Settings.prototype.get = async function() {
 
     // cache response.settings for future requests
     this.settings = sets
+    // console.log("Settings.proto.get(): return response.settings", this.settings);
     return sets
 }
 

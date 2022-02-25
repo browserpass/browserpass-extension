@@ -1,6 +1,7 @@
 const m = require("mithril");
 const Moment = require("moment");
 const Login = require("../models/Login");
+const Settings = require("../models/Settings");
 const helpers = require("../../helpers");
 
 module.exports = LoginForm;
@@ -16,6 +17,7 @@ function LoginForm(settingsModel) {
             editing = false,
             obj = {},
             viewSettingsModel = persistSettingsModel,
+            storePath = "",
             stores = []
         ;
 
@@ -33,9 +35,25 @@ function LoginForm(settingsModel) {
                     editing = true
                 }
 
-                if (editing || viewSettingsModel.isSetting(settings)) {
-                    Login.prototype.isLogin(obj)
-                    m.redraw()
+                // set the storePath
+                this.storePath();
+
+                // trigger redraw after retrieving details
+                if (editing && Login.prototype.isLogin(obj) || Settings.prototype.isSettings(settings)) {
+                    m.redraw();
+                }
+            },
+            storePath: function(storeId) {
+                if (editing) {
+                    storePath = obj.store.path;
+                } else if (Settings.prototype.isSettings(settings)) {
+                    if (typeof storeId == "string") {
+                        storePath = settings.stores[storeId].path;
+                    } else {
+                        storePath = stores[0].path;
+                    }
+                } else {
+                    storePath = "~/.password-store";
                 }
             },
             view: function(vnode) {
@@ -57,19 +75,21 @@ function LoginForm(settingsModel) {
                         m("div.store", [
                             m(
                                 "select",
-                                {disabled: editing},
+                                {disabled: editing, onchange: m.withAttr("value", this.storePath)},
                                 stores.map(
                                     function(store) {
-                                       return m("option", {value: store.id}, store.name)
+                                       return m("option", {
+                                           value: store.id,
+                                           selected: store.id == vnode.attrs.storeid
+                                        }, store.name)
                                 }),
                             ),
-                            m("div.storePath", "~/.password-store/"),
+                            m("div.storePath", `${storePath}`),
                         ]),
                         m("div.path", [
                             m("input[type=text]", {
                                 placeholder: "filename",
-                                disabled: editing,
-                                value: editing ? obj.login : "",
+                                value: obj.login,
                             }),
                             m("div", ".gpg"),
                         ]),
