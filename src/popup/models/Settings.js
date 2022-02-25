@@ -3,32 +3,37 @@
 require("chrome-extension-async");
 
 function Settings() {
-    this.sets = {}
+    this.settings = {}
 }
 
 Settings.prototype.get = async function() {
-    if (this.sets.hasOwnProperty("theme")) {
-        // console.log("Settings.get(): return this.sets", this.sets)
-        return this.sets
+    if (this.isSettings(this.settings)) {
+        return this.settings
     }
 
     var response = await chrome.runtime.sendMessage({ action: "getSettings" });
     if (response.status != "ok") {
         throw new Error(response.message);
     }
-    let _sets = response.settings;
 
-    if (_sets.hasOwnProperty("hostError")) {
-        throw new Error(_sets.hostError.params.message);
+    // save response to tmp settings variable, sets
+    let sets = response.settings;
+
+    if (sets.hasOwnProperty("hostError")) {
+        throw new Error(sets.hostError.params.message);
     }
 
-    if (typeof _sets.origin === "undefined") {
+    if (typeof sets.origin === "undefined") {
         throw new Error("Unable to retrieve current tab information");
     }
 
-    this.sets = _sets
-    // console.log("Settings.get(): return response.settings", _sets)
-    return _sets
+    // cache response.settings for future requests
+    this.settings = sets
+    return sets
+}
+
+Settings.prototype.isSettings = function(obj) {
+    return obj.hasOwnProperty("theme");
 }
 
 module.exports = Settings

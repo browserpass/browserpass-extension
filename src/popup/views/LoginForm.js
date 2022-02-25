@@ -5,24 +5,23 @@ const helpers = require("../../helpers");
 
 module.exports = LoginForm;
 
-var _sets_ = {};
+var persistSettingsModel = {};
 
-function LoginForm(sts) {
+function LoginForm(settingsModel) {
 
-    _sets_ = sts;
+    persistSettingsModel = settingsModel;
 
     return function(ctl) {
         var
             editing = false,
             obj = {},
-            sets = _sets_,
+            viewSettingsModel = persistSettingsModel,
             stores = []
         ;
 
         return {
             oninit: async function(vnode, params) {
-                settings = await sets.get();
-                // console.log("LoginForm.oninit(), settings:", settings);
+                settings = await viewSettingsModel.get();
 
                 Object.keys(settings.stores).forEach(k => {
                     stores.push(settings.stores[k])
@@ -31,11 +30,10 @@ function LoginForm(sts) {
                 // Show existing login
                 if (vnode.attrs.login !== undefined) {
                     obj = await Login.prototype.get(settings, vnode.attrs.storeid, vnode.attrs.login);
-                    // console.log("LoginForm.oninit(), login:", obj);
                     editing = true
                 }
 
-                if (editing || settings.hasOwnProperty("theme")) {
+                if (editing || viewSettingsModel.isSetting(settings)) {
                     Login.prototype.isLogin(obj)
                     m.redraw()
                 }

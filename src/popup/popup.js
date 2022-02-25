@@ -39,25 +39,23 @@ function handleError(error, type = "error") {
  */
 async function run() {
     try {
-        let sets = new Settings();
-        // console.log("run():", sets);
+        let settingsModel = new Settings();
 
         // get user settings
         var logins = [],
-            settings = await sets.get(),
+            settings = await settingsModel.get(),
             root = document.getElementsByTagName("html")[0];
         root.classList.remove("colors-dark");
         root.classList.add(`colors-${settings.theme}`);
 
         // get list of logins
-        // console.log("run():", settings);
         logins = await Login.prototype.getAll(settings);
 
         for (let login of logins) {
             login.doAction = withLogin.bind({ settings: settings, login: login });
         }
 
-        const LoginView = new LoginForm(sets);
+        const LoginView = new LoginForm(settingsModel);
         m.route(document.body, "/list", {
             "/list": new Interface(settings, logins),
             "/details/:storeid/:login": LoginView,
