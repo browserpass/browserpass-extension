@@ -3,16 +3,15 @@
 require("chrome-extension-async");
 const m = require('mithril');
 const helpers = require("../../helpers");
-// const BrowserpassURL = require("@browserpass/url");
 
-function Login(sets, obj) {
+function Login(settings, obj) {
     if (Login.prototype.isLogin(obj)) {
         // console.log("Login() obj update this:", obj)
         for (const prop in obj) {
             this[prop] = obj[prop];
         }
     }
-    this.settings = sets;
+    this.settings = settings;
 }
 
 Login.prototype.getAll = async function(settings) {
@@ -31,14 +30,10 @@ Login.prototype.getAll = async function(settings) {
 }
 
 Login.prototype.get = async function(settings, storeid, lpath) {
-    let files = []
-    files[storeid] = Array()
-    files[storeid].push(lpath)
-
-    let logins = helpers.prepareLogins(files, settings)
+    let login = helpers.prepareLogin(settings, storeid, lpath);
 
     var response = await chrome.runtime.sendMessage({
-        action: "getDetails", login: logins[0], params: {}
+        action: "getDetails", login: login, params: {}
     });
 
     if (response.status != "ok") {

@@ -68,7 +68,7 @@ function prepareLogins(files, settings) {
     for (let storeId in files) {
         for (let key in files[storeId]) {
             // set login fields
-            const login = prepareLogin(index++, settings, storeId, files[storeId][key], origin);
+            const login = prepareLogin(settings, storeId, files[storeId][key], index++, origin);
 
             logins.push(login);
         }
@@ -77,14 +77,27 @@ function prepareLogins(files, settings) {
     return logins;
 }
 
-// @TODO: This separation may no longer be needed
-function prepareLogin(index, settings, storeId, file, origin) {
+/**
+ * Prepare a single login based settings, storeId, and path
+ *
+ * @since 3.X.Y
+ *
+ * @param string settings   Settings object
+ * @param string storeId    Store ID alphanumeric ID
+ * @param string file       Relative path in store to password
+ * @param number index      An array index for login, if building an array of logins (optional, default: 0)
+ * @param object origin     Instance of BrowserpassURL (optional, default: new BrowserpassURL(settings.origin))
+ * @return object of login
+ */
+function prepareLogin(settings, storeId, file, index, origin) {
     const login = {
-        index: index,
+        index: (index = isFinite(index) && index > -1 ? parseInt(index) : 0),
         store: settings.stores[storeId],
         login: file.replace(/\.gpg$/i, ""),
         allowFill: true,
     };
+
+    origin = origin == undefined ? new BrowserpassURL(settings.origin) : origin;
 
     // extract url info from path
     let pathInfo = pathToInfo(storeId + "/" + login.login, origin);
