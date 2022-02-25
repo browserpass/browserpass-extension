@@ -17,6 +17,7 @@ function LoginForm(settingsModel) {
             editing = false,
             obj = {},
             viewSettingsModel = persistSettingsModel,
+            settings = {},
             storePath = "",
             stores = []
         ;
