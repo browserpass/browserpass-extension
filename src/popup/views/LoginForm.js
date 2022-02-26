@@ -13,13 +13,16 @@ function LoginForm(settingsModel) {
     persistSettingsModel = settingsModel;
 
     return function(ctl) {
+
+        // do some basic initialization
         var
             editing = false,
+            passwordLength = 32,
             obj = {},
-            viewSettingsModel = persistSettingsModel,
             settings = {},
             storePath = "",
-            stores = []
+            stores = [],
+            viewSettingsModel = persistSettingsModel
         ;
 
         return {
@@ -34,17 +37,30 @@ function LoginForm(settingsModel) {
                 if (vnode.attrs.login !== undefined) {
                     obj = await Login.prototype.get(settings, vnode.attrs.storeid, vnode.attrs.login);
                     editing = true
+                } else {
+                    // view instance should be a Login
+                    obj = new Login(settings);
                 }
 
                 // set the storePath
-                this.storePath();
+                this.setStorePath();
 
                 // trigger redraw after retrieving details
                 if (editing && Login.prototype.isLogin(obj) || Settings.prototype.isSettings(settings)) {
                     m.redraw();
                 }
             },
-            storePath: function(storeId) {
+            setRawDetails: function(text) {
+                obj.raw = text;
+                obj.fields.secret = obj.getRawPassword();
+            },
+            setPasswordLength: function(length) {
+                passwordLength = length;
+            },
+            setSecret: function(secret) {
+                obj.setPassword(secret);
+            },
+            setStorePath: function(storeId) {
                 if (editing) {
                     storePath = obj.store.path;
                 } else if (Settings.prototype.isSettings(settings)) {
@@ -76,7 +92,7 @@ function LoginForm(settingsModel) {
                         m("div.store", [
                             m(
                                 "select",
-                                {disabled: editing, onchange: m.withAttr("value", this.storePath)},
+                                {disabled: editing, onchange: m.withAttr("value", this.setStorePath)},
                                 stores.map(
                                     function(store) {
                                        return m("option", {
@@ -85,7 +101,7 @@ function LoginForm(settingsModel) {
                                         }, store.name)
                                 }),
                             ),
-                            m("div.storePath", `${storePath}`),
+                            m("div.storePath", storePath),
                         ]),
                         m("div.path", [
                             m("input[type=text]", {
@@ -99,9 +115,14 @@ function LoginForm(settingsModel) {
                         m("div.password", [
                             m("input[type=text]", {
                                 placeholder: "password",
-                                value: editing ? obj.fields.secret : "",
+                                value: obj.hasOwnProperty("fields") ? obj.fields.secret : "",
+                                oninput: m.withAttr("value", this.setSecret)
                             }),
-                            m("div.btn.generate"),
+                            m("div.btn.generate", {
+                                onclick: () => {
+                                    obj.setPassword(obj.generateSecret(passwordLength));
+                                }
+                            }),
                         ]),
                         m("div.options", [
                             m("input[type=checkbox]", {
@@ -110,17 +131,16 @@ function LoginForm(settingsModel) {
                             }),
                             m("label", { for: "include_symbols" }, "symbols"),
                             m("input[type=number]", {
-                                value: "40",
+                                value: passwordLength,
+                                oninput: m.withAttr("value", this.setPasswordLength)
                             }),
                             m("span", "length"),
                         ]),
-                        m(
-                            "div.details",
-                            m("textarea", {
-                                placeholder: "user: johnsmith",
-                                value: editing ? obj.raw : "",
-                            })
-                        ),
+                        m("div.details", m("textarea", {
+                            placeholder: "user: johnsmith",
+                            value: obj.raw,
+                            oninput: m.withAttr("value", this.setRawDetails)
+                        }))
                     ]),
                 )
 
