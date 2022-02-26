@@ -17,7 +17,7 @@ function LoginForm(settingsModel) {
         // do some basic initialization
         var
             editing = false,
-            passwordLength = 32,
+            passwordLength = 16,
             obj = {},
             settings = {},
             storePath = "",
