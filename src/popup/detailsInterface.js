@@ -13,20 +13,14 @@ const helpers = require("../helpers");
  * @param array  login    Target login object
  * @return void
  */
-function DetailsInterface(popup, settings, login) {
+function DetailsInterface(settings, login) {
     // public methods
-    this.popup = popup;
     this.attach = attach;
     this.view = view;
 
     //fields
     this.settings = settings;
     this.login = login;
-    this.secret = login.fields.secret;
-    // this.editing = false;
-
-    // raw data
-    this.rawText = m("textarea", { readonly: true }, login.raw.trim());
 
     // get basename & dirname of entry
     this.login.basename = this.login.login.substr(this.login.login.lastIndexOf("/") + 1);
@@ -46,48 +40,6 @@ function attach(element) {
 }
 
 /**
- * Generate a highlighted version of the password for display
- *
- * @since 3.7.0
- *
- * @return []Vnode
- */
-function passChars() {
-    return this.secret.split("").map((c) => {
-        if (c.match(/[0-9]/)) {
-            return m("span.char.num", c);
-        } else if (c.match(/[^\w\s]/)) {
-            return m("span.char.punct", c);
-        }
-        return m("span.char", c);
-    });
-}
-
-/**
- * Generate a new password
- *
- * @since 3.7.0
- *
- * @param int    length   New secret length
- * @param string alphabet Allowed alphabet
- * @return string
- */
-function generateSecret(
-    length = 16,
-    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-) {
-    let secret = "";
-    let value = new Uint8Array(1);
-    while (secret.length < length) {
-        crypto.getRandomValues(value);
-        if (value[0] < alphabet.length) {
-            secret += alphabet[value[0]];
-        }
-    }
-    return secret;
-}
-
-/**
  * Generates vnodes for render
  *
  * @since 3.6.0
@@ -97,10 +49,17 @@ function generateSecret(
  * @return []Vnode
  */
 function view(ctl, params) {
-    const self = this;
     const login = this.login;
     const storeBgColor = login.store.bgColor || login.store.settings.bgColor;
     const storeColor = login.store.color || login.store.settings.color;
+    const passChars = login.fields.secret.split("").map((c) => {
+        if (c.match(/[0-9]/)) {
+            return m("span.char.num", c);
+        } else if (c.match(/[^\w\s]/)) {
+            return m("span.char.punct", c);
+        }
+        return m("span.char", c);
+    });
 
     var nodes = [];
     nodes.push(
@@ -130,91 +89,20 @@ function view(ctl, params) {
                 ]),
                 m("div.line2", [m.trust(login.basename)]),
             ]),
-            this.popup.editing
-                ? m("div.action.back", {
-                      tabindex: 0,
-                      title: "Cancel",
-                      onclick: () => {
-                          this.popup.editing = false;
-                      },
-                  })
-                : null,
-            this.popup.editing && this.settings.caps.delete
-                ? m("div.action.delete", {
-                      tabindex: 0,
-                      title: "Delete",
-                      onclick: () => login.doAction("delete"),
-                  })
-                : null,
-            this.popup.editing
-                ? m("div.action.save", {
-                      tabindex: 0,
-                      title: "Save",
-                      onclick: () =>
-                          login.doAction("save", { rawContents: this.rawText.dom.value }),
-                  })
-                : null,
-            !this.popup.editing
-                ? m("div.action.back", {
-                      tabindex: 0,
-                      title: "Return to search",
-                      onclick: () => {
-                          //   this.popup.renderMainView();
-                      },
-                  })
-                : null,
-            !this.popup.editing && this.settings.caps.save
-                ? m("div.action.edit", {
-                      tabindex: 0,
-                      title: "Edit",
-                      onclick: () => {
-                          this.popup.editing = true;
-                          this.rawText = m(
-                              "textarea",
-                              {
-                                  oninput: (ev) => {
-                                      this.secret = ev.target.value.split("\n")[0].trim();
-                                  },
-                              },
-                              login.raw.trim()
-                          );
-                      },
-                  })
-                : null,
         ]),
         m("div.part.details", [
             m("div.part.snack.line-secret", [
                 m("div.label", "Secret"),
-                m("div.chars", passChars.call(self)),
-                !this.popup.editing
-                    ? m("div.action.copy", {
-                          title: "Copy password",
-                          onclick: () => login.doAction("copyPassword"),
-                      })
-                    : m("div.action.generate", {
-                          title: "Generate new password",
-                          onclick: () => {
-                              this.rawText.dom.value = this.rawText.dom.value.replace(
-                                  /^.*((?:(<?\r)\n)|(?:\n\r?))/,
-                                  generateSecret() + "$1"
-                              );
-                              this.rawText.dom.dispatchEvent(new Event("input"));
-                          },
-                      }),
+                m("div.chars", passChars),
+                m("div.action.copy", { onclick: () => login.doAction("copyPassword") }),
             ]),
-            !this.popup.editing
-                ? m("div.part.snack.line-login", [
-                      m("div.label", "Login"),
-                      m("div", login.fields.login),
-                      m("div.action.copy", {
-                          title: "Copy username",
-                          onclick: () => login.doAction("copyUsername"),
-                      }),
-                  ])
-                : null,
+            m("div.part.snack.line-login", [
+                m("div.label", "Login"),
+                m("div", login.fields.login),
+                m("div.action.copy", { onclick: () => login.doAction("copyUsername") }),
+            ]),
             (() => {
                 if (
-                    !this.popup.editing &&
                     this.settings.enableOTP &&
                     login.fields.otp &&
                     login.fields.otp.params.type === "totp"
@@ -244,14 +132,11 @@ function view(ctl, params) {
                         m("div.label", "Token"),
                         m("div.progress-container", progressNode),
                         m("div", helpers.makeTOTP(login.fields.otp.params)),
-                        m("div.action.copy", {
-                            title: "Copy token",
-                            onclick: () => login.doAction("copyOTP"),
-                        }),
+                        m("div.action.copy", { onclick: () => login.doAction("copyOTP") }),
                     ]);
                 }
             })(),
-            m("div.part.raw", this.rawText),
+            m("div.part.raw", m("textarea", login.raw.trim())),
         ])
     );
 

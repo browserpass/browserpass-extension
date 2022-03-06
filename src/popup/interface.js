@@ -3,7 +3,6 @@ module.exports = Interface;
 const m = require("mithril");
 const Moment = require("moment");
 const SearchInterface = require("./searchinterface");
-const AddEditInterface = require("./addeditinterface");
 const helpers = require("../helpers");
 
 const LATEST_NATIVE_APP_VERSION = 3000003;
@@ -61,11 +60,7 @@ function attach(element) {
 function view(ctl, params) {
     const nodes = [];
 
-    if (this.editing) {
-        nodes.push(m(new AddEditInterface(this)));
-    } else {
-        nodes.push(...this.renderMainView(ctl, params));
-    }
+    nodes.push(...this.renderMainView(ctl, params));
 
     if (this.settings.version < LATEST_NATIVE_APP_VERSION) {
         nodes.push(
