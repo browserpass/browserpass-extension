@@ -2,16 +2,27 @@
 
 require("chrome-extension-async");
 const m = require('mithril');
+const sha1 = require("sha1");
 const helpers = require("../../helpers");
 
 function Login(settings, obj = {}) {
     if (Login.prototype.isLogin(obj)) {
-        // console.log("Login() obj update this:", obj)
         for (const prop in obj) {
             this[prop] = obj[prop];
         }
+        // content sha used to determine if login has changes
+        this.contentSha = sha1(this.login + sha1(this.raw || ''));
     } else {
-        this.fields = {}
+        this.allowFill = true;
+        this.fields = {};
+        this.host = null;
+        this.login = '';
+        this.recent = {
+            when: 0,
+            count: 0,
+        };
+        // a null content sha identifies this a new entry
+        this.contentSha = null;
     }
     this.settings = settings;
 }
@@ -92,7 +103,7 @@ Login.prototype.isLogin = function(obj) {
     results.push(obj.hasOwnProperty('login') && typeof obj.login == 'string');
     results.push(obj.hasOwnProperty('store') && typeof obj.store == 'object');
     results.push(obj.hasOwnProperty('host'));
-    results.push(obj.hasOwnProperty('recent') && typeof obj.store == 'object');
+    results.push(obj.hasOwnProperty('recent') && typeof obj.recent == 'object');
     // console.log("Login.prototype.isLogin(obj):", check(results), results, check, obj);
 
     return check(results);
@@ -100,6 +111,41 @@ Login.prototype.isLogin = function(obj) {
 
 Login.prototype.isPass = function(file) {
     return typeof file == 'string' && /\.gpg$/i.test(file)
+}
+
+/*
+ * Validation, ready to save
+ */
+Login.prototype.isValid = function(obj) {
+    let results = [],
+    check = Array => Array.every(Boolean)
+    ;
+
+    results.push(Login.prototype.isLogin(obj));
+    results.push(obj.hasOwnProperty('login') && obj.login.length > 0);
+    results.push(obj.hasOwnProperty('raw') && typeof obj.raw == 'string' && obj.raw.length > 0);
+    // console.log("Login.prototype.isValid() results:", check(results), results, check, obj);
+
+    return check(results);
+}
+
+Login.prototype.save = async function(obj) {
+    if (Login.prototype.isValid(obj)) {
+        // Firefox requires data to be serializable,
+        // this removes everything offending such as functions
+        const login = JSON.parse(JSON.stringify(obj));
+        const action = (this.contentSha == null) ? "add" : "save";
+
+        let response = await chrome.runtime.sendMessage({
+            action: action, login: login, params: { rawContents: login.raw }
+        });
+
+        if (response.status != "ok") {
+            throw new Error(response.message);
+        }
+        return response;
+    }
+    return {};
 }
 
 Login.prototype.setPassword = function(password = "") {

@@ -1,5 +1,4 @@
 const m = require("mithril");
-const Moment = require("moment");
 const Login = require("../models/Login");
 const Settings = require("../models/Settings");
 const helpers = require("../../helpers");
@@ -28,6 +27,7 @@ function LoginForm(settingsModel) {
         return {
             oninit: async function(vnode, params) {
                 settings = await viewSettingsModel.get();
+                // console.log("LoginForm.init(vnode) settings:", settings)
 
                 Object.keys(settings.stores).forEach(k => {
                     stores.push(settings.stores[k])
@@ -41,6 +41,7 @@ function LoginForm(settingsModel) {
                     // view instance should be a Login
                     obj = new Login(settings);
                 }
+                // console.log("LoginForm.init(vnode) login:", obj);
 
                 // set the storePath
                 this.setStorePath();
@@ -50,12 +51,15 @@ function LoginForm(settingsModel) {
                     m.redraw();
                 }
             },
-            setRawDetails: function(text) {
-                obj.raw = text;
-                obj.fields.secret = obj.getRawPassword();
+            setLogin: function(path) {
+                obj.login = path;
             },
             setPasswordLength: function(length) {
                 passwordLength = length;
+            },
+            setRawDetails: function(text) {
+                obj.raw = text;
+                obj.fields.secret = obj.getRawPassword();
             },
             setSecret: function(secret) {
                 obj.setPassword(secret);
@@ -65,10 +69,11 @@ function LoginForm(settingsModel) {
                     storePath = obj.store.path;
                 } else if (Settings.prototype.isSettings(settings)) {
                     if (typeof storeId == "string") {
-                        storePath = settings.stores[storeId].path;
+                        obj.store = settings.stores[storeId]
                     } else {
-                        storePath = stores[0].path;
+                        obj.store = stores[0]
                     }
+                    storePath = obj.store.path;
                 } else {
                     storePath = "~/.password-store";
                 }
@@ -86,7 +91,18 @@ function LoginForm(settingsModel) {
                             },
                         }),
                         m("span", editing ? "Edit credentials" : "Add credentials"),
-                        m("div.btn.save"),
+                        (Settings.prototype.canSave(settings)
+                            ? m("div.btn.save", {
+                                onclick: async (e) => {
+                                    if (!Login.prototype.isValid(obj)) {
+                                        e.preventDefault();
+                                        return;
+                                    }
+                                    await Login.prototype.save(obj);
+                                    m.route.set('/list');
+                                }
+                            })
+                            : null),
                     ]),
                     m("div.location", [
                         m("div.store", [
@@ -107,6 +123,7 @@ function LoginForm(settingsModel) {
                             m("input[type=text]", {
                                 placeholder: "filename",
                                 value: obj.login,
+                                oninput: m.withAttr("value", this.setLogin)
                             }),
                             m("div", ".gpg"),
                         ]),
@@ -144,7 +161,7 @@ function LoginForm(settingsModel) {
                     ]),
                 )
 
-                if (editing) {
+                if (editing && Settings.prototype.canDelete(settings)) {
                     nodes.push(m("div.actions", m("button.delete", "Delete")));
                 }
 
@@ -170,28 +187,4 @@ function passChars() {
         }
         return m("span.char", c);
     });
-}
-
-/**
- * Generate a new password
- *
- * @since 3.7.0
- *
- * @param int    length   New secret length
- * @param string alphabet Allowed alphabet
- * @return string
- */
-function generateSecret(
-    length = 16,
-    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
-) {
-    let secret = "";
-    let value = new Uint8Array(1);
-    while (secret.length < length) {
-        crypto.getRandomValues(value);
-        if (value[0] < alphabet.length) {
-            secret += alphabet[value[0]];
-        }
-    }
-    return secret;
 }

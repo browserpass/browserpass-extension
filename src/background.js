@@ -683,7 +683,8 @@ async function handleMessage(settings, message, sendResponse) {
 
     // fetch file & parse fields if a login entry is present
     try {
-        if (typeof message.login !== "undefined") {
+        // do not fetch file for new login entries
+        if (typeof message.login !== "undefined" && message.action != "add") {
             await parseFields(settings, message.login);
         }
     } catch (e) {
@@ -728,6 +729,7 @@ async function handleMessage(settings, message, sendResponse) {
                 });
             }
             break;
+        case "add":
         case "save":
             try {
                 var response = await hostAction(settings, "save", {
