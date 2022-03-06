@@ -3,7 +3,16 @@
 require("chrome-extension-async");
 
 function Settings() {
+    // @TODO: perhaps this should be default settings
     this.settings = {}
+}
+
+Settings.prototype.canDelete = function (obj) {
+    return obj.hasOwnProperty("caps") && obj.caps.delete == true;
+}
+
+Settings.prototype.canSave = function (obj) {
+    return obj.hasOwnProperty("caps") && obj.caps.save == true;
 }
 
 Settings.prototype.get = async function() {
