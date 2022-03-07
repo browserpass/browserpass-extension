@@ -58,7 +58,8 @@ async function run() {
         const LoginView = new LoginForm(settingsModel);
         m.route(document.body, "/list", {
             "/list": new Interface(settings, logins),
-            "/details/:storeid/:login": LoginView,
+            "/details/:storeid/:login": new DetailsInterface(settingsModel),
+            "/edit/:storeid/:login": LoginView,
             "/add": LoginView,
         });
     } catch (e) {
