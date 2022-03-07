@@ -79,20 +79,28 @@ Login.prototype.getRawPassword = function() {
  *
  * @since 3.7.0
  *
- * @param int    length   New secret length
- * @param string alphabet Allowed alphabet
+ * @param {int}     length  New secret length
+ * @param {boolean} symbols Use symbols or not, default: false
  * @return string
  */
 Login.prototype.generateSecret = function(
     length = 16,
-    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
+    useSymbols = false
 ) {
-    let secret = "";
-    let value = new Uint8Array(1);
+    let
+        secret = "",
+        value = new Uint8Array(1),
+        alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+        symbols = "`~!@#$%^&*()_-+=:;<>,.?/",
+        options = ""
+    ;
+
+    options = (Boolean(useSymbols)) ? `${alphabet}${symbols}` : alphabet;
+
     while (secret.length < length) {
         crypto.getRandomValues(value);
-        if (value[0] < alphabet.length) {
-            secret += alphabet[value[0]];
+        if (value[0] < options.length) {
+            secret += options[value[0]];
         }
     }
     return secret;
