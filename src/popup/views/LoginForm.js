@@ -112,7 +112,10 @@ function LoginForm(settingsModel) {
                         m("div.store", [
                             m(
                                 "select",
-                                {disabled: editing, onchange: m.withAttr("value", this.setStorePath)},
+                                {
+                                    disabled: editing,
+                                    onchange: m.withAttr("value", this.setStorePath)
+                                },
                                 stores.map(
                                     function(store) {
                                        return m("option", {
@@ -125,6 +128,7 @@ function LoginForm(settingsModel) {
                         ]),
                         m("div.path", [
                             m("input[type=text]", {
+                                disabled: editing,
                                 placeholder: "filename",
                                 value: obj.login,
                                 oninput: m.withAttr("value", this.setLogin)
