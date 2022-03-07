@@ -21,6 +21,7 @@ function LoginForm(settingsModel) {
             settings = {},
             storePath = "",
             stores = [],
+            symbols = false,
             viewSettingsModel = persistSettingsModel
         ;
 
@@ -77,6 +78,9 @@ function LoginForm(settingsModel) {
                 } else {
                     storePath = "~/.password-store";
                 }
+            },
+            setSymbols: function(checked) {
+                symbols = checked;
             },
             view: function(vnode) {
                 var
@@ -145,14 +149,16 @@ function LoginForm(settingsModel) {
                             }),
                             m("div.btn.generate", {
                                 onclick: () => {
-                                    obj.setPassword(obj.generateSecret(passwordLength));
+                                    obj.setPassword(obj.generateSecret(passwordLength, symbols));
                                 }
                             }),
                         ]),
                         m("div.options", [
                             m("input[type=checkbox]", {
                                 id: "include_symbols",
-                                checked: true,
+                                checked: symbols,
+                                onchange: m.withAttr("checked", this.setSymbols),
+                                value: 1,
                             }),
                             m("label", { for: "include_symbols" }, "symbols"),
                             m("input[type=number]", {
