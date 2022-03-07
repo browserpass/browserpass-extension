@@ -330,7 +330,8 @@ body {
     }
 }
 
-.addEdit {
+.addEdit,
+.details {
     .title {
         display: flex;
         box-sizing: border-box;
@@ -358,6 +359,11 @@ body {
         &.back {
             background-image: url("/popup/icon-back.svg");
             width: 20px;
+        }
+
+        &.edit {
+            background-image: url("/popup/icon-edit.svg");
+            width: 25px;
         }
 
         &.save {
