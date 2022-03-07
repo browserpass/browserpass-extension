@@ -43,7 +43,40 @@ Settings.prototype.get = async function() {
     return sets
 }
 
+/**
+ * Retreive store object. Can optionally return just the sub path value.
+ *
+ * @since 3.X.Y
+ *
+ * @param {object} obj Login object
+ * @param {string} property (optional) store sub property path value to return
+ */
+Settings.prototype.getStore = function(obj, property = "") {
+    let
+        store = (obj.hasOwnProperty("store")) ? obj.store : {},
+        value = null
+    ;
+
+    switch (property) {
+        case "color":
+        case "bgColor":
+            if (store.hasOwnProperty(property)) {
+                value = store[property];
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    return value;
+}
+
 Settings.prototype.isSettings = function(obj) {
+    if (typeof obj == 'undefined') {
+        return false;
+    }
+
     return obj.hasOwnProperty("theme");
 }
 

@@ -4,14 +4,12 @@ require("chrome-extension-async");
 const m = require('mithril');
 const sha1 = require("sha1");
 const helpers = require("../../helpers");
+const Settings = require("./Settings");
 
 function Login(settings, obj = {}) {
     if (Login.prototype.isLogin(obj)) {
-        for (const prop in obj) {
-            this[prop] = obj[prop];
-        }
         // content sha used to determine if login has changes
-        this.contentSha = sha1(this.login + sha1(this.raw || ''));
+        this.contentSha = sha1(obj.login + sha1(obj.raw || ''));
     } else {
         this.allowFill = true;
         this.fields = {};
@@ -24,6 +22,12 @@ function Login(settings, obj = {}) {
         // a null content sha identifies this a new entry
         this.contentSha = null;
     }
+
+    // Set object properties
+    for (const prop in obj) {
+        this[prop] = obj[prop];
+    }
+
     this.settings = settings;
 }
 
@@ -94,7 +98,42 @@ Login.prototype.generateSecret = function(
     return secret;
 }
 
+/**
+ * Retreive store object. Can optionally return only sub path value.
+ * @todo Can be inheirited perhaps? And extended/overloaded?
+ *
+ * @since 3.X.Y
+ *
+ * @param {object} obj Login object
+ * @param {string} property (optional) store sub property path value to return
+ */
+Login.prototype.getStore = function(obj, property = "") {
+    let
+        settingsValue = Settings.prototype.getStore(obj.settings, property),
+        store = (obj.hasOwnProperty("store")) ? obj.store : {},
+        value = null
+    ;
+
+    switch (property) {
+        case "color":
+        case "bgColor":
+            if (store.hasOwnProperty(property)) {
+                value = store[property];
+            }
+            break;
+
+        default:
+            break;
+    }
+
+    return value || settingsValue;
+}
+
 Login.prototype.isLogin = function(obj) {
+    if (typeof obj == 'undefined') {
+        return false;
+    }
+
     let results = [],
         check = Array => Array.every(Boolean)
     ;
