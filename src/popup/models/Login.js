@@ -31,6 +31,32 @@ function Login(settings, obj = {}) {
     this.settings = settings;
 }
 
+/**
+ * Remove login entry
+ *
+ * @since 3.X.Y
+ *
+ * @param {object} obj Login entry to be deleted
+ * @returns {object}    Response or an empty object
+ */
+Login.prototype.delete = async function (obj) {
+    if (Login.prototype.isValid(obj)) {
+        // Firefox requires data to be serializable,
+        // this removes everything offending such as functions
+        const login = JSON.parse(JSON.stringify(obj));
+
+        let response = await chrome.runtime.sendMessage({
+            action: "delete", login: login
+        });
+
+        if (response.status != "ok") {
+            throw new Error(response.message);
+        }
+        return response;
+    }
+    return {};
+}
+
 Login.prototype.getAll = async function(settings) {
     // get list of logins
     let response = await chrome.runtime.sendMessage({ action: "listFiles" });

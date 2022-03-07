@@ -750,6 +750,25 @@ async function handleMessage(settings, message, sendResponse) {
                 });
             }
             break;
+        case "delete":
+            try {
+                var response = await hostAction(settings, "delete", {
+                    storeId: message.login.store.id,
+                    file: `${message.login.login}.gpg`,
+                });
+                console.log(response);
+                if (response.status != "ok") {
+                    alert(`Delete failed: ${response.params.message}`);
+                    throw new Error(JSON.stringify(response));
+                }
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to delete password file" + e.toString(),
+                });
+            }
+            break;
         case "copyPassword":
             try {
                 copyToClipboard(message.login.fields.secret);
