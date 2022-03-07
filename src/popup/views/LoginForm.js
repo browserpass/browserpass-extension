@@ -98,8 +98,12 @@ function LoginForm(settingsModel) {
                                         e.preventDefault();
                                         return;
                                     }
+                                    // @TODO check if successfully saved?
                                     await Login.prototype.save(obj);
-                                    m.route.set('/list');
+                                    m.mount(document.body, {
+                                        view: () => m("div.part.notice", "Successfully saved password entry")
+                                    });
+                                    setTimeout(window.close, 1000);
                                 }
                             })
                             : null),
@@ -162,6 +166,7 @@ function LoginForm(settingsModel) {
                 )
 
                 if (editing && Settings.prototype.canDelete(settings)) {
+                    // @TODO: implement login deletion
                     nodes.push(m("div.actions", m("button.delete", "Delete")));
                 }
 
