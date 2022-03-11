@@ -95,44 +95,52 @@ function renderMainView(ctl, params) {
                 return m(
                     "div.part.login",
                     {
-                        key: result.index,
-                        tabindex: 0,
-                        // onclick: function (e) {
-                        //     var action = e.target.getAttribute("action");
-                        //     if (action) {
-                        //         result.doAction(action);
-                        //     } else {
-                        //         result.doAction("fill");
-                        //     }
-                        // },
-                        // onkeydown: keyHandler.bind(result),
+                        onclick: function (e) {
+                            var action = e.target.getAttribute("action");
+                            if (action) {
+                                result.doAction(action);
+                            }
+                        },
+                        onkeydown: keyHandler.bind(result),
                     },
                     [
-                        m("div.name", { title: "Fill username / password | <Enter>" }, [
-                            m("div.line1", [
-                                m(
-                                    "div.store.badge",
-                                    {
-                                        style: `background-color: ${storeBgColor};
+                        m(
+                            "div.name",
+                            {
+                                key: result.index,
+                                tabindex: 0,
+                                title: "Fill username / password | <Enter>",
+                                onclick: function (e) {
+                                    result.doAction("fill");
+                                },
+                                onkeydown: keyHandler.bind(result),
+                            },
+                            [
+                                m("div.line1", [
+                                    m(
+                                        "div.store.badge",
+                                        {
+                                            style: `background-color: ${storeBgColor};
                                                 color: ${storeColor}`,
-                                    },
-                                    result.store.name
-                                ),
-                                m("div.path", [m.trust(result.path)]),
-                                result.recent.when > 0
-                                    ? m("div.recent", {
-                                          title:
-                                              "Used here " +
-                                              result.recent.count +
-                                              " time" +
-                                              (result.recent.count > 1 ? "s" : "") +
-                                              ", last " +
-                                              Moment(new Date(result.recent.when)).fromNow(),
-                                      })
-                                    : null,
-                            ]),
-                            m("div.line2", [m.trust(result.display)]),
-                        ]),
+                                        },
+                                        result.store.name
+                                    ),
+                                    m("div.path", [m.trust(result.path)]),
+                                    result.recent.when > 0
+                                        ? m("div.recent", {
+                                              title:
+                                                  "Used here " +
+                                                  result.recent.count +
+                                                  " time" +
+                                                  (result.recent.count > 1 ? "s" : "") +
+                                                  ", last " +
+                                                  Moment(new Date(result.recent.when)).fromNow(),
+                                          })
+                                        : null,
+                                ]),
+                                m("div.line2", [m.trust(result.display)]),
+                            ]
+                        ),
                         m("div.action.copy-user", {
                             tabindex: 0,
                             title: "Copy username | <Ctrl+Shift+C>",
@@ -143,13 +151,14 @@ function renderMainView(ctl, params) {
                             title: "Copy password | <Ctrl+C>",
                             action: "copyPassword",
                         }),
-                        // m("div.action.details", {
-                        //     tabindex: 0,
-                        //     title: "Open Details | <Ctrl+O>",
-                        // }),
                         m("div.action.details", {
+                            tabindex: 0,
+                            title: "Open Details | <Ctrl+O>",
                             oncreate: m.route.link,
                             href: `/details/${result.store.id}/${encodeURIComponent(result.login)}`,
+                            onclick: (e) => {
+                                e.preventDefault();
+                            },
                         }),
                     ]
                 );
