@@ -184,7 +184,6 @@ function AddEditInterface(settingsModel) {
                 );
 
                 if (editing && Settings.prototype.canDelete(settings)) {
-                    // @TODO: implement login deletion
                     nodes.push(
                         m(
                             "div.actions",
