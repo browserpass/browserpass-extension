@@ -8,7 +8,7 @@ const Interface = require("./interface");
 const DetailsInterface = require("./detailsInterface");
 const helpers = require("../helpers");
 const m = require("mithril");
-const LoginForm = require("./views/LoginForm");
+const AddEditInterface = require("./addEditInterface");
 
 run();
 
@@ -55,7 +55,7 @@ async function run() {
             login.doAction = withLogin.bind({ settings: settings, login: login });
         }
 
-        const LoginView = new LoginForm(settingsModel);
+        const LoginView = new AddEditInterface(settingsModel);
         m.route(document.body, "/list", {
             "/list": new Interface(settings, logins),
             "/details/:storeid/:login": new DetailsInterface(settingsModel),
