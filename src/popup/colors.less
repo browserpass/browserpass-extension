@@ -28,8 +28,25 @@
         background-color: @badge-color;
     }
 
+    .addEdit,
+    .details {
+        .btn {
+            &:hover,
+            &:focus {
+                background-color: @hover-bg-color;
+            }
+        }
+    }
+
     .part.error {
         color: @error-text-color;
+    }
+
+    .part.add {
+        background-color: @bg-color;
+        &:hover {
+            background-color: @hover-bg-color;
+        }
     }
 
     .part.details {
