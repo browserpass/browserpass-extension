@@ -35,12 +35,28 @@
             &:focus {
                 background-color: @hover-bg-color;
             }
+
+            &.generate {
+                background-color: @edit-bg-color;
+            }
+        }
+
+        .contents {
+            .password,
+            .options,
+            .details {
+                border-color: @snack-color;
+            }
         }
 
         .location {
             select {
                 background-color: @input-bg-color;
                 color: @input-text-color;
+            }
+
+            .suffix {
+                background-color: @edit-bg-color;
             }
         }
 
@@ -51,11 +67,17 @@
             }
         }
 
+        label {
+            background-color: @snack-label-color;
+            color: @invert-text-color;
+        }
+
         input[type="number"],
         input[type="text"],
         textarea {
-            background-color: @input-bg-color;
-            color: @input-text-color;
+            background-color: @edit-bg-color;
+            border-color: @snack-color;
+            color: @text-color;
         }
     }
 

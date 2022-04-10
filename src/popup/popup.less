@@ -366,9 +366,8 @@ body {
         }
 
         &.generate {
-            background-size: 14px;
             width: 15px;
-            height: 15px;
+            padding-right: 10px;
             background-image: url("/popup/icon-generate.svg");
         }
     }
@@ -381,17 +380,23 @@ body {
             display: flex;
             align-items: center;
             margin-bottom: 6px;
+            padding-right: 5px;
         }
 
         .storePath {
             margin-left: 10px;
+            font-size: 12px;
+        }
+
+        .suffix {
+            font-size: 12px;
+            padding: 5px 4px;
+            margin-right: -5px;
         }
 
         select {
-            // background-color: #4a4a4a;
             border: none;
             outline: none;
-            // color: #eee;
             padding: 5px;
             cursor: pointer;
         }
@@ -408,27 +413,35 @@ body {
         flex-direction: column;
         margin: 0 6px 20px;
 
+        label {
+            display: flex;
+            flex-grow: 0;
+            justify-content: flex-end;
+            font-weight: bold;
+            padding: 6px 6px;
+            border: none;
+        }
+
         .password,
         .options,
         .details {
             display: flex;
             margin-bottom: 6px;
+            border: 1px solid;
+            border-radius: 2px;
         }
 
         .options {
-            font-size: 12px;
             align-items: center;
-            margin-bottom: 10px;
 
             input[type="checkbox"] {
-                margin: 3px;
+                margin: 3px 6px;
             }
 
             input[type="number"] {
                 font-size: 12px;
                 width: 40px;
-                margin-left: 10px;
-                margin-right: 3px;
+                height: 20px;
             }
         }
     }
@@ -455,11 +468,13 @@ body {
         width: 100%;
         font-family: "Open Sans";
         padding: 5px 8px;
+        font-family: Source Code Pro, monospace;
     }
 
     textarea {
         resize: none;
-        height: 70px;
+        min-height: 110px;
+        min-width: 340px;
     }
 }
 
