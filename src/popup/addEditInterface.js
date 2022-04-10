@@ -229,21 +229,3 @@ function AddEditInterface(settingsModel) {
         };
     };
 }
-
-/**
- * Generate a highlighted version of the password for display
- *
- * @since 3.7.0
- *
- * @return []Vnode
- */
-function passChars() {
-    return this.secret.split("").map((c) => {
-        if (c.match(/[0-9]/)) {
-            return m("span.char.num", c);
-        } else if (c.match(/[^\w\s]/)) {
-            return m("span.char.punct", c);
-        }
-        return m("span.char", c);
-    });
-}
