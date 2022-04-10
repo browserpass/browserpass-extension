@@ -89,6 +89,7 @@ function AddEditInterface(settingsModel) {
                 nodes.push(
                     m("div.title", [
                         m("div.btn.back", {
+                            title: "Back to list",
                             onclick: (e) => {
                                 m.route.set("/list");
                             },
@@ -96,6 +97,7 @@ function AddEditInterface(settingsModel) {
                         m("span", editing ? "Edit credentials" : "Add credentials"),
                         Settings.prototype.canSave(settings)
                             ? m("div.btn.save", {
+                                  title: "Save",
                                   onclick: async (e) => {
                                       if (!Login.prototype.isValid(obj)) {
                                           e.preventDefault();
@@ -106,7 +108,7 @@ function AddEditInterface(settingsModel) {
                                           view: () =>
                                               m(
                                                   "div.part.notice",
-                                                  "Successfully saved password entry"
+                                                  `Successfully saved password entry ${obj.login}.`
                                               ),
                                       });
                                       setTimeout(window.close, 1000);
@@ -142,12 +144,14 @@ function AddEditInterface(settingsModel) {
                                 value: obj.login,
                                 oninput: m.withAttr("value", this.setLogin),
                             }),
-                            m("div", ".gpg"),
+                            m("div.suffix", ".gpg"),
                         ]),
                     ]),
                     m("div.contents", [
                         m("div.password", [
+                            m("label", { for: "secret" }, "Secret"),
                             m("input[type=text]", {
+                                id: "secret",
                                 placeholder: "password",
                                 value: obj.hasOwnProperty("fields") ? obj.fields.secret : "",
                                 oninput: m.withAttr("value", this.setSecret),
@@ -159,18 +163,19 @@ function AddEditInterface(settingsModel) {
                             }),
                         ]),
                         m("div.options", [
+                            m("label", { for: "include_symbols" }, "Symbols"),
                             m("input[type=checkbox]", {
                                 id: "include_symbols",
                                 checked: symbols,
                                 onchange: m.withAttr("checked", this.setSymbols),
                                 value: 1,
                             }),
-                            m("label", { for: "include_symbols" }, "symbols"),
+                            m("label", { for: "length" }, "Length"),
                             m("input[type=number]", {
+                                id: "length",
                                 value: passwordLength,
                                 oninput: m.withAttr("value", this.setPasswordLength),
                             }),
-                            m("span", "length"),
                         ]),
                         m(
                             "div.details",
@@ -191,6 +196,13 @@ function AddEditInterface(settingsModel) {
                                 "button.delete",
                                 {
                                     onclick: async (e) => {
+                                        var remove = confirm(
+                                            `Are you sure you want to delete ${obj.login}?`
+                                        );
+                                        if (!remove) {
+                                            e.preventDefault();
+                                            return;
+                                        }
                                         if (!Login.prototype.isValid(obj)) {
                                             e.preventDefault();
                                             return;
@@ -200,7 +212,7 @@ function AddEditInterface(settingsModel) {
                                             view: () =>
                                                 m(
                                                     "div.part.notice",
-                                                    "Successfully deleted password entry"
+                                                    `Successfully deleted password entry ${obj.login} from ${obj.store.name}.`
                                                 ),
                                         });
                                         setTimeout(window.close, 1000);

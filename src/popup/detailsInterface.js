@@ -83,6 +83,7 @@ function DetailsInterface(settingsModel) {
                 nodes.push(
                     m("div.title", [
                         m("div.btn.back", {
+                            title: "Back to list",
                             onclick: (e) => {
                                 m.route.set("/list");
                             },
@@ -90,6 +91,7 @@ function DetailsInterface(settingsModel) {
                         m("span", "View credentials"),
                         Settings.prototype.canSave(settings)
                             ? m("div.btn.edit", {
+                                  title: `Edit ${login.basename}`,
                                   oncreate: m.route.link,
                                   href: `/edit/${obj.store.id}/${encodeURIComponent(obj.login)}`,
                               })
