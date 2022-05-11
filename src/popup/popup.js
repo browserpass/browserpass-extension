@@ -114,9 +114,7 @@ async function withLogin(action, params = {}) {
         const login = JSON.parse(JSON.stringify(this.login));
 
         // hand off action to background script
-        // console.log({ action, login, params });
         var response = await chrome.runtime.sendMessage({ action, login, params });
-        // console.log(response);
         if (response.status != "ok") {
             throw new Error(response.message);
         } else {

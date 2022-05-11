@@ -26,7 +26,6 @@ function Interface(settings, logins) {
     // fields
     this.settings = settings;
     this.logins = logins;
-    // console.log("Interface(settings, logins):", settings, logins);
 
     this.results = [];
     this.currentDomainOnly = !settings.tab.url.match(/^(chrome|about):/);

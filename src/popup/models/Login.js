@@ -177,7 +177,6 @@ Login.prototype.isLogin = function(obj) {
     results.push(obj.hasOwnProperty('store') && typeof obj.store == 'object');
     results.push(obj.hasOwnProperty('host'));
     results.push(obj.hasOwnProperty('recent') && typeof obj.recent == 'object');
-    // console.log("Login.prototype.isLogin(obj):", check(results), results, check, obj);
 
     return check(results);
 }
@@ -197,7 +196,6 @@ Login.prototype.isValid = function(obj) {
     results.push(Login.prototype.isLogin(obj));
     results.push(obj.hasOwnProperty('login') && obj.login.length > 0);
     results.push(obj.hasOwnProperty('raw') && typeof obj.raw == 'string' && obj.raw.length > 0);
-    // console.log("Login.prototype.isValid() results:", check(results), results, check, obj);
 
     return check(results);
 }

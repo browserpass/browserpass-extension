@@ -23,7 +23,6 @@ function AddEditInterface(settingsModel) {
         return {
             oninit: async function (vnode, params) {
                 settings = await viewSettingsModel.get();
-                // console.log("AddEditInterface.init(vnode) settings:", settings)
 
                 Object.keys(settings.stores).forEach((k) => {
                     stores.push(settings.stores[k]);
@@ -41,7 +40,6 @@ function AddEditInterface(settingsModel) {
                     // view instance should be a Login
                     obj = new Login(settings);
                 }
-                // console.log("AddEditInterface.init(vnode) login:", obj);
 
                 // set the storePath
                 this.setStorePath();
