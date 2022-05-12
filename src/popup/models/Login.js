@@ -117,7 +117,8 @@ Login.prototype.generateSecret = function(
         secret = "",
         value = new Uint8Array(1),
         alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
-        symbols = "`~!@#$%^&*()_-+=:;<>,.?/",
+        // double quote and backslash are at the end and escaped
+        symbols = "!#$%&'()*+,-./:;<=>?@[]^_`{|}~.\"\\",
         options = ""
     ;
 
