@@ -169,17 +169,16 @@ Login.prototype.isLogin = function(obj) {
         return false;
     }
 
-    let results = [],
-        check = Array => Array.every(Boolean)
-    ;
+    let results = [];
 
+    results.push(Login.prototype.isPrototypeOf(obj));
     results.push(obj.hasOwnProperty('allowFill') && typeof obj.allowFill == 'boolean');
     results.push(obj.hasOwnProperty('login') && typeof obj.login == 'string');
     results.push(obj.hasOwnProperty('store') && typeof obj.store == 'object');
     results.push(obj.hasOwnProperty('host'));
     results.push(obj.hasOwnProperty('recent') && typeof obj.recent == 'object');
 
-    return check(results);
+    return results.every(Boolean);
 }
 
 Login.prototype.isPass = function(file) {
@@ -190,15 +189,13 @@ Login.prototype.isPass = function(file) {
  * Validation, ready to save
  */
 Login.prototype.isValid = function(obj) {
-    let results = [],
-    check = Array => Array.every(Boolean)
-    ;
+    let results = [];
 
     results.push(Login.prototype.isLogin(obj));
     results.push(obj.hasOwnProperty('login') && obj.login.length > 0);
     results.push(obj.hasOwnProperty('raw') && typeof obj.raw == 'string' && obj.raw.length > 0);
 
-    return check(results);
+    return results.every(Boolean);
 }
 
 Login.prototype.save = async function(obj) {

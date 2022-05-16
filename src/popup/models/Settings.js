@@ -2,9 +2,14 @@
 
 require("chrome-extension-async");
 
-function Settings() {
+function Settings(obj = {}) {
     // @TODO: perhaps this should be default settings
-    this.settings = {}
+    if (Object.prototype.isPrototypeOf(obj)) {
+        // Set object properties
+        for (const prop in obj) {
+            this[prop] = obj[prop];
+        }
+    }
 }
 
 Settings.prototype.canDelete = function (obj) {
@@ -16,7 +21,7 @@ Settings.prototype.canSave = function (obj) {
 }
 
 Settings.prototype.get = async function() {
-    if (this.isSettings(this.settings)) {
+    if (Settings.prototype.isSettings(this.settings)) {
         return this.settings
     }
 
@@ -37,8 +42,8 @@ Settings.prototype.get = async function() {
     }
 
     // cache response.settings for future requests
-    this.settings = sets
-    return sets
+    this.settings = new Settings(sets);
+    return this.settings;
 }
 
 /**
@@ -75,7 +80,7 @@ Settings.prototype.isSettings = function(obj) {
         return false;
     }
 
-    return obj.hasOwnProperty("theme");
+    return Settings.prototype.isPrototypeOf(obj);
 }
 
 module.exports = Settings
