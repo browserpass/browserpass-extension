@@ -91,7 +91,7 @@ function prepareLogins(files, settings) {
  */
 function prepareLogin(settings, storeId, file, index, origin) {
     const login = {
-        index: (index > -1 ? parseInt(index) : 0),
+        index: index > -1 ? parseInt(index) : 0,
         store: settings.stores[storeId],
         login: file.replace(/\.gpg$/i, ""),
         allowFill: true,
