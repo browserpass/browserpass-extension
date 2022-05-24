@@ -89,7 +89,7 @@ function prepareLogins(files, settings) {
  * @param object origin     Instance of BrowserpassURL (optional, default: new BrowserpassURL(settings.origin))
  * @return object of login
  */
-function prepareLogin(settings, storeId, file, index, origin) {
+function prepareLogin(settings, storeId, file, index = 0, origin = undefined) {
     const login = {
         index: index > -1 ? parseInt(index) : 0,
         store: settings.stores[storeId],
@@ -97,7 +97,9 @@ function prepareLogin(settings, storeId, file, index, origin) {
         allowFill: true,
     };
 
-    origin = origin == undefined ? new BrowserpassURL(settings.origin) : origin;
+    origin = BrowserpassURL.prototype.isPrototypeOf(origin)
+        ? origin
+        : new BrowserpassURL(settings.origin);
 
     // extract url info from path
     let pathInfo = pathToInfo(storeId + "/" + login.login, origin);
