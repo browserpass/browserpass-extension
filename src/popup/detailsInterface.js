@@ -84,7 +84,7 @@ function DetailsInterface(settingsModel) {
                     m("div.title", [
                         m("div.btn.back", {
                             title: "Back to list",
-                            onclick: (e) => {
+                            onclick: () => {
                                 m.route.set("/list");
                             },
                         }),
@@ -173,7 +173,16 @@ function DetailsInterface(settingsModel) {
                                 ]);
                             }
                         })(),
-                        m("div.part.raw", m("textarea", (login.raw || "").trim())),
+                        m(
+                            "div.part.raw",
+                            m(
+                                "textarea",
+                                {
+                                    disabled: true, // disable edit here
+                                },
+                                (login.raw || "").trim()
+                            )
+                        ),
                     ])
                 );
 

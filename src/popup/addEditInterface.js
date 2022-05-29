@@ -88,7 +88,7 @@ function AddEditInterface(settingsModel) {
                     m("div.title", [
                         m("div.btn.back", {
                             title: "Back to list",
-                            onclick: (e) => {
+                            onclick: () => {
                                 m.route.set("/list");
                             },
                         }),
