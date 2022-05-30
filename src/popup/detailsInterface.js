@@ -13,8 +13,7 @@ var persistSettingsModel = {};
  *
  * @since 3.X.Y
  *
- * @param object settings   Settings object
- * @param array  login      Target login object
+ * @param object settings   Settings model object
  * @return function         View component
  */
 function DetailsInterface(settingsModel) {
@@ -22,11 +21,15 @@ function DetailsInterface(settingsModel) {
 
     /**
      * DetailsView
+     *
+     * @since 3.X.Y
+     *
+     * @param object vnode  current vnode object
      */
-    return function (ctl) {
+    return function (vnode) {
         // set default state
         var settings = {},
-            obj = new Login(persistSettingsModel, {
+            loginObj = new Login(persistSettingsModel, {
                 basename: "",
                 dirname: "",
                 store: {},
@@ -41,17 +44,20 @@ function DetailsInterface(settingsModel) {
              *
              * @since 3.X.Y
              *
-             * @param {function}    vnode current vnode instance
-             * @param {object}      params Runtime params
+             * @param object    vnode current vnode instance
              */
-            oninit: async function (vnode, params) {
+            oninit: async function (vnode) {
                 settings = await viewSettingsModel.get();
 
-                obj = await Login.prototype.get(settings, vnode.attrs.storeid, vnode.attrs.login);
+                loginObj = await Login.prototype.get(
+                    settings,
+                    vnode.attrs.storeid,
+                    vnode.attrs.login
+                );
 
                 // get basename & dirname of entry
-                obj.basename = obj.login.substr(obj.login.lastIndexOf("/") + 1);
-                obj.dirname = obj.login.substr(0, obj.login.lastIndexOf("/")) + "/";
+                loginObj.basename = loginObj.login.substr(loginObj.login.lastIndexOf("/") + 1);
+                loginObj.dirname = loginObj.login.substr(0, loginObj.login.lastIndexOf("/")) + "/";
 
                 // trigger redraw after retrieving details
                 m.redraw();
@@ -61,15 +67,15 @@ function DetailsInterface(settingsModel) {
              *
              * @since 3.6.0
              *
-             * @param function ctl    Controller
-             * @param object   params Runtime params
+             * @param object vnode
              * @return []Vnode
              */
-            view: function (ctl, params) {
-                const login = obj;
-                const storeBgColor = Login.prototype.getStore(obj, "bgColor");
-                const storeColor = Login.prototype.getStore(obj, "color");
-                const secret = (obj.hasOwnProperty("fields") ? obj.fields.secret : null) || "";
+            view: function (vnode) {
+                const login = loginObj;
+                const storeBgColor = Login.prototype.getStore(loginObj, "bgColor");
+                const storeColor = Login.prototype.getStore(loginObj, "color");
+                const secret =
+                    (loginObj.hasOwnProperty("fields") ? loginObj.fields.secret : null) || "";
                 const passChars = secret.split("").map((c) => {
                     if (c.match(/[0-9]/)) {
                         return m("span.char.num", c);
@@ -93,7 +99,9 @@ function DetailsInterface(settingsModel) {
                             ? m("div.btn.edit", {
                                   title: `Edit ${login.basename}`,
                                   oncreate: m.route.link,
-                                  href: `/edit/${obj.store.id}/${encodeURIComponent(obj.login)}`,
+                                  href: `/edit/${loginObj.store.id}/${encodeURIComponent(
+                                      loginObj.login
+                                  )}`,
                               })
                             : null,
                     ]),

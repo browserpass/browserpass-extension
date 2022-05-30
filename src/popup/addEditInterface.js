@@ -10,18 +10,25 @@ var persistSettingsModel = {};
 function AddEditInterface(settingsModel) {
     persistSettingsModel = settingsModel;
 
-    return function (ctl) {
+    /**
+     * AddEditView
+     *
+     * @since 3.X.Y
+     *
+     * @param object vnode  current vnode object
+     */
+    return function (vnode) {
         // do some basic initialization
         var editing = false,
             passwordLength = 16,
-            obj = {},
+            loginObj = {},
             settings = {},
             storePath = "",
             stores = [],
             symbols = false,
             viewSettingsModel = persistSettingsModel;
         return {
-            oninit: async function (vnode, params) {
+            oninit: async function (vnode) {
                 settings = await viewSettingsModel.get();
 
                 Object.keys(settings.stores).forEach((k) => {
@@ -30,7 +37,7 @@ function AddEditInterface(settingsModel) {
 
                 // Show existing login
                 if (vnode.attrs.login !== undefined) {
-                    obj = await Login.prototype.get(
+                    loginObj = await Login.prototype.get(
                         settings,
                         vnode.attrs.storeid,
                         vnode.attrs.login
@@ -38,7 +45,7 @@ function AddEditInterface(settingsModel) {
                     editing = true;
                 } else {
                     // view instance should be a Login
-                    obj = new Login(settings);
+                    loginObj = new Login(settings);
                 }
 
                 // set the storePath
@@ -46,35 +53,35 @@ function AddEditInterface(settingsModel) {
 
                 // trigger redraw after retrieving details
                 if (
-                    (editing && Login.prototype.isLogin(obj)) ||
+                    (editing && Login.prototype.isLogin(loginObj)) ||
                     Settings.prototype.isSettings(settings)
                 ) {
                     m.redraw();
                 }
             },
             setLogin: function (path) {
-                obj.login = path;
+                loginObj.login = path;
             },
             setPasswordLength: function (length) {
                 passwordLength = length;
             },
             setRawDetails: function (text) {
-                obj.raw = text;
-                obj.fields.secret = obj.getRawPassword();
+                loginObj.raw = text;
+                loginObj.fields.secret = loginObj.getRawPassword();
             },
             setSecret: function (secret) {
-                obj.setPassword(secret);
+                loginObj.setPassword(secret);
             },
             setStorePath: function (storeId) {
                 if (editing) {
-                    storePath = obj.store.path;
+                    storePath = loginObj.store.path;
                 } else if (Settings.prototype.isSettings(settings)) {
                     if (typeof storeId == "string") {
-                        obj.store = settings.stores[storeId];
+                        loginObj.store = settings.stores[storeId];
                     } else {
-                        obj.store = stores[0];
+                        loginObj.store = stores[0];
                     }
-                    storePath = obj.store.path;
+                    storePath = loginObj.store.path;
                 } else {
                     storePath = "~/.password-store";
                 }
@@ -97,16 +104,16 @@ function AddEditInterface(settingsModel) {
                             ? m("div.btn.save", {
                                   title: "Save",
                                   onclick: async (e) => {
-                                      if (!Login.prototype.isValid(obj)) {
+                                      if (!Login.prototype.isValid(loginObj)) {
                                           e.preventDefault();
                                           return;
                                       }
-                                      await Login.prototype.save(obj);
+                                      await Login.prototype.save(loginObj);
                                       m.mount(document.body, {
                                           view: () =>
                                               m(
                                                   "div.part.notice",
-                                                  `Successfully saved password entry ${obj.login}.`
+                                                  `Successfully saved password entry ${loginObj.login}.`
                                               ),
                                       });
                                       setTimeout(window.close, 1000);
@@ -139,7 +146,7 @@ function AddEditInterface(settingsModel) {
                             m("input[type=text]", {
                                 disabled: editing,
                                 placeholder: "filename",
-                                value: obj.login,
+                                value: loginObj.login,
                                 oninput: m.withAttr("value", this.setLogin),
                             }),
                             m("div.suffix", ".gpg"),
@@ -151,12 +158,16 @@ function AddEditInterface(settingsModel) {
                             m("input[type=text]", {
                                 id: "secret",
                                 placeholder: "password",
-                                value: obj.hasOwnProperty("fields") ? obj.fields.secret : "",
+                                value: loginObj.hasOwnProperty("fields")
+                                    ? loginObj.fields.secret
+                                    : "",
                                 oninput: m.withAttr("value", this.setSecret),
                             }),
                             m("div.btn.generate", {
                                 onclick: () => {
-                                    obj.setPassword(obj.generateSecret(passwordLength, symbols));
+                                    loginObj.setPassword(
+                                        loginObj.generateSecret(passwordLength, symbols)
+                                    );
                                 },
                             }),
                         ]),
@@ -179,7 +190,7 @@ function AddEditInterface(settingsModel) {
                             "div.details",
                             m("textarea", {
                                 placeholder: "user: johnsmith",
-                                value: obj.raw,
+                                value: loginObj.raw,
                                 oninput: m.withAttr("value", this.setRawDetails),
                             })
                         ),
@@ -195,22 +206,22 @@ function AddEditInterface(settingsModel) {
                                 {
                                     onclick: async (e) => {
                                         var remove = confirm(
-                                            `Are you sure you want to delete ${obj.login}?`
+                                            `Are you sure you want to delete ${loginObj.login}?`
                                         );
                                         if (!remove) {
                                             e.preventDefault();
                                             return;
                                         }
-                                        if (!Login.prototype.isValid(obj)) {
+                                        if (!Login.prototype.isValid(loginObj)) {
                                             e.preventDefault();
                                             return;
                                         }
-                                        await Login.prototype.delete(obj);
+                                        await Login.prototype.delete(loginObj);
                                         m.mount(document.body, {
                                             view: () =>
                                                 m(
                                                     "div.part.notice",
-                                                    `Successfully deleted password entry ${obj.login} from ${obj.store.name}.`
+                                                    `Successfully deleted password entry ${loginObj.login} from ${loginObj.store.name}.`
                                                 ),
                                         });
                                         setTimeout(window.close, 1000);
