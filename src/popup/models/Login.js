@@ -71,6 +71,16 @@ Login.prototype.delete = async function (loginObj) {
     return {};
 }
 
+/**
+ * Request a list of all login files and then
+ * extend them with Login.prototype.
+ *
+ * @since 3.X.Y
+ * @throws {error} host response errors
+ *
+ * @param {object} settings Settings object
+ * @returns {array} Logins
+ */
 Login.prototype.getAll = async function(settings) {
     // get list of logins
     let response = await chrome.runtime.sendMessage({ action: "listFiles" });
@@ -86,6 +96,17 @@ Login.prototype.getAll = async function(settings) {
     return logins;
 }
 
+/**
+ * Request decrypted details of login from host for store id.
+ *
+ * @since 3.X.Y
+ * @throws {error} host response errors
+ *
+ * @param {object} settings Settings object
+ * @param {string} storeid  store id
+ * @param {string} lpath    relative file path of login in store
+ * @returns Login object
+ */
 Login.prototype.get = async function(settings, storeid, lpath) {
     let login = helpers.prepareLogin(settings, storeid, lpath);
 
@@ -100,6 +121,16 @@ Login.prototype.get = async function(settings, storeid, lpath) {
     return new Login(settings, response.login);
 }
 
+/**
+ * Returns fields.secret or first line from fields.raw
+ *
+ * See also Login.prototype.getRawPassword and the
+ * functions: setSecret(), setRawDetails() in src/popup/addEditInterface.js
+ *
+ * @since 3.X.Y
+ *
+ * @returns {string} secret
+ */
 Login.prototype.getPassword = function() {
     if (typeof this.fields == 'object' && this.fields.hasOwnProperty("secret")) {
         return this.fields.secret;
@@ -107,6 +138,16 @@ Login.prototype.getPassword = function() {
     return this.prototype.getRawPassword();
 }
 
+/**
+ * Return only password from fields.raw
+ *
+ * Is used with in combination with Login.prototype.getPassword and the
+ * functions: setSecret(), setRawDetails() in src/popup/addEditInterface.js
+ *
+ * @since 3.X.Y
+ *
+ * @returns {string} secret
+ */
 Login.prototype.getRawPassword = function() {
     if (typeof this.raw == 'string') {
         return this.raw.split("\n", 1)[0].trim();
