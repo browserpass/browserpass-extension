@@ -6,10 +6,19 @@ const sha1 = require("sha1");
 const helpers = require("../../helpers");
 const Settings = require("./Settings");
 
-function Login(settings, obj = {}) {
-    if (Login.prototype.isLogin(obj)) {
+/**
+ * Login Constructor()
+ *
+ * @since 3.X.Y
+ *
+ * @param {object} settings
+ * @param {object} loginObj (optional) Extend an existing
+ *      login object to be backwards and forwards compatible.
+ */
+function Login(settings, loginObj = {}) {
+    if (Login.prototype.isLogin(loginObj)) {
         // content sha used to determine if login has changes
-        this.contentSha = sha1(obj.login + sha1(obj.raw || ''));
+        this.contentSha = sha1(loginObj.login + sha1(loginObj.raw || ''));
     } else {
         this.allowFill = true;
         this.fields = {};
@@ -24,8 +33,8 @@ function Login(settings, obj = {}) {
     }
 
     // Set object properties
-    for (const prop in obj) {
-        this[prop] = obj[prop];
+    for (const prop in loginObj) {
+        this[prop] = loginObj[prop];
     }
 
     this.settings = settings;
@@ -36,14 +45,14 @@ function Login(settings, obj = {}) {
  *
  * @since 3.X.Y
  *
- * @param {object} obj Login entry to be deleted
- * @returns {object}    Response or an empty object
+ * @param {object} loginObj Login entry to be deleted
+ * @returns {object} Response or an empty object
  */
-Login.prototype.delete = async function (obj) {
-    if (Login.prototype.isValid(obj)) {
+Login.prototype.delete = async function (loginObj) {
+    if (Login.prototype.isValid(loginObj)) {
         // Firefox requires data to be serializable,
         // this removes everything offending such as functions
-        const login = JSON.parse(JSON.stringify(obj));
+        const login = JSON.parse(JSON.stringify(loginObj));
 
         let response = await chrome.runtime.sendMessage({
             action: "delete", login: login
@@ -135,17 +144,16 @@ Login.prototype.generateSecret = function(
 
 /**
  * Retreive store object. Can optionally return only sub path value.
- * @todo Can be inheirited perhaps? And extended/overloaded?
  *
  * @since 3.X.Y
  *
- * @param {object} obj Login object
+ * @param {object} login Login object
  * @param {string} property (optional) store sub property path value to return
  */
-Login.prototype.getStore = function(obj, property = "") {
+Login.prototype.getStore = function(login, property = "") {
     let
-        settingsValue = Settings.prototype.getStore(obj.settings, property),
-        store = (obj.hasOwnProperty("store")) ? obj.store : {},
+        settingsValue = Settings.prototype.getStore(login.settings, property),
+        store = (login.hasOwnProperty("store")) ? login.store : {},
         value = null
     ;
 
@@ -164,45 +172,78 @@ Login.prototype.getStore = function(obj, property = "") {
     return value || settingsValue;
 }
 
-Login.prototype.isLogin = function(obj) {
-    if (typeof obj == 'undefined') {
+/**
+ * Returns a boolean indication on if object passed
+ * is an instance of Login.prototype.
+ * @since 3.X.Y
+ *
+ * @param {object} login Login object
+ * @returns Boolean
+ */
+Login.prototype.isLogin = function(login) {
+    if (typeof login == 'undefined') {
         return false;
     }
 
     let results = [];
 
-    results.push(Login.prototype.isPrototypeOf(obj));
-    results.push(obj.hasOwnProperty('allowFill') && typeof obj.allowFill == 'boolean');
-    results.push(obj.hasOwnProperty('login') && typeof obj.login == 'string');
-    results.push(obj.hasOwnProperty('store') && typeof obj.store == 'object');
-    results.push(obj.hasOwnProperty('host'));
-    results.push(obj.hasOwnProperty('recent') && typeof obj.recent == 'object');
+    results.push(Login.prototype.isPrototypeOf(login));
+    results.push(login.hasOwnProperty('allowFill') && typeof login.allowFill == 'boolean');
+    results.push(login.hasOwnProperty('login') && typeof login.login == 'string');
+    results.push(login.hasOwnProperty('store') && typeof login.store == 'object');
+    results.push(login.hasOwnProperty('host'));
+    results.push(login.hasOwnProperty('recent') && typeof login.recent == 'object');
 
     return results.every(Boolean);
 }
+
+/**
+ * Returns a boolean indication on if object passed
+ * is a file path to an encrypted file.
+ *
+ * @since 3.X.Y
+ *
+ * @param {string} file Encrypted login file path
+ * @returns Boolean
+ */
 
 Login.prototype.isPass = function(file) {
     return typeof file == 'string' && /\.gpg$/i.test(file)
 }
 
-/*
- * Validation, ready to save
+/**
+ * Validation, determine if object passed is Login
+ * and is ready to be saved.
+ *
+ * @since 3.X.Y
+ *
+ * @param {object} loginObj Login object to validated
  */
-Login.prototype.isValid = function(obj) {
+Login.prototype.isValid = function(loginObj) {
     let results = [];
 
-    results.push(Login.prototype.isLogin(obj));
-    results.push(obj.hasOwnProperty('login') && obj.login.length > 0);
-    results.push(obj.hasOwnProperty('raw') && typeof obj.raw == 'string' && obj.raw.length > 0);
+    results.push(Login.prototype.isLogin(loginObj));
+    results.push(loginObj.hasOwnProperty('login') && loginObj.login.length > 0);
+    results.push(loginObj.hasOwnProperty('raw') && typeof loginObj.raw == 'string' && loginObj.raw.length > 0);
 
     return results.every(Boolean);
 }
 
-Login.prototype.save = async function(obj) {
-    if (Login.prototype.isValid(obj)) {
+/**
+ * Calls validation for Login and if it passes,
+ * then calls chrome.runtime.sendMessage()
+ * with {action: "add/save"} for new/existing secrets.
+ *
+ * @since 3.X.Y
+ *
+ * @param {object} loginObj Login object to be saved.
+ * @returns {object} Response or an empty object.
+ */
+Login.prototype.save = async function(loginObj) {
+    if (Login.prototype.isValid(loginObj)) {
         // Firefox requires data to be serializable,
         // this removes everything offending such as functions
-        const login = JSON.parse(JSON.stringify(obj));
+        const login = JSON.parse(JSON.stringify(loginObj));
         const action = (this.contentSha == null) ? "add" : "save";
 
         let response = await chrome.runtime.sendMessage({
@@ -217,6 +258,13 @@ Login.prototype.save = async function(obj) {
     return {};
 }
 
+/**
+ * Sets password on Login.fields.secret and Login.raw
+ *
+ * @since 3.X.Y
+ *
+ * @param {string} password Value of password to be assgined.
+ */
 Login.prototype.setPassword = function(password = "") {
     if (typeof password != 'string') {
         console.warn(`Login password should be of type 'string', received '${typeof password}' instead.`);
