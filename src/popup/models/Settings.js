@@ -2,25 +2,57 @@
 
 require("chrome-extension-async");
 
-function Settings(obj = {}) {
+/**
+ * Settings Constructor()
+ * @since 3.X.Y
+ *
+ * @param {object} settingsObj (optional) Extend an existing
+ *      settings object to be backwards and forwards compatible.
+ */
+function Settings(settingsObj = {}) {
     // @TODO: perhaps this should be default settings
-    if (Object.prototype.isPrototypeOf(obj)) {
+    if (Object.prototype.isPrototypeOf(settingsObj)) {
         // Set object properties
-        for (const prop in obj) {
-            this[prop] = obj[prop];
+        for (const prop in settingsObj) {
+            this[prop] = settingsObj[prop];
         }
     }
 }
 
-Settings.prototype.canDelete = function (obj) {
-    return obj.hasOwnProperty("caps") && obj.caps.delete == true;
+/**
+ * Check if host application can handle DELETE requests.
+ *
+ * @since 3.X.Y
+ *
+ * @param {object} settingsObj Settings object
+ * @returns
+ */
+Settings.prototype.canDelete = function (settingsObj) {
+    return settingsObj.hasOwnProperty("caps") && settingsObj.caps.delete == true;
 }
 
-Settings.prototype.canSave = function (obj) {
-    return obj.hasOwnProperty("caps") && obj.caps.save == true;
+/**
+ * Check if host application can handle SAVE requests.
+ *
+ * @since 3.X.Y
+ *
+ * @param {object} settingsObj Settings object
+ * @returns
+ */
+Settings.prototype.canSave = function (settingsObj) {
+    return settingsObj.hasOwnProperty("caps") && settingsObj.caps.save == true;
 }
 
-Settings.prototype.get = async function() {
+/**
+ * Retrieves Browserpass settings or throws an error.
+ * Will also cache the first successful response.
+ *
+ * @since 3.X.Y
+ *
+ * @throws {error} Any error response from the host or browser will be thrown
+ * @returns {object} settings
+ */
+Settings.prototype.get = async function () {
     if (Settings.prototype.isSettings(this.settings)) {
         return this.settings
     }
@@ -51,12 +83,13 @@ Settings.prototype.get = async function() {
  *
  * @since 3.X.Y
  *
- * @param {object} obj Login object
+ * @param {object} settingsObj Settings object
  * @param {string} property (optional) store sub property path value to return
+ * @returns {object} store object or path value
  */
-Settings.prototype.getStore = function(obj, property = "") {
+Settings.prototype.getStore = function (settingsObj, property = "") {
     let
-        store = (obj.hasOwnProperty("store")) ? obj.store : {},
+        store = (settingsObj.hasOwnProperty("store")) ? settingsObj.store : {},
         value = null
     ;
 
@@ -69,18 +102,27 @@ Settings.prototype.getStore = function(obj, property = "") {
             break;
 
         default:
+            value = store;
             break;
     }
 
     return value;
 }
 
-Settings.prototype.isSettings = function(obj) {
-    if (typeof obj == 'undefined') {
+/**
+ * Validation, determine if object passed is Settings.
+ *
+ * @since 3.X.Y
+ *
+ * @param {object} settingsObj
+ * @returns
+ */
+Settings.prototype.isSettings = function (settingsObj) {
+    if (typeof settingsObj == 'undefined') {
         return false;
     }
 
-    return Settings.prototype.isPrototypeOf(obj);
+    return Settings.prototype.isPrototypeOf(settingsObj);
 }
 
 module.exports = Settings
