@@ -23,6 +23,12 @@ run();
  */
 async function run() {
     try {
+        /**
+         * Create instance of settings, which will cache
+         * first request of settings which will be re-used
+         * for subsequent requests. Pass this settings
+         * instance pre-cached to each of the views.
+         */
         let settingsModel = new Settings();
 
         // get user settings
