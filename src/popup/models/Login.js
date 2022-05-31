@@ -244,20 +244,6 @@ Login.prototype.isLogin = function(login) {
 }
 
 /**
- * Returns a boolean indication on if object passed
- * is a file path to an encrypted file.
- *
- * @since 3.X.Y
- *
- * @param {string} file Encrypted login file path
- * @returns Boolean
- */
-
-Login.prototype.isPass = function(file) {
-    return typeof file == 'string' && /\.gpg$/i.test(file)
-}
-
-/**
  * Validation, determine if object passed is Login
  * and is ready to be saved.
  *
