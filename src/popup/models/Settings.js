@@ -10,7 +10,6 @@ require("chrome-extension-async");
  *      settings object to be backwards and forwards compatible.
  */
 function Settings(settingsObj = {}) {
-    // @TODO: perhaps this should be default settings
     if (Object.prototype.isPrototypeOf(settingsObj)) {
         // Set object properties
         for (const prop in settingsObj) {
