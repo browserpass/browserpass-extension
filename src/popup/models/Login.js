@@ -189,7 +189,7 @@ Login.prototype.generateSecret = function(
 }
 
 /**
- * Retreive store object. Can optionally return only sub path value.
+ * Retrieve store object. Can optionally return only sub path value.
  *
  * @since 3.X.Y
  *
