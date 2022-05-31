@@ -59,19 +59,59 @@ function AddEditInterface(settingsModel) {
                     m.redraw();
                 }
             },
+            /**
+             * Update login path.
+             * Used in onchange: m.withAttr("value", ...)
+             *
+             * @since 3.X.Y
+             *
+             * @param {string} path
+             */
             setLogin: function (path) {
                 loginObj.login = path;
             },
+            /**
+             * Update pass length when generating secret in view.
+             * Used onchange: m.withAttr("value", ...)
+             *
+             * @since 3.X.Y
+             *
+             * @param {int} length
+             */
             setPasswordLength: function (length) {
                 passwordLength = length;
             },
+            /**
+             * Update login raw text and secret when "raw text" changes.
+             * Used oninput: m.withAttr("value", ...)
+             *
+             * @since 3.X.Y
+             *
+             * @param {string} text
+             */
             setRawDetails: function (text) {
                 loginObj.raw = text;
                 loginObj.fields.secret = loginObj.getRawPassword();
             },
+            /**
+             * Update login secret and raw text when "secret" changes.
+             * Used oninput: m.withAttr("value", ...)
+             *
+             * @since 3.X.Y
+             *
+             * @param {string} secret
+             */
             setSecret: function (secret) {
                 loginObj.setPassword(secret);
             },
+            /**
+             * Update login store id.
+             * Used in onchange: m.withAttr("value", ...)
+             *
+             * @since 3.X.Y
+             *
+             * @param {string} storeId
+             */
             setStorePath: function (storeId) {
                 if (editing) {
                     storePath = loginObj.store.path;
@@ -86,6 +126,15 @@ function AddEditInterface(settingsModel) {
                     storePath = "~/.password-store";
                 }
             },
+            /**
+             * Toggle checked on/off, determines if symbols
+             * are used when generating a new random password.
+             * Used in onchange: m.withAttr("value", ...)
+             *
+             * @since 3.X.Y
+             *
+             * @param {int} checked value 1 or 0 for checked
+             */
             setSymbols: function (checked) {
                 symbols = checked;
             },
