@@ -298,11 +298,6 @@ Login.prototype.save = async function(loginObj) {
  * @param {string} password Value of password to be assgined.
  */
 Login.prototype.setPassword = function(password = "") {
-    if (typeof password != 'string') {
-        console.warn(`Login password should be of type 'string', received '${typeof password}' instead.`);
-        password = String(password);
-    }
-
     let secret = this.raw || ""
 
     if (password.length > 0) {
