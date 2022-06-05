@@ -325,6 +325,16 @@ body {
     height: 30px;
 }
 
+.chars {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    font-family: Source Code Pro, monospace;
+    .char {
+        white-space: pre;
+    }
+}
+
 .addEdit,
 .details {
     .title {
@@ -419,6 +429,7 @@ body {
             justify-content: flex-end;
             font-weight: bold;
             padding: 6px 6px;
+            margin-right: 8px;
             border: none;
         }
 

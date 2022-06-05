@@ -42,6 +42,10 @@
         }
 
         .contents {
+            .password {
+                background-color: @edit-bg-color;
+            }
+
             .password,
             .options,
             .details {
@@ -101,10 +105,6 @@
                     background-color: @snack-label-color;
                     color: @invert-text-color;
                 }
-                .char.num,
-                .char.punct {
-                    color: @match-text-color;
-                }
                 .progress-container {
                     background: transparent;
                     .progress {
@@ -118,6 +118,11 @@
                 color: @text-color;
             }
         }
+    }
+
+    .char.num,
+    .char.punct {
+        color: @match-text-color;
     }
 
     .part.search {
