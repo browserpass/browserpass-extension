@@ -90,8 +90,7 @@ function AddEditInterface(settingsModel) {
              * @param {string} text
              */
             setRawDetails: function (text) {
-                loginObj.raw = text;
-                loginObj.fields.secret = loginObj.getRawPassword();
+                loginObj.setRawDetails(text);
             },
             /**
              * Update login secret and raw text when "secret" changes.
@@ -204,14 +203,20 @@ function AddEditInterface(settingsModel) {
                     m("div.contents", [
                         m("div.password", [
                             m("label", { for: "secret" }, "Secret"),
-                            m("input[type=text]", {
-                                id: "secret",
-                                placeholder: "password",
-                                value: loginObj.hasOwnProperty("fields")
-                                    ? loginObj.fields.secret
-                                    : "",
-                                oninput: m.withAttr("value", this.setSecret),
-                            }),
+                            m(
+                                "div.chars",
+                                loginObj.hasOwnProperty("fields")
+                                    ? helpers.highlight(loginObj.fields.secret)
+                                    : ""
+                            ),
+                            // m("input[type=text]", {
+                            //     id: "secret",
+                            //     placeholder: "password",
+                            //     value: loginObj.hasOwnProperty("fields")
+                            //         ? loginObj.fields.secret
+                            //         : "",
+                            //     // oninput: m.withAttr("value", this.setSecret),
+                            // }),
                             m("div.btn.generate", {
                                 onclick: () => {
                                     loginObj.setPassword(
