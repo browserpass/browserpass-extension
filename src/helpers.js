@@ -9,14 +9,24 @@ const m = require("mithril");
 const Authenticator = require("otplib").authenticator.Authenticator;
 const BrowserpassURL = require("@browserpass/url");
 
+const fieldsPrefix = {
+    secret: ["secret", "password", "pass"],
+    login: ["login", "username", "user"],
+    openid: ["openid"],
+    otp: ["otp", "totp"],
+    url: ["url", "uri", "website", "site", "link", "launch"],
+};
+
 module.exports = {
-    handleError,
-    withLogin,
-    prepareLogins,
-    prepareLogin,
+    fieldsPrefix,
     filterSortLogins,
+    handleError,
+    highlight,
     ignoreFiles,
     makeTOTP,
+    prepareLogin,
+    prepareLogins,
+    withLogin,
 };
 
 //----------------------------------- Function definitions ----------------------------------//
@@ -228,6 +238,25 @@ function prepareLogin(settings, storeId, file, index = 0, origin = undefined) {
     }
 
     return login;
+}
+
+/**
+ * Highlight password characters
+ *
+ * @since 3.X.Y
+ *
+ * @param {string} secret a string to be split by character
+ * @return {array} mithril vnodes to be rendered
+ */
+function highlight(secret = "") {
+    return secret.split("").map((c) => {
+        if (c.match(/[0-9]/)) {
+            return m("span.char.num", c);
+        } else if (c.match(/[^\w\s]/)) {
+            return m("span.char.punct", c);
+        }
+        return m("span.char", c);
+    });
 }
 
 /**

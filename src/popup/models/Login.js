@@ -6,6 +6,10 @@ const sha1 = require("sha1");
 const helpers = require("../../helpers");
 const Settings = require("./Settings");
 
+// Search for one of the secret prefixes
+// from Array helpers.fieldsPrefix.secret
+const secretPrefixRegEx = RegExp(`^(${helpers.fieldsPrefix.secret.join("|")}): `, 'i');
+
 /**
  * Login Constructor()
  *
@@ -35,6 +39,9 @@ function Login(settings, loginObj = {}) {
     // Set object properties
     for (const prop in loginObj) {
         this[prop] = loginObj[prop];
+        if (prop === 'raw') {
+            this.setRawDetails(loginObj[prop]);
+        }
     }
 
     this.settings = settings;
@@ -135,7 +142,7 @@ Login.prototype.getPassword = function() {
     if (typeof this.fields == 'object' && this.fields.hasOwnProperty("secret")) {
         return this.fields.secret;
     }
-    return this.prototype.getRawPassword();
+    return this.getRawPassword();
 }
 
 /**
@@ -150,9 +157,45 @@ Login.prototype.getPassword = function() {
  */
 Login.prototype.getRawPassword = function() {
     if (typeof this.raw == 'string') {
-        return this.raw.split("\n", 1)[0].trim();
+        let secret = this.raw.split(/[\n\r]+/, 1)[0].trim();
+
+        if (this.hasSecretPrefix() || secret.search(secretPrefixRegEx) > -1) {
+            return secret.replace(secretPrefixRegEx, "");
+        }
+        return secret;
     }
     return "";
+}
+
+/**
+ * Update the raw text details, password, and also the secretPrefix.
+ *
+ * @since 3.X.Y
+ *
+ * @param {string} text Full text details of secret to be updated
+ */
+Login.prototype.setRawDetails = function(text = "") {
+    // if raw details has passwrod in first line,
+    // then update password. default to blank
+    let password = ""
+
+    if (text.length > 0) {
+        const line = text.split(/[\r\n]+/, 1)[0]
+        // Update the secret prefix when it changes
+        if (text.search(secretPrefixRegEx) > -1) {
+            let parts = line.split(": ", 2);
+            this.secretPrefix = (this.secretPrefix != parts[0].trim())
+                ? parts[0].trim()
+                : this.secretPrefix;
+            password = parts[1].trim();
+        } else {
+            delete this.secretPrefix;
+            password = line
+        }
+
+        this.fields.secret = password;
+        this.raw = text;
+    }
 }
 
 /**
@@ -291,29 +334,55 @@ Login.prototype.save = async function(loginObj) {
 }
 
 /**
- * Sets password on Login.fields.secret and Login.raw
+ * Sets password on Login.fields.secret and Login.raw,
+ * leave the secretPrefix unchanged.
  *
  * @since 3.X.Y
  *
  * @param {string} password Value of password to be assgined.
  */
 Login.prototype.setPassword = function(password = "") {
+    // secret is either entire raw text or defaults to blank string
     let secret = this.raw || ""
 
     if (password.length > 0) {
-        // check first line of raw text for secret
-        if (secret.search(/\n\r?/) > -1) {
+        // if user has secret prefix make sure it persists
+        const combined = (this.hasSecretPrefix()) ? `${this.secretPrefix}: ${password}` : password
+
+        // check first line for an existing password
+        if (secret.search(/[\n\r]+/) > -1) {
+            // update the secret/password of first line,
+            // and not the prefix
             secret = secret.replace(
                 /^.*((?:(<?\r)\n)|(?:\n\r?))/,
-                password + "$1"
+                combined + "$1"
             );
         } else {
-            secret = password;
+            secret = combined;
         }
 
         this.fields.secret = password;
         this.raw = secret;
     }
+}
+
+/**
+ * Determine if secretPrefix property has been set for
+ * the current Login object: "this"
+ *
+ * @since 3.X.Y
+ *
+ * @returns {boolean}
+ */
+Login.prototype.hasSecretPrefix = function() {
+    let results = [];
+
+    // results.push(Login.hasOwn(this,'secretPrefix'));
+    results.push(this.hasOwnProperty('secretPrefix'));
+    results.push(Boolean(this.secretPrefix));
+    results.push(helpers.fieldsPrefix.secret.includes(this.secretPrefix));
+
+    return results.every(Boolean);
 }
 
 module.exports = Login;

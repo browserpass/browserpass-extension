@@ -952,13 +952,7 @@ async function parseFields(settings, login) {
     login.raw = response.data.contents;
 
     // parse lines
-    login.fields = {
-        secret: ["secret", "password", "pass"],
-        login: ["login", "username", "user"],
-        openid: ["openid"],
-        otp: ["otp", "totp"],
-        url: ["url", "uri", "website", "site", "link", "launch"],
-    };
+    login.fields = helpers.fieldsPrefix;
     login.settings = {
         autoSubmit: { name: "autosubmit", type: "bool" },
     };

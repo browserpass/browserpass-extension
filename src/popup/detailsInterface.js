@@ -76,14 +76,7 @@ function DetailsInterface(settingsModel) {
                 const storeColor = Login.prototype.getStore(loginObj, "color");
                 const secret =
                     (loginObj.hasOwnProperty("fields") ? loginObj.fields.secret : null) || "";
-                const passChars = secret.split("").map((c) => {
-                    if (c.match(/[0-9]/)) {
-                        return m("span.char.num", c);
-                    } else if (c.match(/[^\w\s]/)) {
-                        return m("span.char.punct", c);
-                    }
-                    return m("span.char", c);
-                });
+                const passChars = helpers.highlight(secret);
 
                 var nodes = [];
                 nodes.push(
