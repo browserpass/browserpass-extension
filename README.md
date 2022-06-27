@@ -353,7 +353,7 @@ If you simply want to re-use the same credentials on multiple subdomains of the 
 
 ### Why Browserpass on Firefox does not work on Mozilla domains?
 
-Firefox has decided to [block all extensions from injecting any content scripts on their domains](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_scripts), sadly there's nothing we can do about it.
+Firefox has decided to [block all extensions from injecting any content scripts on their domains by default](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Content_scripts), sadly there's nothing we can do about it. It is possible to disable this behavior on a per-domain basis by changing the `extensions.webextensions.restrictedDomains` setting in `about:config`, however be aware that this affects all extensions, not just browserpass.
 
 The full list of blocked domains at the time of writing is:
 
