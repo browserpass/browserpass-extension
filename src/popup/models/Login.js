@@ -179,23 +179,21 @@ Login.prototype.setRawDetails = function(text = "") {
     // then update password. default to blank
     let password = ""
 
-    if (text.length > 0) {
-        const line = text.split(/[\r\n]+/, 1)[0]
-        // Update the secret prefix when it changes
-        if (text.search(secretPrefixRegEx) > -1) {
-            let parts = line.split(": ", 2);
-            this.secretPrefix = (this.secretPrefix != parts[0].trim())
-                ? parts[0].trim()
-                : this.secretPrefix;
-            password = parts[1].trim();
-        } else {
-            delete this.secretPrefix;
-            password = line
-        }
-
-        this.fields.secret = password;
-        this.raw = text;
+    const line = text.split(/[\r\n]+/, 1)[0]
+    // Update the secret prefix when it changes
+    if (text.search(secretPrefixRegEx) > -1) {
+        let parts = line.split(": ", 2);
+        this.secretPrefix = (this.secretPrefix != parts[0].trim())
+            ? parts[0].trim()
+            : this.secretPrefix;
+        password = parts[1].trim();
+    } else {
+        delete this.secretPrefix;
+        password = line
     }
+
+    this.fields.secret = password;
+    this.raw = text;
 }
 
 /**
