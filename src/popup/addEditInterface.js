@@ -79,7 +79,7 @@ function AddEditInterface(settingsModel) {
              * @param {int} length
              */
             setPasswordLength: function (length) {
-                passwordLength = length;
+                passwordLength = length > 0 ? length : 1;
             },
             /**
              * Update login raw text and secret when "raw text" changes.
@@ -198,6 +198,18 @@ function AddEditInterface(settingsModel) {
                                 oninput: m.withAttr("value", this.setLogin),
                             }),
                             m("div.suffix", ".gpg"),
+                        ]),
+                    ]),
+                    //@TODO: Remove this block after fixing styles
+                    m("div.part.details", [
+                        m("div.part.snack.line-secret", [
+                            m("div.label", "Secret"),
+                            m(
+                                "div.chars",
+                                Login.prototype.isLogin(loginObj)
+                                    ? helpers.highlight(loginObj.getPassword())
+                                    : ""
+                            ),
                         ]),
                     ]),
                     m("div.contents", [
