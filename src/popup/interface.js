@@ -154,6 +154,7 @@ function renderMainView(ctl, params) {
                             tabindex: 0,
                             title: "Open Details | <Ctrl+O>",
                             oncreate: m.route.link,
+                            onupdate: m.route.link,
                             href: `/details/${result.store.id}/${encodeURIComponent(result.login)}`,
                             onclick: (e) => {
                                 e.preventDefault();
