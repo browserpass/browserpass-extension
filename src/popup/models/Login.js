@@ -291,19 +291,20 @@ Login.prototype.isLogin = function(login) {
 }
 
 /**
- * Validation, determine if object passed is Login
- * and is ready to be saved.
+ * Validation, determine if object passed is a
+ * Login.prototype and is ready to be saved.
  *
  * @since 3.X.Y
  *
- * @param {object} loginObj Login object to validated
+ * @param {object} login Login object to validated
  */
-Login.prototype.isValid = function(loginObj) {
+Login.prototype.isValid = function(login) {
     let results = [];
 
-    results.push(Login.prototype.isLogin(loginObj));
-    results.push(loginObj.hasOwnProperty('login') && loginObj.login.length > 0);
-    results.push(loginObj.hasOwnProperty('raw') && typeof loginObj.raw == 'string' && loginObj.raw.length > 0);
+    results.push(Login.prototype.isLogin(login));
+    results.push(Login.prototype.isPrototypeOf(login));
+    results.push(login.hasOwnProperty('login') && login.login.length > 0);
+    results.push(login.hasOwnProperty('raw') && typeof login.raw == 'string' && login.raw.length > 0);
 
     return results.every(Boolean);
 }
