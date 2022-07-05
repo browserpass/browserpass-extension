@@ -37,11 +37,17 @@ function Login(settings, loginObj = {}) {
     }
 
     // Set object properties
+    let setRaw = false;
     for (const prop in loginObj) {
         this[prop] = loginObj[prop];
-        if (prop === 'raw') {
-            this.setRawDetails(loginObj[prop]);
+        if (prop === 'raw' && loginObj[prop].length > 0) {
+            // update secretPrefix after everything else
+            setRaw = true;
         }
+    }
+
+    if (setRaw) {
+        this.setRawDetails(loginObj['raw']);
     }
 
     this.settings = settings;
@@ -261,7 +267,8 @@ Login.prototype.getStore = function(login, property = "") {
 
 /**
  * Returns a boolean indication on if object passed
- * is an instance of Login.prototype.
+ * having minimum login required login propteries,
+ * Login.prototype.isPrototypeOf(login) IS NOT the goal of this.
  * @since 3.X.Y
  *
  * @param {object} login Login object
@@ -274,7 +281,6 @@ Login.prototype.isLogin = function(login) {
 
     let results = [];
 
-    results.push(Login.prototype.isPrototypeOf(login));
     results.push(login.hasOwnProperty('allowFill') && typeof login.allowFill == 'boolean');
     results.push(login.hasOwnProperty('login') && typeof login.login == 'string');
     results.push(login.hasOwnProperty('store') && typeof login.store == 'object');
