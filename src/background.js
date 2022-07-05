@@ -952,7 +952,7 @@ async function parseFields(settings, login) {
     login.raw = response.data.contents;
 
     // parse lines
-    login.fields = helpers.fieldsPrefix;
+    login.fields = deepCopy(helpers.fieldsPrefix);
     login.settings = {
         autoSubmit: { name: "autosubmit", type: "bool" },
     };
