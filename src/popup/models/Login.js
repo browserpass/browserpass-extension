@@ -16,13 +16,13 @@ const secretPrefixRegEx = RegExp(`^(${helpers.fieldsPrefix.secret.join("|")}): `
  * @since 3.X.Y
  *
  * @param {object} settings
- * @param {object} loginObj (optional) Extend an existing
+ * @param {object} login (optional) Extend an existing
  *      login object to be backwards and forwards compatible.
  */
-function Login(settings, loginObj = {}) {
-    if (Login.prototype.isLogin(loginObj)) {
+function Login(settings, login = {}) {
+    if (Login.prototype.isLogin(login)) {
         // content sha used to determine if login has changes
-        this.contentSha = sha1(loginObj.login + sha1(loginObj.raw || ''));
+        this.contentSha = sha1(login.login + sha1(login.raw || ''));
     } else {
         this.allowFill = true;
         this.fields = {};
@@ -38,23 +38,23 @@ function Login(settings, loginObj = {}) {
 
     // Set object properties
     let setRaw = false;
-    for (const prop in loginObj) {
-        this[prop] = loginObj[prop];
-        if (prop === 'raw' && loginObj[prop].length > 0) {
+    for (const prop in login) {
+        this[prop] = login[prop];
+        if (prop === 'raw' && login[prop].length > 0) {
             // update secretPrefix after everything else
             setRaw = true;
         }
     }
 
     if (setRaw) {
-        this.setRawDetails(loginObj['raw']);
+        this.setRawDetails(login['raw']);
     }
 
     this.settings = settings;
     // ensure doAction works in detailInterface,
     // and any other view in which it is necessary.
     this.doAction = helpers.withLogin.bind({
-        settings: settings, login: loginObj
+        settings: settings, login: login
     });
 }
 
@@ -63,14 +63,14 @@ function Login(settings, loginObj = {}) {
  *
  * @since 3.X.Y
  *
- * @param {object} loginObj Login entry to be deleted
+ * @param {object} login Login entry to be deleted
  * @returns {object} Response or an empty object
  */
-Login.prototype.delete = async function (loginObj) {
-    if (Login.prototype.isValid(loginObj)) {
+Login.prototype.delete = async function (login) {
+    if (Login.prototype.isValid(login)) {
         // Firefox requires data to be serializable,
         // this removes everything offending such as functions
-        const login = JSON.parse(JSON.stringify(loginObj));
+        const login = JSON.parse(JSON.stringify(login));
 
         let response = await chrome.runtime.sendMessage({
             action: "delete", login: login
@@ -316,14 +316,14 @@ Login.prototype.isValid = function(login) {
  *
  * @since 3.X.Y
  *
- * @param {object} loginObj Login object to be saved.
+ * @param {object} login Login object to be saved.
  * @returns {object} Response or an empty object.
  */
-Login.prototype.save = async function(loginObj) {
-    if (Login.prototype.isValid(loginObj)) {
+Login.prototype.save = async function(login) {
+    if (Login.prototype.isValid(login)) {
         // Firefox requires data to be serializable,
         // this removes everything offending such as functions
-        const login = JSON.parse(JSON.stringify(loginObj));
+        const login = JSON.parse(JSON.stringify(login));
         const action = (this.contentSha == null) ? "add" : "save";
 
         let response = await chrome.runtime.sendMessage({
