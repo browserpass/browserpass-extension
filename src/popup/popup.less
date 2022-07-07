@@ -492,3 +492,53 @@ body {
 .updates {
     padding: @login-part-padding;
 }
+
+.m-notifications {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    z-index: 10;
+
+    .m-notification {
+        width: auto;
+        margin: 0 10px 3px;
+        cursor: pointer;
+        animation: fade-in 0.3s;
+        white-space: normal;
+
+        &.destroy {
+            animation: fade-out 0.3s;
+        }
+
+        &.info,
+        &.warning,
+        &.danger,
+        &.success {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.25rem;
+        }
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}

@@ -17,7 +17,21 @@
     @snack-color,
     @snack-label-color,
     @progress-color,
-    @edit-bg-color) {
+    @edit-bg-color,
+    // notification colors
+    @ntfy-hover-shadow,
+    @ntfy-info-color,
+    @ntfy-info-bgcolor,
+    @ntfy-info-border,
+    @ntfy-warn-color,
+    @ntfy-warn-bgcolor,
+    @ntfy-warn-border,
+    @ntfy-error-color,
+    @ntfy-error-bgcolor,
+    @ntfy-error-border,
+    @ntfy-success-color,
+    @ntfy-success-bgcolor,
+    @ntfy-success-border) {
     html,
     body {
         background-color: @bg-color;
@@ -170,6 +184,38 @@
         span,
         a {
             color: @error-text-color;
+        }
+    }
+
+    .m-notifications {
+        .m-notification {
+            &:hover {
+                box-shadow: 1px 1px 2px @ntfy-hover-shadow;
+            }
+
+            &.info {
+                color: @ntfy-info-color;
+                background-color: @ntfy-info-bgcolor;
+                border: 1px solid @ntfy-info-border;
+            }
+
+            &.warning {
+                color: @ntfy-warn-color;
+                background-color: @ntfy-warn-bgcolor;
+                border: 1px solid @ntfy-warn-border;
+            }
+
+            &.danger {
+                color: @ntfy-error-color;
+                background-color: @ntfy-error-bgcolor;
+                border: 1px solid @ntfy-error-border;
+            }
+
+            &.success {
+                color: @ntfy-success-color;
+                background-color: @ntfy-success-bgcolor;
+                border: 1px solid @ntfy-success-border;
+            }
         }
     }
 }
