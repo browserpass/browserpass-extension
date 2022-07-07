@@ -70,10 +70,10 @@ Login.prototype.delete = async function (login) {
     if (Login.prototype.isValid(login)) {
         // Firefox requires data to be serializable,
         // this removes everything offending such as functions
-        const login = JSON.parse(JSON.stringify(login));
+        const request = JSON.parse(JSON.stringify(login));
 
         let response = await chrome.runtime.sendMessage({
-            action: "delete", login: login
+            action: "delete", login: request
         });
 
         if (response.status != "ok") {
@@ -323,11 +323,11 @@ Login.prototype.save = async function(login) {
     if (Login.prototype.isValid(login)) {
         // Firefox requires data to be serializable,
         // this removes everything offending such as functions
-        const login = JSON.parse(JSON.stringify(login));
+        const request = JSON.parse(JSON.stringify(login));
         const action = (this.contentSha == null) ? "add" : "save";
 
         let response = await chrome.runtime.sendMessage({
-            action: action, login: login, params: { rawContents: login.raw }
+            action: action, login: request, params: { rawContents: request.raw }
         });
 
         if (response.status != "ok") {
