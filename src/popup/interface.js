@@ -59,6 +59,7 @@ function attach(element) {
  */
 function view(ctl, params) {
     const nodes = [];
+    // clear last viewed login
     layout.setCurrentLogin(null);
 
     nodes.push(...this.renderMainView(ctl, params));

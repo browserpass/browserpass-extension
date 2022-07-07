@@ -34,8 +34,8 @@ function AddEditInterface(settingsModel) {
 
         return {
             oninit: async function (vnode) {
-                console.log("AddEditinterface.oninit", vnode.state, vnode.attrs);
-                layout.getCurrentLogin();
+                tmpLogin = layout.getCurrentLogin();
+                console.log("AddEditinterface.oninit", vnode.state, vnode.attrs, tmpLogin);
                 settings = await viewSettingsModel.get();
 
                 Object.keys(settings.stores).forEach((k) => {
@@ -44,11 +44,17 @@ function AddEditInterface(settingsModel) {
 
                 // Show existing login
                 if (vnode.attrs.context.login !== undefined) {
-                    loginObj = await Login.prototype.get(
-                        settings,
-                        vnode.attrs.context.storeid,
-                        vnode.attrs.context.login
-                    );
+                    if (tmpLogin !== null && tmpLogin.login == vnode.attrs.context.login) {
+                        // use existing decrypted login
+                        loginObj = tmpLogin;
+                    } else {
+                        // no match, must re-decrypt login
+                        loginObj = await Login.prototype.get(
+                            settings,
+                            vnode.attrs.context.storeid,
+                            vnode.attrs.context.login
+                        );
+                    }
                     editing = true;
                 } else {
                     // view instance should be a Login
