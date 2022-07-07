@@ -3,6 +3,7 @@ module.exports = DetailsInterface;
 const m = require("mithril");
 const Moment = require("moment");
 const helpers = require("../helpers");
+const layout = require("./layoutInterface");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
 
@@ -37,6 +38,9 @@ function DetailsInterface(settingsModel) {
             }),
             progress = null,
             viewSettingsModel = persistSettingsModel;
+
+        console.log("DetailsInterface.closure", vnode.state, vnode.attrs);
+
         return {
             // public methods
             /**
@@ -47,12 +51,13 @@ function DetailsInterface(settingsModel) {
              * @param object    vnode current vnode instance
              */
             oninit: async function (vnode) {
+                console.log("DetailsInterface.oninit", vnode.state, vnode.attrs);
                 settings = await viewSettingsModel.get();
 
                 loginObj = await Login.prototype.get(
                     settings,
-                    vnode.attrs.storeid,
-                    vnode.attrs.login
+                    vnode.attrs.context.storeid,
+                    vnode.attrs.context.login
                 );
 
                 // get basename & dirname of entry
@@ -60,6 +65,7 @@ function DetailsInterface(settingsModel) {
                 loginObj.dirname = loginObj.login.substr(0, loginObj.login.lastIndexOf("/")) + "/";
 
                 // trigger redraw after retrieving details
+                layout.setCurrentLogin(loginObj);
                 m.redraw();
             },
             /**

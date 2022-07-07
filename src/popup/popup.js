@@ -4,6 +4,7 @@
 require("chrome-extension-async");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
+const layout = require("./layoutInterface");
 const Interface = require("./interface");
 const DetailsInterface = require("./detailsInterface");
 const helpers = require("../helpers");
@@ -43,12 +44,21 @@ async function run() {
 
         const LoginView = new AddEditInterface(settingsModel);
         m.route(document.body, "/list", {
-            "/list": new Interface(settings, logins),
-            "/details/:storeid/:login": new DetailsInterface(settingsModel),
-            "/edit/:storeid/:login": LoginView,
-            "/add": LoginView,
+            "/list": page(new Interface(settings, logins)),
+            "/details/:storeid/:login": page(new DetailsInterface(settingsModel)),
+            "/edit/:storeid/:login": page(LoginView),
+            "/add": page(LoginView),
         });
     } catch (e) {
+        // @TODO: nicer error could be an error page, or just show an error notification
         helpers.handleError(e);
     }
+}
+
+function page(component) {
+    return {
+        render: function (vnode) {
+            return m(layout.LayoutInterface, m(component, { context: vnode.attrs }));
+        },
+    };
 }

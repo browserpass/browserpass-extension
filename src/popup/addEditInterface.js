@@ -1,7 +1,9 @@
 const m = require("mithril");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
+const Notifications = require("./notifications");
 const helpers = require("../helpers");
+const layout = require("./layoutInterface");
 
 module.exports = AddEditInterface;
 
@@ -27,8 +29,13 @@ function AddEditInterface(settingsModel) {
             stores = [],
             symbols = false,
             viewSettingsModel = persistSettingsModel;
+
+        console.log("AddEditInterface.closure", vnode.state, vnode.attrs);
+
         return {
             oninit: async function (vnode) {
+                console.log("AddEditinterface.oninit", vnode.state, vnode.attrs);
+                layout.getCurrentLogin();
                 settings = await viewSettingsModel.get();
 
                 Object.keys(settings.stores).forEach((k) => {
@@ -36,11 +43,11 @@ function AddEditInterface(settingsModel) {
                 });
 
                 // Show existing login
-                if (vnode.attrs.login !== undefined) {
+                if (vnode.attrs.context.login !== undefined) {
                     loginObj = await Login.prototype.get(
                         settings,
-                        vnode.attrs.storeid,
-                        vnode.attrs.login
+                        vnode.attrs.context.storeid,
+                        vnode.attrs.context.login
                     );
                     editing = true;
                 } else {
@@ -137,6 +144,11 @@ function AddEditInterface(settingsModel) {
             setSymbols: function (checked) {
                 symbols = checked;
             },
+            /**
+             * Mithril component view
+             * @param {object} vnode
+             * @returns {array} children vnodes
+             */
             view: function (vnode) {
                 var nodes = [];
                 nodes.push(
@@ -153,18 +165,19 @@ function AddEditInterface(settingsModel) {
                                   title: "Save",
                                   onclick: async (e) => {
                                       if (!Login.prototype.isValid(loginObj)) {
+                                          Notifications.errorMsg(
+                                              "Please fix validation errors and try again."
+                                          );
                                           e.preventDefault();
                                           return;
                                       }
                                       await Login.prototype.save(loginObj);
-                                      m.mount(document.body, {
-                                          view: () =>
-                                              m(
-                                                  "div.part.notice",
-                                                  `Successfully saved password entry ${loginObj.login}.`
-                                              ),
-                                      });
-                                      setTimeout(window.close, 1000);
+                                      Notifications.successMsg(
+                                          m.trust(
+                                              `Password entry, <strong>${loginObj.login}</strong>, has been saved to <strong>${loginObj.store.name}</strong>.`
+                                          )
+                                      );
+                                      m.route.set("/list");
                                   },
                               })
                             : null,
@@ -278,19 +291,21 @@ function AddEditInterface(settingsModel) {
                                             e.preventDefault();
                                             return;
                                         }
+                                        //@TODO: isValid or canDelete?
                                         if (!Login.prototype.isValid(loginObj)) {
+                                            Notifications.errorMsg(
+                                                "Error: Changes are not valid, please check and try again."
+                                            );
                                             e.preventDefault();
                                             return;
                                         }
                                         await Login.prototype.delete(loginObj);
-                                        m.mount(document.body, {
-                                            view: () =>
-                                                m(
-                                                    "div.part.notice",
-                                                    `Successfully deleted password entry ${loginObj.login} from ${loginObj.store.name}.`
-                                                ),
-                                        });
-                                        setTimeout(window.close, 1000);
+                                        Notifications.successMsg(
+                                            m.trust(
+                                                `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
+                                            )
+                                        );
+                                        m.route.set("/list");
                                     },
                                 },
                                 "Delete"

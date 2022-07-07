@@ -3,6 +3,7 @@ module.exports = Interface;
 const m = require("mithril");
 const Moment = require("moment");
 const SearchInterface = require("./searchinterface");
+const layout = require("./layoutInterface");
 const helpers = require("../helpers");
 
 const LATEST_NATIVE_APP_VERSION = 3000003;
@@ -58,6 +59,7 @@ function attach(element) {
  */
 function view(ctl, params) {
     const nodes = [];
+    layout.setCurrentLogin(null);
 
     nodes.push(...this.renderMainView(ctl, params));
 
