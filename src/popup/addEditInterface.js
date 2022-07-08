@@ -168,7 +168,7 @@ function AddEditInterface(settingsModel) {
                         m("span", editing ? "Edit credentials" : "Add credentials"),
                         Settings.prototype.canSave(settings)
                             ? m("div.btn.save", {
-                                  title: "Save",
+                                  title: "Save credentials",
                                   onclick: async (e) => {
                                       if (!Login.prototype.isValid(loginObj)) {
                                           Notifications.errorMsg(
@@ -194,6 +194,7 @@ function AddEditInterface(settingsModel) {
                                 "select",
                                 {
                                     disabled: editing,
+                                    title: "Select which password-store to save credentials in.",
                                     onchange: m.withAttr("value", this.setStorePath),
                                 },
                                 stores.map(function (store) {
@@ -212,6 +213,7 @@ function AddEditInterface(settingsModel) {
                         m("div.path", [
                             m("input[type=text]", {
                                 disabled: editing,
+                                title: "File path of credentials within password-store.",
                                 placeholder: "filename",
                                 value: loginObj.login,
                                 oninput: m.withAttr("value", this.setLogin),
@@ -249,6 +251,7 @@ function AddEditInterface(settingsModel) {
                             //     // oninput: m.withAttr("value", this.setSecret),
                             // }),
                             m("div.btn.generate", {
+                                title: "Generate password",
                                 onclick: () => {
                                     loginObj.setPassword(
                                         loginObj.generateSecret(passwordLength, symbols)
@@ -262,11 +265,13 @@ function AddEditInterface(settingsModel) {
                                 id: "include_symbols",
                                 checked: symbols,
                                 onchange: m.withAttr("checked", this.setSymbols),
+                                title: "Include symbols in generated password",
                                 value: 1,
                             }),
                             m("label", { for: "length" }, "Length"),
                             m("input[type=number]", {
                                 id: "length",
+                                title: "Length of generated password",
                                 value: passwordLength,
                                 oninput: m.withAttr("value", this.setPasswordLength),
                             }),
