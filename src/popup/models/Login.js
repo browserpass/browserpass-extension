@@ -8,7 +8,9 @@ const Settings = require("./Settings");
 
 // Search for one of the secret prefixes
 // from Array helpers.fieldsPrefix.secret
-const secretPrefixRegEx = RegExp(`^(${helpers.fieldsPrefix.secret.join("|")}): `, 'i');
+const
+    multiLineSecretRegEx = RegExp(`^(${helpers.fieldsPrefix.secret.join("|")}): `, 'mi')
+;
 
 /**
  * Login Constructor()
@@ -82,6 +84,39 @@ Login.prototype.delete = async function (login) {
         return response;
     }
     return {};
+}
+
+/**
+ * Generate a new password
+ *
+ * @since 3.7.0
+ *
+ * @param {int}     length  New secret length
+ * @param {boolean} symbols Use symbols or not, default: false
+ * @return string
+ */
+Login.prototype.generateSecret = function (
+    length = 16,
+    useSymbols = false
+) {
+    let
+        secret = "",
+        value = new Uint8Array(1),
+        alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+        // double quote and backslash are at the end and escaped
+        symbols = "!#$%&'()*+,-./:;<=>?@[]^_`{|}~.\"\\",
+        options = ""
+        ;
+
+    options = (Boolean(useSymbols)) ? `${alphabet}${symbols}` : alphabet;
+
+    while (secret.length < length) {
+        crypto.getRandomValues(value);
+        if (value[0] < options.length) {
+            secret += options[value[0]];
+        }
+    }
+    return secret;
 }
 
 /**
@@ -162,77 +197,45 @@ Login.prototype.getPassword = function() {
  * @returns {string} secret
  */
 Login.prototype.getRawPassword = function() {
-    if (typeof this.raw == 'string') {
-        let secret = this.raw.split(/[\n\r]+/, 1)[0].trim();
+    if (typeof this.raw == 'string' && this.raw.length > 0) {
+        const text = this.raw;
 
-        if (this.hasSecretPrefix() || secret.search(secretPrefixRegEx) > -1) {
-            return secret.replace(secretPrefixRegEx, "");
-        }
-        return secret;
+        const index = text.search(multiLineSecretRegEx);
+        let details = text.substring(index).split(/[\n\r]+/, 1)[0].trim();
+
+        // assume first line
+        return text.split(/[\n\r]+/, 1)[0].trim();
     }
     return "";
 }
 
 /**
- * Update the raw text details, password, and also the secretPrefix.
- *
- * @since 3.X.Y
- *
- * @param {string} text Full text details of secret to be updated
+ * Extract secret password and prefix from raw text string
+ * Private
+ * @param {string} text
+ * @returns {object}
  */
-Login.prototype.setRawDetails = function(text = "") {
-    // if raw details has passwrod in first line,
-    // then update password. default to blank
-    let password = ""
-
-    const line = text.split(/[\r\n]+/, 1)[0]
-    // Update the secret prefix when it changes
-    if (text.search(secretPrefixRegEx) > -1) {
-        let parts = line.split(": ", 2);
-        this.secretPrefix = (this.secretPrefix != parts[0].trim())
-            ? parts[0].trim()
-            : this.secretPrefix;
-        password = parts[1].trim();
-    } else {
-        delete this.secretPrefix;
-        password = line
+function getSecretDetails(text = "") {
+    let results = {
+        prefix: null,
+        password: "",
     }
 
-    this.fields.secret = password;
-    this.raw = text;
-}
+    if (typeof text == 'string' && text.length > 0) {
+        const index = text.search(multiLineSecretRegEx);
 
-/**
- * Generate a new password
- *
- * @since 3.7.0
- *
- * @param {int}     length  New secret length
- * @param {boolean} symbols Use symbols or not, default: false
- * @return string
- */
-Login.prototype.generateSecret = function(
-    length = 16,
-    useSymbols = false
-) {
-    let
-        secret = "",
-        value = new Uint8Array(1),
-        alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
-        // double quote and backslash are at the end and escaped
-        symbols = "!#$%&'()*+,-./:;<=>?@[]^_`{|}~.\"\\",
-        options = ""
-    ;
-
-    options = (Boolean(useSymbols)) ? `${alphabet}${symbols}` : alphabet;
-
-    while (secret.length < length) {
-        crypto.getRandomValues(value);
-        if (value[0] < options.length) {
-            secret += options[value[0]];
+        // assume first line
+        if (index == -1) {
+            results.password = text.split(/[\n\r]+/, 1)[0].trim();
+        } else {
+            const secret = text.substring(index).split(/[\n\r]+/, 1)[0].trim();
+            const parts = secret.split(':');
+            results.prefix = parts[0];
+            results.password = parts[1].trim();
         }
     }
-    return secret;
+
+    return results;
 }
 
 /**
@@ -263,6 +266,25 @@ Login.prototype.getStore = function(login, property = "") {
     }
 
     return value || settingsValue;
+}
+
+/**
+ * Determine if secretPrefix property has been set for
+ * the current Login object: "this"
+ *
+ * @since 3.X.Y
+ *
+ * @returns {boolean}
+ */
+Login.prototype.hasSecretPrefix = function () {
+    let results = [];
+
+    // results.push(Login.hasOwn(this,'secretPrefix'));
+    results.push(this.hasOwnProperty('secretPrefix'));
+    results.push(Boolean(this.secretPrefix));
+    results.push(helpers.fieldsPrefix.secret.includes(this.secretPrefix));
+
+    return results.every(Boolean);
 }
 
 /**
@@ -350,44 +372,55 @@ Login.prototype.setPassword = function(password = "") {
     // secret is either entire raw text or defaults to blank string
     let secret = this.raw || ""
 
-    if (password.length > 0) {
-        // if user has secret prefix make sure it persists
-        const combined = (this.hasSecretPrefix()) ? `${this.secretPrefix}: ${password}` : password
+    // if user has secret prefix make sure it persists
+    const combined = (this.hasSecretPrefix()) ? `${this.secretPrefix}: ${password}` : password
 
-        // check first line for an existing password
-        if (secret.search(/[\n\r]+/) > -1) {
-            // update the secret/password of first line,
-            // and not the prefix
-            secret = secret.replace(
-                /^.*((?:(<?\r)\n)|(?:\n\r?))/,
-                combined + "$1"
-            );
-        } else {
-            secret = combined;
-        }
+    // check for an existing prefix + password
+    const start = secret.search(multiLineSecretRegEx)
+    if (start > -1) {
+        // multi line, update the secret/password, not the prefix
+        const remaining = secret.substring(start)
+        let end = remaining.search(/[\n\r]/);
+        end = (end > -1) ? end : remaining.length; // when no newline after pass
 
-        this.fields.secret = password;
-        this.raw = secret;
+        const parts = [
+            secret.substring(0, start),
+            combined,
+            secret.substring(start + end)
+        ]
+        secret = parts.join("");
+    } else if (secret.length > 0) {
+        // replace everything in first line except ending
+        secret = secret.replace(
+            /^.*((?:\n\r?))?/,
+            combined + "$1"
+        );
+    } else {
+        // when secret is already empty just set password
+        secret = combined;
     }
+
+    this.fields.secret = password;
+    this.raw = secret;
 }
 
 /**
- * Determine if secretPrefix property has been set for
- * the current Login object: "this"
+ * Update the raw text details, password, and also the secretPrefix.
  *
  * @since 3.X.Y
  *
- * @returns {boolean}
+ * @param {string} text Full text details of secret to be updated
  */
-Login.prototype.hasSecretPrefix = function() {
-    let results = [];
+Login.prototype.setRawDetails = function (text = "") {
+    const results = getSecretDetails(text);
 
-    // results.push(Login.hasOwn(this,'secretPrefix'));
-    results.push(this.hasOwnProperty('secretPrefix'));
-    results.push(Boolean(this.secretPrefix));
-    results.push(helpers.fieldsPrefix.secret.includes(this.secretPrefix));
-
-    return results.every(Boolean);
+    if (results.prefix) {
+        this.secretPrefix = results.prefix;
+    } else {
+        delete this.secretPrefix;
+    }
+    this.fields.secret = results.password;
+    this.raw = text;
 }
 
 module.exports = Login;
