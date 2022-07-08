@@ -30,6 +30,7 @@ function DetailsInterface(settingsModel) {
     return function (vnode) {
         // set default state
         var settings = {},
+            loading = true,
             loginObj = new Login(persistSettingsModel, {
                 basename: "",
                 dirname: "",
@@ -66,6 +67,7 @@ function DetailsInterface(settingsModel) {
 
                 // trigger redraw after retrieving details
                 layout.setCurrentLogin(loginObj);
+                loading = false;
                 m.redraw();
             },
             /**
@@ -135,12 +137,18 @@ function DetailsInterface(settingsModel) {
                         m("div.part.snack.line-secret", [
                             m("div.label", "Secret"),
                             m("div.chars", passChars),
-                            m("div.action.copy", { onclick: () => login.doAction("copyPassword") }),
+                            m("div.action.copy", {
+                                title: "Copy Password",
+                                onclick: () => login.doAction("copyPassword"),
+                            }),
                         ]),
                         m("div.part.snack.line-login", [
                             m("div.label", "Login"),
                             m("div", login.hasOwnProperty("fields") ? login.fields.login : ""),
-                            m("div.action.copy", { onclick: () => login.doAction("copyUsername") }),
+                            m("div.action.copy", {
+                                title: "Copy Username",
+                                onclick: () => login.doAction("copyUsername"),
+                            }),
                         ]),
                         (() => {
                             if (
@@ -175,6 +183,7 @@ function DetailsInterface(settingsModel) {
                                     m("div.progress-container", progressNode),
                                     m("div", helpers.makeTOTP(login.fields.otp.params)),
                                     m("div.action.copy", {
+                                        title: "Copy OTP",
                                         onclick: () => login.doAction("copyOTP"),
                                     }),
                                 ]);
@@ -193,7 +202,10 @@ function DetailsInterface(settingsModel) {
                     ])
                 );
 
-                return m("div.details", nodes);
+                return m(
+                    "div.details",
+                    loading ? m(".loading", m("p", "Loading please wait ...")) : nodes
+                );
             },
         };
     };

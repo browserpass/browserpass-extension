@@ -18,6 +18,7 @@ EXTENSION_FILES := \
 	src/*.svg \
 	src/fonts/* \
 	src/popup/*.html \
+	src/popup/*.gif \
 	src/popup/*.svg \
 	src/options/*.html
 EXTENSION_FILES := \
