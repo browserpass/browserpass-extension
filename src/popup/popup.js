@@ -50,7 +50,6 @@ async function run() {
             "/add": page(LoginView),
         });
     } catch (e) {
-        // @TODO: nicer error could be an error page, or just show an error notification
         helpers.handleError(e);
     }
 }

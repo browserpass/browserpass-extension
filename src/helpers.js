@@ -6,6 +6,7 @@ const sha1 = require("sha1");
 const ignore = require("ignore");
 const hash = require("hash.js");
 const m = require("mithril");
+const notify = require("./popup/notifications");
 const Authenticator = require("otplib").authenticator.Authenticator;
 const BrowserpassURL = require("@browserpass/url");
 
@@ -40,11 +41,26 @@ module.exports = {
  * @param string type Error type
  */
 function handleError(error, type = "error") {
-    if (type == "error") {
-        console.log(error);
+    switch (type) {
+        case "error":
+            console.log(error);
+            notify.errorMsg(error.toString());
+            break;
+
+        case "warn":
+        case "warning":
+            notify.warningMsg(error.toString());
+            break;
+
+        case "success":
+            notify.successMsg(error.toString());
+            break;
+
+        case "notice":
+        default:
+            notify.infoMsg(error.toString());
+            break;
     }
-    var node = { view: () => m(`div.part.${type}`, error.toString()) };
-    m.mount(document.body, node);
 }
 
 /**
@@ -78,12 +94,6 @@ async function withLogin(action, params = {}) {
             case "copyOTP":
                 handleError("Copying OTP token to clipboard...", "notice");
                 break;
-            case "getDetails":
-                handleError("Loading entry details...", "notice");
-                break;
-            case "save":
-                // no in-progress notice
-                break;
             default:
                 handleError("Please wait...", "notice");
                 break;
@@ -103,13 +113,6 @@ async function withLogin(action, params = {}) {
                     settings: this.settings,
                     login: response.login,
                 });
-            }
-            if (action === "getDetails") {
-                var details = new DetailsInterface(this.settings, response.login);
-                details.attach(document.body);
-            } else if (action === "save") {
-                handleError("Successfully saved password entry", "notice");
-                setTimeout(window.close, 1000);
             } else {
                 window.close();
             }

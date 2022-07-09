@@ -183,6 +183,7 @@ function AddEditInterface(settingsModel) {
                                               `Password entry, <strong>${loginObj.login}</strong>, has been saved to <strong>${loginObj.store.name}</strong>.`
                                           )
                                       );
+                                      setTimeout(window.close, 3000);
                                       m.route.set("/list");
                                   },
                               })
@@ -316,6 +317,7 @@ function AddEditInterface(settingsModel) {
                                                 `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
                                             )
                                         );
+                                        setTimeout(window.close, 3000);
                                         m.route.set("/list");
                                     },
                                 },
