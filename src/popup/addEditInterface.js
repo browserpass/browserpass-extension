@@ -243,14 +243,6 @@ function AddEditInterface(settingsModel) {
                                     ? helpers.highlight(loginObj.fields.secret)
                                     : ""
                             ),
-                            // m("input[type=text]", {
-                            //     id: "secret",
-                            //     placeholder: "password",
-                            //     value: loginObj.hasOwnProperty("fields")
-                            //         ? loginObj.fields.secret
-                            //         : "",
-                            //     // oninput: m.withAttr("value", this.setSecret),
-                            // }),
                             m("div.btn.generate", {
                                 title: "Generate password",
                                 onclick: () => {
@@ -299,18 +291,12 @@ function AddEditInterface(settingsModel) {
                                         var remove = confirm(
                                             `Are you sure you want to delete ${loginObj.login}?`
                                         );
+
                                         if (!remove) {
                                             e.preventDefault();
                                             return;
                                         }
-                                        //@TODO: isValid or canDelete?
-                                        if (!Login.prototype.isValid(loginObj)) {
-                                            Notifications.errorMsg(
-                                                "Error: Changes are not valid, please check and try again."
-                                            );
-                                            e.preventDefault();
-                                            return;
-                                        }
+
                                         await Login.prototype.delete(loginObj);
                                         Notifications.successMsg(
                                             m.trust(
