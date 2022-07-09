@@ -46,13 +46,6 @@ function addDanger(text, timeout = 0) {
 }
 
 let Notifications = {
-    oninit(vnode) {
-        console.log("Notifications.oninit", vnode.state, vnode.attrs);
-        addSuccess("This is a notification message of type 'Success'");
-        addInfo("This is a notification message of type 'Info'");
-        addWarning("This is a notification message of type 'Warning'");
-        addDanger("This is a notification message of type 'Danger'");
-    },
     view(vnode) {
         let ui = vnode.state;
         return state.list
@@ -72,8 +65,6 @@ let Notifications = {
 
 let Notification = {
     oninit(vnode) {
-        console.log("Notification.oninit", vnode.state, vnode.attrs);
-        //
         if (vnode.attrs.timeout > 0) {
             setTimeout(() => {
                 Notification.destroy(vnode);
