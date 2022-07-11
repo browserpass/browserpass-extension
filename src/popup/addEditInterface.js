@@ -8,6 +8,7 @@ const layout = require("./layoutInterface");
 module.exports = AddEditInterface;
 
 var persistSettingsModel = {};
+const symbolsRegEx = RegExp(/[^a-z0-9]+/, "i");
 
 function AddEditInterface(settingsModel) {
     persistSettingsModel = settingsModel;
@@ -66,6 +67,16 @@ function AddEditInterface(settingsModel) {
                     (editing && Login.prototype.isLogin(loginObj)) ||
                     Settings.prototype.isSettings(settings)
                 ) {
+                    // update default password options based on current password
+                    const password = loginObj.getPassword();
+                    // use current password length for default length
+                    if (password.length > 0) {
+                        this.setPasswordLength(password.length);
+                    }
+                    // if has symbols, include them in options
+                    if (password.search(symbolsRegEx) > -1) {
+                        this.setSymbols(true);
+                    }
                     m.redraw();
                 }
             },
@@ -246,7 +257,7 @@ function AddEditInterface(settingsModel) {
                 );
 
                 if (
-                    (editing && Settings.prototype.canDelete(settings)) ||
+                    Settings.prototype.canDelete(settings) ||
                     Settings.prototype.canSave(settings)
                 ) {
                     nodes.push(
@@ -259,7 +270,7 @@ function AddEditInterface(settingsModel) {
                                           onclick: async (e) => {
                                               if (!Login.prototype.isValid(loginObj)) {
                                                   Notifications.errorMsg(
-                                                      "Please fix validation errors and try again."
+                                                      "Credentials are incomplete, please fix and try again."
                                                   );
                                                   e.preventDefault();
                                                   return;
@@ -277,7 +288,7 @@ function AddEditInterface(settingsModel) {
                                       "Save"
                                   )
                                 : null,
-                            Settings.prototype.canDelete(settings)
+                            editing && Settings.prototype.canDelete(settings)
                                 ? m(
                                       "button.delete",
                                       {
