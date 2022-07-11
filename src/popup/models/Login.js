@@ -327,6 +327,8 @@ Login.prototype.isValid = function(login) {
     results.push(Login.prototype.isPrototypeOf(login));
     results.push(login.hasOwnProperty('login') && login.login.length > 0);
     results.push(login.hasOwnProperty('raw') && typeof login.raw == 'string' && login.raw.length > 0);
+    // Should we require password.length > 0
+    // results.push(typeof login.getPassword == 'function' && login.getPassword().length > 0);
 
     return results.every(Boolean);
 }
