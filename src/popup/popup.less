@@ -351,10 +351,11 @@ body {
     .title {
         display: flex;
         box-sizing: border-box;
-        justify-content: space-between;
+        // justify-content: space-between;
 
         span {
-            align-self: center;
+            // align-self: center;
+            margin: auto;
         }
     }
 
@@ -432,7 +433,7 @@ body {
     .contents {
         display: flex;
         flex-direction: column;
-        margin: 0 6px 20px;
+        margin: 0 6px 5px;
 
         label {
             display: flex;
@@ -470,15 +471,38 @@ body {
 
     .actions {
         display: flex;
-        align-items: center;
-        flex-direction: column;
         margin-bottom: 10px;
 
+        .save,
         .delete {
             cursor: pointer;
             font-weight: bolder;
-            border: none;
-            padding: 5px 10px;
+            font-size: medium;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+        }
+
+        .save::after,
+        .delete::after {
+            display: inline-block;
+            width: 15px;
+            margin-left: 5px;
+        }
+
+        .save {
+            margin-left: 5px;
+            margin-right: auto;
+        }
+        .save::after {
+            content: url("/popup/icon-save.svg");
+        }
+
+        .delete {
+            margin-left: auto;
+            margin-right: 5px;
+        }
+        .delete::after {
+            content: url("/popup/icon-delete.svg");
         }
     }
 

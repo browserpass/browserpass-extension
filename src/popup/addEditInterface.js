@@ -166,28 +166,6 @@ function AddEditInterface(settingsModel) {
                             },
                         }),
                         m("span", editing ? "Edit credentials" : "Add credentials"),
-                        Settings.prototype.canSave(settings)
-                            ? m("div.btn.save", {
-                                  title: "Save credentials",
-                                  onclick: async (e) => {
-                                      if (!Login.prototype.isValid(loginObj)) {
-                                          Notifications.errorMsg(
-                                              "Please fix validation errors and try again."
-                                          );
-                                          e.preventDefault();
-                                          return;
-                                      }
-                                      await Login.prototype.save(loginObj);
-                                      Notifications.successMsg(
-                                          m.trust(
-                                              `Password entry, <strong>${loginObj.login}</strong>, has been saved to <strong>${loginObj.store.name}</strong>.`
-                                          )
-                                      );
-                                      setTimeout(window.close, 3000);
-                                      m.route.set("/list");
-                                  },
-                              })
-                            : null,
                     ]),
                     m("div.location", [
                         m("div.store", [
@@ -280,36 +258,67 @@ function AddEditInterface(settingsModel) {
                     ])
                 );
 
-                if (editing && Settings.prototype.canDelete(settings)) {
+                if (
+                    (editing && Settings.prototype.canDelete(settings)) ||
+                    Settings.prototype.canSave(settings)
+                ) {
                     nodes.push(
-                        m(
-                            "div.actions",
-                            m(
-                                "button.delete",
-                                {
-                                    onclick: async (e) => {
-                                        var remove = confirm(
-                                            `Are you sure you want to delete ${loginObj.login}?`
-                                        );
+                        m("div.actions", [
+                            Settings.prototype.canSave(settings)
+                                ? m(
+                                      "button.save",
+                                      {
+                                          title: "Save credentials",
+                                          onclick: async (e) => {
+                                              if (!Login.prototype.isValid(loginObj)) {
+                                                  Notifications.errorMsg(
+                                                      "Please fix validation errors and try again."
+                                                  );
+                                                  e.preventDefault();
+                                                  return;
+                                              }
+                                              await Login.prototype.save(loginObj);
+                                              Notifications.successMsg(
+                                                  m.trust(
+                                                      `Password entry, <strong>${loginObj.login}</strong>, has been saved to <strong>${loginObj.store.name}</strong>.`
+                                                  )
+                                              );
+                                              setTimeout(window.close, 3000);
+                                              m.route.set("/list");
+                                          },
+                                      },
+                                      "Save"
+                                  )
+                                : null,
+                            Settings.prototype.canDelete(settings)
+                                ? m(
+                                      "button.delete",
+                                      {
+                                          title: "Delete credentials",
+                                          onclick: async (e) => {
+                                              var remove = confirm(
+                                                  `Are you sure you want to delete ${loginObj.login}?`
+                                              );
 
-                                        if (!remove) {
-                                            e.preventDefault();
-                                            return;
-                                        }
+                                              if (!remove) {
+                                                  e.preventDefault();
+                                                  return;
+                                              }
 
-                                        await Login.prototype.delete(loginObj);
-                                        Notifications.successMsg(
-                                            m.trust(
-                                                `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
-                                            )
-                                        );
-                                        setTimeout(window.close, 3000);
-                                        m.route.set("/list");
-                                    },
-                                },
-                                "Delete"
-                            )
-                        )
+                                              await Login.prototype.delete(loginObj);
+                                              Notifications.successMsg(
+                                                  m.trust(
+                                                      `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
+                                                  )
+                                              );
+                                              setTimeout(window.close, 3000);
+                                              m.route.set("/list");
+                                          },
+                                      },
+                                      "Delete"
+                                  )
+                                : null,
+                        ])
                     );
                 }
 

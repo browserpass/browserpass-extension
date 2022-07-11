@@ -79,9 +79,21 @@
         }
 
         .actions {
+            .save {
+                background-color: @ntfy-success-bgcolor;
+                border: 2px solid @ntfy-success-border;
+                color: @ntfy-success-color;
+            }
             .delete {
-                background-color: @hint-bg-color;
-                color: @hint-color;
+                background-color: @ntfy-error-bgcolor;
+                border: 2px solid @ntfy-error-border;
+                color: @ntfy-error-color;
+            }
+            .save,
+            .delete {
+                &:hover {
+                    box-shadow: 1px 1px 2px @ntfy-hover-shadow;
+                }
             }
         }
 
