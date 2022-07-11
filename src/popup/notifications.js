@@ -31,17 +31,17 @@ let state = {
     },
 };
 
-function addSuccess(text, timeout = 0) {
+function addSuccess(text, timeout = 3500) {
     state.list.push({ id: guid(), type: "success", text, timeout });
 }
-function addInfo(text, timeout = 0) {
+function addInfo(text, timeout = 3500) {
     state.list.push({ id: guid(), type: "info", text, timeout });
 }
-function addWarning(text, timeout = 0) {
+function addWarning(text, timeout = 4000) {
     state.list.push({ id: guid(), type: "warning", text, timeout });
 }
 
-function addDanger(text, timeout = 0) {
+function addDanger(text, timeout = 5000) {
     state.list.push({ id: guid(), type: "danger", text, timeout });
 }
 

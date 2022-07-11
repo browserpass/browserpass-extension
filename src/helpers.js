@@ -44,7 +44,8 @@ function handleError(error, type = "error") {
     switch (type) {
         case "error":
             console.log(error);
-            notify.errorMsg(error.toString());
+            // disable error timeout, to allow necessary user action
+            notify.errorMsg(error.toString(), 0);
             break;
 
         case "warn":
@@ -74,7 +75,6 @@ function handleError(error, type = "error") {
  */
 async function withLogin(action, params = {}) {
     try {
-        // replace popup with a "please wait" notice
         switch (action) {
             case "fill":
                 handleError("Filling login details...", "notice");
