@@ -289,7 +289,7 @@ Login.prototype.hasSecretPrefix = function () {
 
 /**
  * Returns a boolean indication on if object passed
- * having minimum login required login propteries,
+ * has the minimum required login propteries,
  * Login.prototype.isPrototypeOf(login) IS NOT the goal of this.
  * @since 3.X.Y
  *
