@@ -382,9 +382,10 @@ body {
             width: 25px;
         }
 
-        &.save {
-            background-image: url("/popup/icon-save.svg");
-            width: 25px;
+        &.alignment {
+            width: 20px;
+            cursor: default;
+            background: none !important;
         }
 
         &.generate {
@@ -395,7 +396,7 @@ body {
     }
 
     .location {
-        margin: 6px 6px 20px;
+        margin: 6px;
 
         .store,
         .path {
@@ -443,6 +444,7 @@ body {
             padding: 6px 6px;
             margin-right: 8px;
             border: none;
+            min-width: 55px;
         }
 
         .password,
@@ -457,8 +459,14 @@ body {
         .options {
             align-items: center;
 
+            label {
+                margin-right: 0;
+            }
+
             input[type="checkbox"] {
                 margin: 3px 6px;
+                height: 25px;
+                width: 20px;
             }
 
             input[type="number"] {

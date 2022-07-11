@@ -163,6 +163,8 @@ function AddEditInterface(settingsModel) {
                             },
                         }),
                         m("span", editing ? "Edit credentials" : "Add credentials"),
+                        // html alignment element makes centering title span easier
+                        m("div.btn.alignment"),
                     ]),
                     m("div.location", [
                         m("div.store", [
@@ -195,18 +197,6 @@ function AddEditInterface(settingsModel) {
                                 oninput: m.withAttr("value", this.setLogin),
                             }),
                             m("div.suffix", ".gpg"),
-                        ]),
-                    ]),
-                    //@TODO: Remove this block after fixing styles
-                    m("div.part.details", [
-                        m("div.part.snack.line-secret", [
-                            m("div.label", "Secret"),
-                            m(
-                                "div.chars",
-                                Login.prototype.isLogin(loginObj)
-                                    ? helpers.highlight(loginObj.getPassword())
-                                    : ""
-                            ),
                         ]),
                     ]),
                     m("div.contents", [
