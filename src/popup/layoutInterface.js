@@ -14,12 +14,10 @@ let LayoutInterface = {
 };
 
 function setCurrentLogin(login) {
-    console.log("LayoutInterface.setCurrentLogin", login);
     session.current = login;
 }
 
 function getCurrentLogin() {
-    console.log("LayoutInterface.getCurrentLogin", session.current);
     return session.current;
 }
 

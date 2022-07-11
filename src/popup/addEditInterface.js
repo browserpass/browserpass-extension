@@ -30,12 +30,9 @@ function AddEditInterface(settingsModel) {
             symbols = false,
             viewSettingsModel = persistSettingsModel;
 
-        console.log("AddEditInterface.closure", vnode.state, vnode.attrs);
-
         return {
             oninit: async function (vnode) {
                 tmpLogin = layout.getCurrentLogin();
-                console.log("AddEditinterface.oninit", vnode.state, vnode.attrs, tmpLogin);
                 settings = await viewSettingsModel.get();
 
                 Object.keys(settings.stores).forEach((k) => {

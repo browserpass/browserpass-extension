@@ -188,7 +188,6 @@ function renderMainView(ctl, params) {
  * @return void
  */
 function search(searchQuery) {
-    console.log("Interface.search: ", searchQuery, this.logins.length);
     this.results = helpers.filterSortLogins(this.logins, searchQuery, this.currentDomainOnly);
 }
 

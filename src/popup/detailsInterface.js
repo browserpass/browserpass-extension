@@ -40,8 +40,6 @@ function DetailsInterface(settingsModel) {
             progress = null,
             viewSettingsModel = persistSettingsModel;
 
-        console.log("DetailsInterface.closure", vnode.state, vnode.attrs);
-
         return {
             // public methods
             /**
@@ -52,7 +50,6 @@ function DetailsInterface(settingsModel) {
              * @param object    vnode current vnode instance
              */
             oninit: async function (vnode) {
-                console.log("DetailsInterface.oninit", vnode.state, vnode.attrs);
                 settings = await viewSettingsModel.get();
 
                 loginObj = await Login.prototype.get(
