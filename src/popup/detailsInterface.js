@@ -6,6 +6,7 @@ const helpers = require("../helpers");
 const layout = require("./layoutInterface");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
+const notify = require("./notifications");
 
 var persistSettingsModel = {};
 
@@ -52,11 +53,17 @@ function DetailsInterface(settingsModel) {
             oninit: async function (vnode) {
                 settings = await viewSettingsModel.get();
 
-                loginObj = await Login.prototype.get(
-                    settings,
-                    vnode.attrs.context.storeid,
-                    vnode.attrs.context.login
-                );
+                try {
+                    loginObj = await Login.prototype.get(
+                        settings,
+                        vnode.attrs.context.storeid,
+                        vnode.attrs.context.login
+                    );
+                } catch (error) {
+                    console.log(error);
+                    notify.errorMsg(error.toString(), 0);
+                    m.route.set("/list");
+                }
 
                 // get basename & dirname of entry
                 loginObj.basename = loginObj.login.substr(loginObj.login.lastIndexOf("/") + 1);
