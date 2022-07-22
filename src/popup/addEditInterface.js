@@ -1,7 +1,7 @@
 const m = require("mithril");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
-const Notifications = require("./notifications");
+const notify = require("./notifications");
 const helpers = require("../helpers");
 const layout = require("./layoutInterface");
 
@@ -271,14 +271,19 @@ user: johnsmith`,
                                           title: "Save credentials",
                                           onclick: async (e) => {
                                               if (!Login.prototype.isValid(loginObj)) {
-                                                  Notifications.errorMsg(
+                                                  notify.errorMsg(
                                                       "Credentials are incomplete, please fix and try again."
                                                   );
                                                   e.preventDefault();
                                                   return;
                                               }
+                                              notify.infoMsg(
+                                                  m.trust(
+                                                      `Please wait, while we save: <strong>${loginObj.login}</strong>`
+                                                  )
+                                              );
                                               await Login.prototype.save(loginObj);
-                                              Notifications.successMsg(
+                                              notify.successMsg(
                                                   m.trust(
                                                       `Password entry, <strong>${loginObj.login}</strong>, has been saved to <strong>${loginObj.store.name}</strong>.`
                                                   )
@@ -305,8 +310,13 @@ user: johnsmith`,
                                                   return;
                                               }
 
+                                              notify.warningMsg(
+                                                  m.trust(
+                                                      `Please wait, while we delete: <strong>${loginObj.login}</strong>`
+                                                  )
+                                              );
                                               await Login.prototype.delete(loginObj);
-                                              Notifications.successMsg(
+                                              notify.successMsg(
                                                   m.trust(
                                                       `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
                                                   )
