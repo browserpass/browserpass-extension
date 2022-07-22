@@ -248,7 +248,9 @@ function AddEditInterface(settingsModel) {
                         m(
                             "div.details",
                             m("textarea", {
-                                placeholder: "user: johnsmith",
+                                placeholder: `secret
+
+user: johnsmith`,
                                 value: loginObj.raw,
                                 oninput: m.withAttr("value", this.setRawDetails),
                             })
