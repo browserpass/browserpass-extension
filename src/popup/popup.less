@@ -568,6 +568,34 @@ body {
     }
 }
 
+dialog#browserpass-modal {
+    margin: auto 6px;
+    width: auto;
+    border-radius: 0.25rem;
+
+    .modal-content {
+        margin-bottom: 15px;
+        white-space: pre-wrap;
+    }
+
+    .modal-actions {
+        display: flex;
+
+        button {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 0.25rem;
+
+            &.cancel {
+                margin-right: auto;
+            }
+            &.confirm {
+                margin-left: auto;
+            }
+        }
+    }
+}
+
 @keyframes fade-in {
     from {
         opacity: 0;

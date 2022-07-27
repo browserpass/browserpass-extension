@@ -306,7 +306,7 @@ user: johnsmith`,
                                               e.preventDefault();
 
                                               dialog.open(
-                                                  `Are you sure you want to delete ${loginObj.login}?`,
+                                                  `Are you sure you want to delete the file from <strong>${loginObj.store.name}</strong>? <strong>${loginObj.login}</strong>`,
                                                   async (remove) => {
                                                       if (!remove) {
                                                           return;

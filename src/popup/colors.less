@@ -226,4 +226,20 @@
             }
         }
     }
+
+    dialog#browserpass-modal {
+        color: @ntfy-info-color;
+        background-color: @ntfy-info-bgcolor;
+        border: 3px solid @ntfy-info-border;
+
+        button {
+            &:hover {
+                box-shadow: 1px 1px 2px @ntfy-hover-shadow;
+            }
+
+            color: @ntfy-warn-color;
+            background-color: @ntfy-warn-bgcolor;
+            border: 1px solid @ntfy-warn-border;
+        }
+    }
 }
