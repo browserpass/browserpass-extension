@@ -1,6 +1,8 @@
 const m = require("mithril");
 
 const modalId = "browserpass-modal";
+const CANCEL = "Cancel";
+const CONFIRM = "Confirm";
 
 /**
  * Basic mirthil dialog component. Shows modal dialog with
@@ -65,16 +67,16 @@ let Modal = {
      *
      * @since 3.X.Y
      *
-     * @param {string} message
-     * @param {function} callback
-     * @param {string} cancelText
-     * @param {string} confirmText
+     * @param {string} message      message or html to render in main body of dialog
+     * @param {function} callback   function which accepts a single boolean argument
+     * @param {string} cancelText   text to display on the negative response button
+     * @param {string} confirmText  text to display on the positive response button
      */
     open: (
         message = "",
         callback = (resp = false) => {},
-        cancelText = "Cancel",
-        confirmText = "Confirm"
+        cancelText = CANCEL,
+        confirmText = CONFIRM
     ) => {
         if (!message.length || typeof callback !== "function") {
             return null;
@@ -83,13 +85,13 @@ let Modal = {
         if (typeof cancelText == "string" && cancelText.length) {
             cancelButtonText = cancelText;
         } else {
-            cancelButtonText = "Cancel";
+            cancelButtonText = CANCEL;
         }
 
         if (typeof confirmText == "string" && confirmText.length) {
             confirmButtonText = confirmText;
         } else {
-            confirmButtonText = "Confirm";
+            confirmButtonText = CONFIRM;
         }
 
         modalElement = document.getElementById(modalId);
