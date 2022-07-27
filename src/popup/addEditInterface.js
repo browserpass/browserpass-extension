@@ -4,6 +4,7 @@ const Settings = require("./models/Settings");
 const notify = require("./notifications");
 const helpers = require("../helpers");
 const layout = require("./layoutInterface");
+const dialog = require("./modalDialog");
 
 module.exports = AddEditInterface;
 
@@ -270,11 +271,12 @@ user: johnsmith`,
                                       {
                                           title: "Save credentials",
                                           onclick: async (e) => {
+                                              e.preventDefault();
+
                                               if (!Login.prototype.isValid(loginObj)) {
                                                   notify.errorMsg(
                                                       "Credentials are incomplete, please fix and try again."
                                                   );
-                                                  e.preventDefault();
                                                   return;
                                               }
                                               notify.infoMsg(
@@ -300,29 +302,31 @@ user: johnsmith`,
                                       "button.delete",
                                       {
                                           title: "Delete credentials",
-                                          onclick: async (e) => {
-                                              var remove = confirm(
-                                                  `Are you sure you want to delete ${loginObj.login}?`
-                                              );
+                                          onclick: (e) => {
+                                              e.preventDefault();
 
-                                              if (!remove) {
-                                                  e.preventDefault();
-                                                  return;
-                                              }
+                                              dialog.open(
+                                                  `Are you sure you want to delete ${loginObj.login}?`,
+                                                  async (remove) => {
+                                                      if (!remove) {
+                                                          return;
+                                                      }
 
-                                              notify.warningMsg(
-                                                  m.trust(
-                                                      `Please wait, while we delete: <strong>${loginObj.login}</strong>`
-                                                  )
+                                                      notify.warningMsg(
+                                                          m.trust(
+                                                              `Please wait, while we delete: <strong>${loginObj.login}</strong>`
+                                                          )
+                                                      );
+                                                      await Login.prototype.delete(loginObj);
+                                                      notify.successMsg(
+                                                          m.trust(
+                                                              `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
+                                                          )
+                                                      );
+                                                      setTimeout(window.close, 3000);
+                                                      m.route.set("/list");
+                                                  }
                                               );
-                                              await Login.prototype.delete(loginObj);
-                                              notify.successMsg(
-                                                  m.trust(
-                                                      `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
-                                                  )
-                                              );
-                                              setTimeout(window.close, 3000);
-                                              m.route.set("/list");
                                           },
                                       },
                                       "Delete"
