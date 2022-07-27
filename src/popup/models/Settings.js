@@ -4,7 +4,7 @@ require("chrome-extension-async");
 
 /**
  * Settings Constructor()
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} settingsObj (optional) Extend an existing
  *      settings object to be backwards and forwards compatible.
@@ -21,7 +21,7 @@ function Settings(settingsObj = {}) {
 /**
  * Check if host application can handle DELETE requests.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} settingsObj Settings object
  * @returns
@@ -33,7 +33,7 @@ Settings.prototype.canDelete = function (settingsObj) {
 /**
  * Check if host application can handle SAVE requests.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} settingsObj Settings object
  * @returns
@@ -46,7 +46,7 @@ Settings.prototype.canSave = function (settingsObj) {
  * Retrieves Browserpass settings or throws an error.
  * Will also cache the first successful response.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @throws {error} Any error response from the host or browser will be thrown
  * @returns {object} settings
@@ -80,7 +80,7 @@ Settings.prototype.get = async function () {
 /**
  * Retreive store object. Can optionally return just the sub path value.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} settingsObj Settings object
  * @param {string} property (optional) store sub property path value to return
@@ -111,7 +111,7 @@ Settings.prototype.getStore = function (settingsObj, property = "") {
 /**
  * Validation, determine if object passed is Settings.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} settingsObj
  * @returns

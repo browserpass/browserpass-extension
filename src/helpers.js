@@ -184,7 +184,7 @@ function prepareLogins(files, settings) {
 /**
  * Prepare a single login based settings, storeId, and path
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param string settings   Settings object
  * @param string storeId    Store ID alphanumeric ID
@@ -246,7 +246,7 @@ function prepareLogin(settings, storeId, file, index = 0, origin = undefined) {
 /**
  * Highlight password characters
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {string} secret a string to be split by character
  * @return {array} mithril vnodes to be rendered

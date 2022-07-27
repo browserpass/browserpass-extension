@@ -15,7 +15,7 @@ const
 /**
  * Login Constructor()
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} settings
  * @param {object} login (optional) Extend an existing
@@ -63,7 +63,7 @@ function Login(settings, login = {}) {
 /**
  * Remove login entry
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} login Login entry to be deleted
  * @returns {object} Response or an empty object
@@ -123,7 +123,7 @@ Login.prototype.generateSecret = function (
  * Request a list of all login files and then
  * extend them with Login.prototype.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  * @throws {error} host response errors
  *
  * @param {object} settings Settings object
@@ -147,7 +147,7 @@ Login.prototype.getAll = async function(settings) {
 /**
  * Request decrypted details of login from host for store id.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  * @throws {error} host response errors
  *
  * @param {object} settings Settings object
@@ -175,7 +175,7 @@ Login.prototype.get = async function(settings, storeid, lpath) {
  * See also Login.prototype.getRawPassword and the
  * functions: setSecret(), setRawDetails() in src/popup/addEditInterface.js
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @returns {string} secret
  */
@@ -192,7 +192,7 @@ Login.prototype.getPassword = function() {
  * Is used with in combination with Login.prototype.getPassword and the
  * functions: setSecret(), setRawDetails() in src/popup/addEditInterface.js
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @returns {string} secret
  */
@@ -241,7 +241,7 @@ function getSecretDetails(text = "") {
 /**
  * Retrieve store object. Can optionally return only sub path value.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} login Login object
  * @param {string} property (optional) store sub property path value to return
@@ -272,7 +272,7 @@ Login.prototype.getStore = function(login, property = "") {
  * Determine if secretPrefix property has been set for
  * the current Login object: "this"
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @returns {boolean}
  */
@@ -291,7 +291,7 @@ Login.prototype.hasSecretPrefix = function () {
  * Returns a boolean indication on if object passed
  * has the minimum required login propteries,
  * Login.prototype.isPrototypeOf(login) IS NOT the goal of this.
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} login Login object
  * @returns Boolean
@@ -316,7 +316,7 @@ Login.prototype.isLogin = function(login) {
  * Validation, determine if object passed is a
  * Login.prototype and is ready to be saved.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} login Login object to validated
  */
@@ -338,7 +338,7 @@ Login.prototype.isValid = function(login) {
  * then calls chrome.runtime.sendMessage()
  * with {action: "add/save"} for new/existing secrets.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} login Login object to be saved.
  * @returns {object} Response or an empty object.
@@ -366,7 +366,7 @@ Login.prototype.save = async function(login) {
  * Sets password on Login.fields.secret and Login.raw,
  * leave the secretPrefix unchanged.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {string} password Value of password to be assgined.
  */
@@ -409,7 +409,7 @@ Login.prototype.setPassword = function(password = "") {
 /**
  * Update the raw text details, password, and also the secretPrefix.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {string} text Full text details of secret to be updated
  */

@@ -17,7 +17,7 @@ function AddEditInterface(settingsModel) {
     /**
      * AddEditView
      *
-     * @since 3.X.Y
+     * @since 3.8.0
      *
      * @param object vnode  current vnode object
      */
@@ -85,7 +85,7 @@ function AddEditInterface(settingsModel) {
              * Update login path.
              * Used in onchange: m.withAttr("value", ...)
              *
-             * @since 3.X.Y
+             * @since 3.8.0
              *
              * @param {string} path
              */
@@ -96,7 +96,7 @@ function AddEditInterface(settingsModel) {
              * Update pass length when generating secret in view.
              * Used onchange: m.withAttr("value", ...)
              *
-             * @since 3.X.Y
+             * @since 3.8.0
              *
              * @param {int} length
              */
@@ -107,7 +107,7 @@ function AddEditInterface(settingsModel) {
              * Update login raw text and secret when "raw text" changes.
              * Used oninput: m.withAttr("value", ...)
              *
-             * @since 3.X.Y
+             * @since 3.8.0
              *
              * @param {string} text
              */
@@ -118,7 +118,7 @@ function AddEditInterface(settingsModel) {
              * Update login secret and raw text when "secret" changes.
              * Used oninput: m.withAttr("value", ...)
              *
-             * @since 3.X.Y
+             * @since 3.8.0
              *
              * @param {string} secret
              */
@@ -129,7 +129,7 @@ function AddEditInterface(settingsModel) {
              * Update login store id.
              * Used in onchange: m.withAttr("value", ...)
              *
-             * @since 3.X.Y
+             * @since 3.8.0
              *
              * @param {string} storeId
              */
@@ -152,7 +152,7 @@ function AddEditInterface(settingsModel) {
              * are used when generating a new random password.
              * Used in onchange: m.withAttr("value", ...)
              *
-             * @since 3.X.Y
+             * @since 3.8.0
              *
              * @param {int} checked value 1 or 0 for checked
              */

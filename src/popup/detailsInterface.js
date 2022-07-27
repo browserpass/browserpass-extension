@@ -13,7 +13,7 @@ var persistSettingsModel = {};
 /**
  * Login details interface
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param object settings   Settings model object
  * @return function         View component
@@ -24,7 +24,7 @@ function DetailsInterface(settingsModel) {
     /**
      * DetailsView
      *
-     * @since 3.X.Y
+     * @since 3.8.0
      *
      * @param object vnode  current vnode object
      */
@@ -46,7 +46,7 @@ function DetailsInterface(settingsModel) {
             /**
              * Initialize compoenent: get settings and login
              *
-             * @since 3.X.Y
+             * @since 3.8.0
              *
              * @param object    vnode current vnode instance
              */

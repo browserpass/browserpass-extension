@@ -9,7 +9,7 @@ const m = require("mithril");
 /**
  * Generate a globally unique id
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * Original source credit goes to github.com/tabula-rasa
  * https://gist.github.com/tabula-rasa/61d2ab25aac779fdf9899f4e87ab8306

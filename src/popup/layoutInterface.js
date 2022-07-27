@@ -17,7 +17,7 @@ let session = {
 
 /**
  * Page layout component
- * @since 3.X.Y
+ * @since 3.8.0
  */
 let LayoutInterface = {
     view: function (vnode) {
@@ -30,7 +30,7 @@ let LayoutInterface = {
 
 /**
  * Set login on details page after successful decrpytion
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @param {object} login set session login object
  */
@@ -40,7 +40,7 @@ function setCurrentLogin(login) {
 
 /**
  * Get current login on edit page to avoid 2nd decryption request
- * @since 3.X.Y
+ * @since 3.8.0
  *
  * @returns {object} current login object
  */

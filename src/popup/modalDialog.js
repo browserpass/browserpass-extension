@@ -21,7 +21,7 @@ var callBackFn = null,
  *
  * Trigger callback with boolean response, hide modal, clear values.
  *
- * @since 3.X.Y
+ * @since 3.8.0
  *
  */
 function buttonClick(response = false) {
@@ -65,7 +65,7 @@ let Modal = {
     /**
      * Show dialog component after args validation
      *
-     * @since 3.X.Y
+     * @since 3.8.0
      *
      * @param {string} message      message or html to render in main body of dialog
      * @param {function} callback   function which accepts a single boolean argument
