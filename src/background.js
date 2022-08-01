@@ -501,11 +501,12 @@ async function getFullSettings() {
         settings.hostError = response;
     }
     settings.version = response.version;
+    const EDIT_VERSION = 3 * 1000000 + 1 * 1000 + 0;
 
     // host capabilities
-    settings.caps.save = settings.version >= 3000000; //TODO 3001000;
-    settings.caps.delete = settings.version >= 3000000; //TODO 3001000;
-    settings.caps.tree = settings.version >= 3000000; //TODO 3001000;
+    settings.caps.save = settings.version >= EDIT_VERSION;
+    settings.caps.delete = settings.version >= EDIT_VERSION;
+    settings.caps.tree = settings.version >= EDIT_VERSION;
 
     // Fill store settings, only makes sense if 'configure' succeeded
     if (response.status === "ok") {
