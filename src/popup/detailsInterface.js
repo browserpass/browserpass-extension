@@ -38,7 +38,6 @@ function DetailsInterface(settingsModel) {
                 store: {},
                 settings: settings,
             }),
-            progress = null,
             viewSettingsModel = persistSettingsModel;
 
         return {
