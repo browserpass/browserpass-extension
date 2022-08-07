@@ -200,11 +200,7 @@ Login.prototype.getRawPassword = function() {
     if (typeof this.raw == 'string' && this.raw.length > 0) {
         const text = this.raw;
 
-        const index = text.search(multiLineSecretRegEx);
-        let details = text.substring(index).split(/[\n\r]+/, 1)[0].trim();
-
-        // assume first line
-        return text.split(/[\n\r]+/, 1)[0].trim();
+        return this.getSecretDetails(text).password;
     }
     return "";
 }
@@ -279,7 +275,6 @@ Login.prototype.getStore = function(login, property = "") {
 Login.prototype.hasSecretPrefix = function () {
     let results = [];
 
-    // results.push(Login.hasOwn(this,'secretPrefix'));
     results.push(this.hasOwnProperty('secretPrefix'));
     results.push(Boolean(this.secretPrefix));
     results.push(helpers.fieldsPrefix.secret.includes(this.secretPrefix));
@@ -327,8 +322,6 @@ Login.prototype.isValid = function(login) {
     results.push(Login.prototype.isPrototypeOf(login));
     results.push(login.hasOwnProperty('login') && login.login.length > 0);
     results.push(login.hasOwnProperty('raw') && typeof login.raw == 'string' && login.raw.length > 0);
-    // Should we require password.length > 0
-    // results.push(typeof login.getPassword == 'function' && login.getPassword().length > 0);
 
     return results.every(Boolean);
 }
