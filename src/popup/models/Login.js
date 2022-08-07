@@ -1,7 +1,6 @@
 "use strict";
 
 require("chrome-extension-async");
-const m = require('mithril');
 const sha1 = require("sha1");
 const helpers = require("../../helpers");
 const Settings = require("./Settings");
