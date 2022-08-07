@@ -726,7 +726,22 @@ async function handleMessage(settings, message, sendResponse) {
             } catch (e) {
                 sendResponse({
                     status: "error",
-                    message: "Unable to enumerate password files" + e.toString(),
+                    message: "Unable to enumerate password files. " + e.toString(),
+                });
+            }
+            break;
+        case "listDirs":
+            try {
+                var response = await hostAction(settings, "tree");
+                if (response.status != "ok") {
+                    throw new Error(JSON.stringify(response));
+                }
+                let dirs = response.data.directories;
+                sendResponse({ status: "ok", dirs });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to enumerate directory trees. " + e.toString(),
                 });
             }
             break;
