@@ -43,6 +43,18 @@ Settings.prototype.canSave = function (settingsObj) {
 }
 
 /**
+ * Check if host application can handle TREE requests.
+ *
+ * @since 3.8.0
+ *
+ * @param {object} settingsObj Settings object
+ * @returns
+ */
+Settings.prototype.canTree = function (settingsObj) {
+    return settingsObj.hasOwnProperty("caps") && settingsObj.caps.tree == true;
+}
+
+/**
  * Retrieves Browserpass settings or throws an error.
  * Will also cache the first successful response.
  *
