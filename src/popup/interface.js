@@ -104,6 +104,7 @@ function renderMainView(ctl, params) {
                             }
                         },
                         onkeydown: keyHandler.bind(result),
+                        tabindex: 0,
                     },
                     [
                         m(
