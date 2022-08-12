@@ -1,6 +1,7 @@
 const m = require("mithril");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
+const Tree = require("./models/Tree");
 const notify = require("./notifications");
 const helpers = require("../helpers");
 const layout = require("./layoutInterface");
@@ -30,9 +31,128 @@ function AddEditInterface(settingsModel) {
             storePath = "",
             stores = [],
             symbols = false,
+            canTree = false,
+            storeTree = new Tree(),
+            storeDirs = [],
             viewSettingsModel = persistSettingsModel;
 
+        /**
+         * Event handler for onkeydown, browse and select listed directory
+         * options for login file path.
+         *
+         * @since 3.8.0
+         *
+         * @param {object} e key event
+         */
+        function pathKeyHandler(e) {
+            let inputEl = document.querySelector("input.path");
+
+            switch (e.code) {
+                // Tab already handled
+                case "ArrowUp":
+                    e.preventDefault();
+                    if (
+                        e.target.classList.contains("directory") &&
+                        e.target.previousElementSibling
+                    ) {
+                        e.target.previousElementSibling.focus();
+                    } else if (e.target != inputEl) {
+                        inputEl.focus();
+                    }
+                    break;
+                case "ArrowDown":
+                    e.preventDefault();
+                    let paths = document.querySelector(".directory");
+
+                    if (e.target == inputEl && paths != null) {
+                        paths.focus();
+                    } else if (
+                        e.target.classList.contains("directory") &&
+                        e.target.nextElementSibling
+                    ) {
+                        e.target.nextElementSibling.focus();
+                    }
+                    break;
+                case "Enter":
+                    e.preventDefault();
+                    if (e.target.classList.contains("directory")) {
+                        // replace search term with selected directory
+                        inputEl.value = `${addDirToLoginPath(
+                            loginObj.login,
+                            e.target.getAttribute("value")
+                        )}/`;
+                        this.state.setLogin(inputEl.value);
+                        inputEl.focus();
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        /**
+         * Event handler for click, insert selected directory
+         * for login file path.
+         *
+         * @since 3.8.0
+         *
+         * @param {object} e key event
+         */
+        function clickDirectoryHandler(e) {
+            e.preventDefault();
+            var inputEl = document.querySelector("input.path");
+
+            // replace search term with selected directory
+            inputEl.value = `${addDirToLoginPath(loginObj.login, e.target.getAttribute("value"))}/`;
+            this.state.setLogin(inputEl.value);
+            inputEl.focus();
+        }
+
+        /**
+         * Rebuilds login file path given a selected directory to add.
+         * @since 3.8.0
+         *
+         * @param {string} currentPath current value of loginObj.login
+         * @param {string} dir selected directory to append to login file path
+         * @returns {string} new login path
+         */
+        function addDirToLoginPath(currentPath, dir) {
+            let parts = currentPath.split("/");
+            let length = parts.length;
+            if (length > 0) {
+                parts[length - 1] = dir;
+                return parts.join("/");
+            }
+            return dir;
+        }
+
+        /**
+         * Reset or clear array of directory list for login path.
+         *
+         * Used in onclick or onfocus for elements not associated
+         * with the login path or list of directories in the
+         * password store tree.
+         *
+         * @since 3.8.0
+         */
+        function clearStoreDirs(e) {
+            if (storeDirs.length > 0) {
+                storeDirs = [];
+                m.redraw();
+            }
+        }
+
         return {
+            oncreate: function (vnode) {
+                let elems = ["div.title", "div.location div.store", "div.contents"];
+                elems.forEach((selector) => {
+                    let el = document.querySelector(selector);
+                    if (el != null) {
+                        // add capturing event listener, not bubbling
+                        el.addEventListener("click", clearStoreDirs.bind(vnode), true);
+                    }
+                });
+            },
             oninit: async function (vnode) {
                 tmpLogin = layout.getCurrentLogin();
                 settings = await viewSettingsModel.get();
@@ -60,7 +180,8 @@ function AddEditInterface(settingsModel) {
                     loginObj = new Login(settings);
                 }
 
-                // set the storePath
+                // set the storePath and get tree dirs
+                canTree = Settings.prototype.canTree(settings);
                 this.setStorePath();
 
                 // trigger redraw after retrieving details
@@ -91,6 +212,11 @@ function AddEditInterface(settingsModel) {
              */
             setLogin: function (path) {
                 loginObj.login = path;
+                if (canTree) {
+                    storeDirs = storeTree.search(path);
+                } else {
+                    storeDirs = [];
+                }
             },
             /**
              * Update pass length when generating secret in view.
@@ -136,6 +262,7 @@ function AddEditInterface(settingsModel) {
             setStorePath: function (storeId) {
                 if (editing) {
                     storePath = loginObj.store.path;
+                    storeTree = canTree ? layout.getStoreTree(loginObj.store.id) : null;
                 } else if (Settings.prototype.isSettings(settings)) {
                     if (typeof storeId == "string") {
                         loginObj.store = settings.stores[storeId];
@@ -143,6 +270,7 @@ function AddEditInterface(settingsModel) {
                         loginObj.store = stores[0];
                     }
                     storePath = loginObj.store.path;
+                    storeTree = canTree ? layout.getStoreTree(loginObj.store.id) : null;
                 } else {
                     storePath = "~/.password-store";
                 }
@@ -186,6 +314,7 @@ function AddEditInterface(settingsModel) {
                                     disabled: editing,
                                     title: "Select which password-store to save credentials in.",
                                     onchange: m.withAttr("value", this.setStorePath),
+                                    onfocus: clearStoreDirs,
                                 },
                                 stores.map(function (store) {
                                     return m(
@@ -201,62 +330,95 @@ function AddEditInterface(settingsModel) {
                             m("div.storePath", storePath),
                         ]),
                         m("div.path", [
-                            m("input[type=text]", {
+                            m("input[type=text].path", {
                                 disabled: editing,
                                 title: "File path of credentials within password-store.",
                                 placeholder: "filename",
                                 value: loginObj.login,
                                 oninput: m.withAttr("value", this.setLogin),
+                                onfocus: m.withAttr("value", this.setLogin),
+                                onkeydown: pathKeyHandler.bind(vnode),
                             }),
                             m("div.suffix", ".gpg"),
                         ]),
+                        canTree && storeDirs.length > 0
+                            ? m(
+                                  "div#tree-dirs",
+                                  m(
+                                      "div.dropdown",
+                                      storeDirs.map(function (dirText) {
+                                          return m(
+                                              "a.directory",
+                                              {
+                                                  tabindex: 0,
+                                                  value: dirText,
+                                                  onkeydown: pathKeyHandler.bind(vnode),
+                                                  onclick: clickDirectoryHandler.bind(vnode),
+                                              },
+                                              dirText
+                                          );
+                                      })
+                                  )
+                              )
+                            : null,
                     ]),
-                    m("div.contents", [
-                        m("div.password", [
-                            m("label", { for: "secret" }, "Secret"),
+                    m(
+                        "div.contents",
+                        {
+                            // onclick: clearStoreDirsV2,
+                            // onfocus: clearStoreDirsV2,
+                        },
+                        [
+                            m("div.password", [
+                                m("label", { for: "secret" }, "Secret"),
+                                m(
+                                    "div.chars",
+                                    loginObj.hasOwnProperty("fields")
+                                        ? helpers.highlight(loginObj.fields.secret)
+                                        : ""
+                                ),
+                                m("div.btn.generate", {
+                                    title: "Generate password",
+                                    onclick: () => {
+                                        loginObj.setPassword(
+                                            loginObj.generateSecret(passwordLength, symbols)
+                                        );
+                                    },
+                                }),
+                            ]),
+                            m("div.options", [
+                                m("label", { for: "include_symbols" }, "Symbols"),
+                                m("input[type=checkbox]", {
+                                    id: "include_symbols",
+                                    checked: symbols,
+                                    onchange: m.withAttr("checked", this.setSymbols),
+                                    onclick: (e) => {
+                                        // disable redraw, otherwise check is cleared too fast
+                                        e.redraw = false;
+                                    },
+                                    title: "Include symbols in generated password",
+                                    value: 1,
+                                }),
+                                m("label", { for: "length" }, "Length"),
+                                m("input[type=number]", {
+                                    id: "length",
+                                    title: "Length of generated password",
+                                    value: passwordLength,
+                                    oninput: m.withAttr("value", this.setPasswordLength),
+                                }),
+                            ]),
                             m(
-                                "div.chars",
-                                loginObj.hasOwnProperty("fields")
-                                    ? helpers.highlight(loginObj.fields.secret)
-                                    : ""
-                            ),
-                            m("div.btn.generate", {
-                                title: "Generate password",
-                                onclick: () => {
-                                    loginObj.setPassword(
-                                        loginObj.generateSecret(passwordLength, symbols)
-                                    );
-                                },
-                            }),
-                        ]),
-                        m("div.options", [
-                            m("label", { for: "include_symbols" }, "Symbols"),
-                            m("input[type=checkbox]", {
-                                id: "include_symbols",
-                                checked: symbols,
-                                onchange: m.withAttr("checked", this.setSymbols),
-                                title: "Include symbols in generated password",
-                                value: 1,
-                            }),
-                            m("label", { for: "length" }, "Length"),
-                            m("input[type=number]", {
-                                id: "length",
-                                title: "Length of generated password",
-                                value: passwordLength,
-                                oninput: m.withAttr("value", this.setPasswordLength),
-                            }),
-                        ]),
-                        m(
-                            "div.details",
-                            m("textarea", {
-                                placeholder: `secret
+                                "div.details",
+                                m("textarea", {
+                                    placeholder: `secret
 
 user: johnsmith`,
-                                value: loginObj.raw,
-                                oninput: m.withAttr("value", this.setRawDetails),
-                            })
-                        ),
-                    ])
+                                    value: loginObj.raw,
+                                    oninput: m.withAttr("value", this.setRawDetails),
+                                })
+                            ),
+                        ]
+                    )
                 );
 
                 if (
@@ -264,75 +426,90 @@ user: johnsmith`,
                     Settings.prototype.canSave(settings)
                 ) {
                     nodes.push(
-                        m("div.actions", [
-                            Settings.prototype.canSave(settings)
-                                ? m(
-                                      "button.save",
-                                      {
-                                          title: "Save credentials",
-                                          onclick: async (e) => {
-                                              e.preventDefault();
+                        m(
+                            "div.actions",
+                            {
+                                oncreate: (vnode) => {
+                                    // create capturing events, not bubbling
+                                    document
+                                        .querySelector("div.actions")
+                                        .addEventListener(
+                                            "click",
+                                            clearStoreDirs.bind(vnode),
+                                            true
+                                        );
+                                },
+                            },
+                            [
+                                Settings.prototype.canSave(settings)
+                                    ? m(
+                                          "button.save",
+                                          {
+                                              title: "Save credentials",
+                                              onclick: async (e) => {
+                                                  e.preventDefault();
 
-                                              if (!Login.prototype.isValid(loginObj)) {
-                                                  notify.errorMsg(
-                                                      "Credentials are incomplete, please fix and try again."
-                                                  );
-                                                  return;
-                                              }
-                                              notify.infoMsg(
-                                                  m.trust(
-                                                      `Please wait, while we save: <strong>${loginObj.login}</strong>`
-                                                  )
-                                              );
-                                              await Login.prototype.save(loginObj);
-                                              notify.successMsg(
-                                                  m.trust(
-                                                      `Password entry, <strong>${loginObj.login}</strong>, has been saved to <strong>${loginObj.store.name}</strong>.`
-                                                  )
-                                              );
-                                              setTimeout(window.close, 3000);
-                                              m.route.set("/list");
-                                          },
-                                      },
-                                      "Save"
-                                  )
-                                : null,
-                            editing && Settings.prototype.canDelete(settings)
-                                ? m(
-                                      "button.delete",
-                                      {
-                                          title: "Delete credentials",
-                                          onclick: (e) => {
-                                              e.preventDefault();
-
-                                              dialog.open(
-                                                  `Are you sure you want to delete the file from <strong>${loginObj.store.name}</strong>? <strong>${loginObj.login}</strong>`,
-                                                  async (remove) => {
-                                                      if (!remove) {
-                                                          return;
-                                                      }
-
-                                                      notify.warningMsg(
-                                                          m.trust(
-                                                              `Please wait, while we delete: <strong>${loginObj.login}</strong>`
-                                                          )
+                                                  if (!Login.prototype.isValid(loginObj)) {
+                                                      notify.errorMsg(
+                                                          "Credentials are incomplete, please fix and try again."
                                                       );
-                                                      await Login.prototype.delete(loginObj);
-                                                      notify.successMsg(
-                                                          m.trust(
-                                                              `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
-                                                          )
-                                                      );
-                                                      setTimeout(window.close, 3000);
-                                                      m.route.set("/list");
+                                                      return;
                                                   }
-                                              );
+                                                  notify.infoMsg(
+                                                      m.trust(
+                                                          `Please wait, while we save: <strong>${loginObj.login}</strong>`
+                                                      )
+                                                  );
+                                                  await Login.prototype.save(loginObj);
+                                                  notify.successMsg(
+                                                      m.trust(
+                                                          `Password entry, <strong>${loginObj.login}</strong>, has been saved to <strong>${loginObj.store.name}</strong>.`
+                                                      )
+                                                  );
+                                                  setTimeout(window.close, 3000);
+                                                  m.route.set("/list");
+                                              },
                                           },
-                                      },
-                                      "Delete"
-                                  )
-                                : null,
-                        ])
+                                          "Save"
+                                      )
+                                    : null,
+                                editing && Settings.prototype.canDelete(settings)
+                                    ? m(
+                                          "button.delete",
+                                          {
+                                              title: "Delete credentials",
+                                              onclick: (e) => {
+                                                  e.preventDefault();
+
+                                                  dialog.open(
+                                                      `Are you sure you want to delete the file from <strong>${loginObj.store.name}</strong>? <strong>${loginObj.login}</strong>`,
+                                                      async (remove) => {
+                                                          if (!remove) {
+                                                              return;
+                                                          }
+
+                                                          notify.warningMsg(
+                                                              m.trust(
+                                                                  `Please wait, while we delete: <strong>${loginObj.login}</strong>`
+                                                              )
+                                                          );
+                                                          await Login.prototype.delete(loginObj);
+                                                          notify.successMsg(
+                                                              m.trust(
+                                                                  `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
+                                                              )
+                                                          );
+                                                          setTimeout(window.close, 3000);
+                                                          m.route.set("/list");
+                                                      }
+                                                  );
+                                              },
+                                          },
+                                          "Delete"
+                                      )
+                                    : null,
+                            ]
+                        )
                     );
                 }
 
