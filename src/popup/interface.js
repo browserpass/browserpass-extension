@@ -160,9 +160,6 @@ function renderMainView(ctl, params) {
                             oncreate: m.route.link,
                             onupdate: m.route.link,
                             href: `/details/${result.store.id}/${encodeURIComponent(result.login)}`,
-                            onclick: (e) => {
-                                e.preventDefault();
-                            },
                         }),
                     ]
                 );
@@ -263,7 +260,7 @@ function keyHandler(e) {
             break;
         case "KeyO":
             if (e.ctrlKey) {
-                this.doAction("getDetails");
+                e.target.querySelector("div.action.details").click();
             }
             break;
         case "Home": {
