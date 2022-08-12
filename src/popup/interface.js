@@ -5,6 +5,7 @@ const Moment = require("moment");
 const SearchInterface = require("./searchinterface");
 const layout = require("./layoutInterface");
 const helpers = require("../helpers");
+const Settings = require("./models/Settings");
 
 const LATEST_NATIVE_APP_VERSION = 3000003;
 
@@ -165,15 +166,17 @@ function renderMainView(ctl, params) {
                 );
             })
         ),
-        m(
-            "div.part.add",
-            {
-                onclick: (e) => {
-                    m.route.set("/add");
-                },
-            },
-            "Add credentials"
-        )
+        Settings.prototype.canSave(this.settings)
+            ? m(
+                  "div.part.add",
+                  {
+                      onclick: (e) => {
+                          m.route.set("/add");
+                      },
+                  },
+                  "Add credentials"
+              )
+            : null
     );
 
     return nodes;
