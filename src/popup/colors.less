@@ -18,6 +18,8 @@
     @snack-label-color,
     @progress-color,
     @edit-bg-color,
+    // tree browser colors
+    @treeopt-bg-color,
     // notification colors
     @ntfy-hover-shadow,
     @ntfy-info-color,
@@ -223,6 +225,15 @@
                 color: @ntfy-success-color;
                 background-color: @ntfy-success-bgcolor;
                 border: 1px solid @ntfy-success-border;
+            }
+        }
+    }
+
+    div#tree-dirs {
+        div.dropdown {
+            a {
+                background-color: @treeopt-bg-color;
+                color: #fff;
             }
         }
     }
