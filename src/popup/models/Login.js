@@ -140,7 +140,7 @@ Login.prototype.getAll = async function(settings) {
         logins.push(new Login(settings, obj));
     });
 
-    return logins;
+    return { raw: response.files, processed: logins };
 }
 
 /**

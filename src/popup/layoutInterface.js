@@ -18,6 +18,8 @@ const Tree = require("./models/Tree");
 let session = {
     // current decrypted login object
     current: null,
+    // login file list
+    logins: [],
     // settings
     settings: null,
     // Tree instances with storeId as key
@@ -66,6 +68,43 @@ function getCurrentLogin() {
 }
 
 /**
+ * Respond with boolean if combination of store id and login currently exist.
+ *
+ * @since 3.8.0
+ *
+ * @param {string} storeId unique store id
+ * @param {string} login relative file path without file extension
+ * @returns {boolean}
+ */
+function storeIncludesLogin(storeId, login) {
+    if (!session.logins[storeId]) {
+        return false;
+    }
+
+    if (!session.logins[storeId].length) {
+        return false;
+    }
+
+    search = `${login.trim().trimLeft("/")}.gpg`;
+    return session.logins[storeId].includes(search);
+}
+
+/**
+ * Set session object containing list of password files.
+ *
+ * @since 3.8.0
+ *
+ * @param {object} logins raw untouched object with store id
+ * as keys each an array containing list of files for respective
+ * password store.
+ */
+function setStoreLogins(logins = {}) {
+    if (Object.prototype.isPrototypeOf(logins)) {
+        session.logins = logins;
+    }
+}
+
+/**
  * Store a single settings object for the current session
  * @since 3.8.0
  *
@@ -93,9 +132,11 @@ function getStoreTree(storeId) {
 
 module.exports = {
     LayoutInterface,
-    setCurrentLogin,
     getCurrentLogin,
-    setSessionSettings,
     getSessionSettings,
     getStoreTree,
+    setCurrentLogin,
+    setStoreLogins,
+    setSessionSettings,
+    storeIncludesLogin,
 };

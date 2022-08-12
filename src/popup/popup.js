@@ -46,10 +46,13 @@ async function run() {
         // get list of logins
         logins = await Login.prototype.getAll(settings);
         layout.setSessionSettings(settings);
+        // save list of logins to validate when adding
+        // a new one will not overwrite any existing ones
+        layout.setStoreLogins(logins.raw);
 
         const LoginView = new AddEditInterface(settingsModel);
         m.route(document.body, "/list", {
-            "/list": page(new Interface(settings, logins)),
+            "/list": page(new Interface(settings, logins.processed)),
             "/details/:storeid/:login": page(new DetailsInterface(settingsModel)),
             "/edit/:storeid/:login": page(LoginView),
             "/add": page(LoginView),

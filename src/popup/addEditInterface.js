@@ -455,6 +455,23 @@ user: johnsmith`,
                                                       );
                                                       return;
                                                   }
+
+                                                  //  when adding, make sure file doesn't already exist
+                                                  if (
+                                                      !editing &&
+                                                      layout.storeIncludesLogin(
+                                                          loginObj.store.id,
+                                                          loginObj.login
+                                                      )
+                                                  ) {
+                                                      notify.errorMsg(
+                                                          m.trust(
+                                                              `Cannot add login, same filename already exists in <strong>${loginObj.store.name}</strong>. Please use edit instead.`
+                                                          )
+                                                      );
+                                                      return;
+                                                  }
+
                                                   notify.infoMsg(
                                                       m.trust(
                                                           `Please wait, while we save: <strong>${loginObj.login}</strong>`
