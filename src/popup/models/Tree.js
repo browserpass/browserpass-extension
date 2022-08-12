@@ -102,19 +102,20 @@ function searchTree(parentNode, paths) {
     // found exact directory match
     let results = []
     if (node != undefined) {
-        // TODO: only include / search
-        // 1. non-regex chars
-        // 2. valid directory chars
-        // results.push(searchTerm);
-        // results.push(...searchTree(node, paths));
-        // console.log(`searchTree(${searchTerm}), results:`, results)
-        // return results;
         return searchTree(node, paths);
     }
 
+    try {
+        "".search(searchTerm)
+    } catch (error) {
+        // regex characters like [] or () and such
+        // break "".search(); catch, log, and stop
+        console.log(error);
+        return results;
+    }
+
     // no exact match, do fuzzy search
-    parentNode.forEach((node, dir) => {
-        // TODO: fix only allow [alphanum]
+    parentNode.forEach((_, dir) => {
         if (dir.search(searchTerm) > -1) {
             results.push(dir);
         }
