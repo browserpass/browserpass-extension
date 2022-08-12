@@ -2,14 +2,18 @@
 "use strict";
 
 require("chrome-extension-async");
+
+// models
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
-const layout = require("./layoutInterface");
-const Interface = require("./interface");
-const DetailsInterface = require("./detailsInterface");
+// utils, libs
 const helpers = require("../helpers");
 const m = require("mithril");
+// components
 const AddEditInterface = require("./addEditInterface");
+const DetailsInterface = require("./detailsInterface");
+const Interface = require("./interface");
+const layout = require("./layoutInterface");
 
 run();
 
@@ -41,6 +45,7 @@ async function run() {
 
         // get list of logins
         logins = await Login.prototype.getAll(settings);
+        layout.setSessionSettings(settings);
 
         const LoginView = new AddEditInterface(settingsModel);
         m.route(document.body, "/list", {
