@@ -18,8 +18,8 @@ const Tree = require("./models/Tree");
 let session = {
     // current decrypted login object
     current: null,
-    // login file list
-    logins: [],
+    // map of store key to array of login files
+    logins: {},
     // settings
     settings: null,
     // Tree instances with storeId as key
