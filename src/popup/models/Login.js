@@ -224,7 +224,7 @@ function getSecretDetails(text = "") {
             results.password = text.split(/[\n\r]+/, 1)[0].trim();
         } else {
             const secret = text.substring(index).split(/[\n\r]+/, 1)[0].trim();
-            const parts = secret.split(':');
+            const parts = secret.split(': ');
             results.prefix = parts[0];
             results.password = parts[1].trim();
         }
