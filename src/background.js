@@ -753,7 +753,7 @@ async function handleMessage(settings, message, sendResponse) {
                     file: `${message.login.login}.gpg`,
                     contents: message.params.rawContents,
                 });
-                console.log(response);
+
                 if (response.status != "ok") {
                     alert(`Save failed: ${response.params.message}`);
                     throw new Error(JSON.stringify(response)); // TODO handle host error
@@ -772,7 +772,7 @@ async function handleMessage(settings, message, sendResponse) {
                     storeId: message.login.store.id,
                     file: `${message.login.login}.gpg`,
                 });
-                console.log(response);
+
                 if (response.status != "ok") {
                     alert(`Delete failed: ${response.params.message}`);
                     throw new Error(JSON.stringify(response));
