@@ -59,6 +59,18 @@ function Login(settings, login = {}) {
     });
 }
 
+
+/**
+ * Determines if the login object is new or not
+ *
+ * @since 3.8.0
+ *
+ * @returns {boolean}
+ */
+Login.prototype.isNew = function (login) {
+    return login.hasOwnProperty("contentSha") && login.contentSha === null;
+}
+
 /**
  * Remove login entry
  *
@@ -340,7 +352,7 @@ Login.prototype.save = async function(login) {
         // Firefox requires data to be serializable,
         // this removes everything offending such as functions
         const request = JSON.parse(JSON.stringify(login));
-        const action = (this.contentSha == null) ? "add" : "save";
+        const action = (this.isNew(login)) ? "add" : "save";
 
         let response = await chrome.runtime.sendMessage({
             action: action, login: request, params: { rawContents: request.raw }
