@@ -85,7 +85,7 @@ function storeIncludesLogin(storeId, login) {
         return false;
     }
 
-    search = `${login.trim().trimLeft("/")}.gpg`;
+    search = `${login.trim().trimStart("/")}.gpg`;
     return session.logins[storeId].includes(search);
 }
 
