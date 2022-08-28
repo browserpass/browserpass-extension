@@ -85,6 +85,33 @@ function AddEditInterface(settingsModel) {
                         inputEl.focus();
                     }
                     break;
+                case "Home":
+                case "End":
+                    // only handle when list has focus
+                    if (e.target.classList.contains("directory")) {
+                        e.preventDefault();
+                        const dirs = e.target.parentElement.children;
+                        dirs.item(e.code == "End" ? dirs.length - 1 : 0).focus();
+                    }
+                    break;
+                case "PageUp":
+                case "PageDown":
+                    // only handle when list has focus
+                    if (e.target.classList.contains("directory")) {
+                        e.preventDefault();
+                        const dirs = Array.from(e.target.parentElement.children);
+                        const current = dirs.findIndex(
+                            (element) => element.innerText == e.target.innerText
+                        );
+                        let next = 0;
+                        if (e.code == "PageUp") {
+                            next = Math.max(0, current - 10);
+                        } else {
+                            next = Math.min(dirs.length - 1, current + 10);
+                        }
+                        dirs[next].focus();
+                    }
+                    break;
                 default:
                     break;
             }
