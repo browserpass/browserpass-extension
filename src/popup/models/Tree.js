@@ -105,18 +105,29 @@ function searchTree(parentNode, paths) {
         return searchTree(node, paths);
     }
 
+    // handle regex symbols
+    let escapedSearch = ""
+    const symbols = "!$()*+,-./:?[]^{|}.\\";
+    for (let index in searchTerm) {
+        if (symbols.includes(searchTerm[index])) {
+            escapedSearch = `${escapedSearch}\\${searchTerm[index]}`;
+        } else {
+            escapedSearch = `${escapedSearch}${searchTerm[index]}`;
+        }
+    }
+
     try {
-        "".search(searchTerm)
+        "".search(escapedSearch)
     } catch (error) {
-        // regex characters like [] or () and such
-        // break "".search(); catch, log, and stop
+        // still need to handle any errors we
+        // might've missed; catch, log, and stop
         console.log(error);
         return results;
     }
 
     // no exact match, do fuzzy search
     parentNode.forEach((_, dir) => {
-        if (dir.search(searchTerm) > -1) {
+        if (dir.search(escapedSearch) > -1) {
             results.push(dir);
         }
     });
