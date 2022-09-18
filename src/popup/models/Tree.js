@@ -106,15 +106,8 @@ function searchTree(parentNode, paths) {
     }
 
     // handle regex symbols
-    let escapedSearch = ""
-    const symbols = "!$()*+,-./:?[]^{|}.\\";
-    for (let index in searchTerm) {
-        if (symbols.includes(searchTerm[index])) {
-            escapedSearch = `${escapedSearch}\\${searchTerm[index]}`;
-        } else {
-            escapedSearch = `${escapedSearch}${searchTerm[index]}`;
-        }
-    }
+    let escapedSearch = searchTerm.
+        replaceAll(/[!$()*+,-./:?\[\]^{|}.\\]/gu, c => `\\${c}`);
 
     try {
         "".search(escapedSearch)
