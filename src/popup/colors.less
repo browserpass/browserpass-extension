@@ -25,9 +25,9 @@
     @ntfy-info-color,
     @ntfy-info-bgcolor,
     @ntfy-info-border,
-    @ntfy-warn-color,
-    @ntfy-warn-bgcolor,
-    @ntfy-warn-border,
+    @ntfy-warning-color,
+    @ntfy-warning-bgcolor,
+    @ntfy-warning-border,
     @ntfy-error-color,
     @ntfy-error-bgcolor,
     @ntfy-error-border,
@@ -210,12 +210,12 @@
             }
 
             &.warning {
-                color: @ntfy-warn-color;
-                background-color: @ntfy-warn-bgcolor;
-                border: 1px solid @ntfy-warn-border;
+                color: @ntfy-warning-color;
+                background-color: @ntfy-warning-bgcolor;
+                border: 1px solid @ntfy-warning-border;
             }
 
-            &.danger {
+            &.error {
                 color: @ntfy-error-color;
                 background-color: @ntfy-error-bgcolor;
                 border: 1px solid @ntfy-error-border;
@@ -248,9 +248,9 @@
                 box-shadow: 1px 1px 2px @ntfy-hover-shadow;
             }
 
-            color: @ntfy-warn-color;
-            background-color: @ntfy-warn-bgcolor;
-            border: 1px solid @ntfy-warn-border;
+            color: @ntfy-warning-color;
+            background-color: @ntfy-warning-bgcolor;
+            border: 1px solid @ntfy-warning-border;
         }
     }
 }

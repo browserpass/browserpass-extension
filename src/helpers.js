@@ -56,7 +56,7 @@ function handleError(error, type = "error") {
             notify.successMsg(error.toString());
             break;
 
-        case "notice":
+        case "info":
         default:
             notify.infoMsg(error.toString());
             break;
@@ -76,25 +76,25 @@ async function withLogin(action, params = {}) {
     try {
         switch (action) {
             case "fill":
-                handleError("Filling login details...", "notice");
+                handleError("Filling login details...", "info");
                 break;
             case "launch":
-                handleError("Launching URL...", "notice");
+                handleError("Launching URL...", "info");
                 break;
             case "launchInNewTab":
-                handleError("Launching URL in a new tab...", "notice");
+                handleError("Launching URL in a new tab...", "info");
                 break;
             case "copyPassword":
-                handleError("Copying password to clipboard...", "notice");
+                handleError("Copying password to clipboard...", "info");
                 break;
             case "copyUsername":
-                handleError("Copying username to clipboard...", "notice");
+                handleError("Copying username to clipboard...", "info");
                 break;
             case "copyOTP":
-                handleError("Copying OTP token to clipboard...", "notice");
+                handleError("Copying OTP token to clipboard...", "info");
                 break;
             default:
-                handleError("Please wait...", "notice");
+                handleError("Please wait...", "info");
                 break;
         }
 

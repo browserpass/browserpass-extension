@@ -41,8 +41,8 @@ function addWarning(text, timeout = 4000) {
     state.list.push({ id: guid(), type: "warning", text, timeout });
 }
 
-function addDanger(text, timeout = 5000) {
-    state.list.push({ id: guid(), type: "danger", text, timeout });
+function addError(text, timeout = 5000) {
+    state.list.push({ id: guid(), type: "error", text, timeout });
 }
 
 let Notifications = {
@@ -57,7 +57,7 @@ let Notifications = {
               )
             : null;
     },
-    errorMsg: addDanger,
+    errorMsg: addError,
     infoMsg: addInfo,
     successMsg: addSuccess,
     warningMsg: addWarning,
@@ -72,7 +72,7 @@ let Notification = {
         }
     },
     notificationClass(type) {
-        const types = ["info", "warning", "success", "danger"];
+        const types = ["info", "warning", "success", "error"];
         if (types.indexOf(type) > -1) return type;
         return "info";
     },
