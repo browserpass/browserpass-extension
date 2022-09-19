@@ -11,8 +11,6 @@ const m = require("mithril");
  *
  * @since 3.8.0
  *
- * Original source credit goes to github.com/tabula-rasa
- * https://gist.github.com/tabula-rasa/61d2ab25aac779fdf9899f4e87ab8306
  * @returns {string}
  */
 function guid() {
