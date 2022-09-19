@@ -100,7 +100,7 @@ Login.prototype.delete = async function (login) {
 /**
  * Generate a new password
  *
- * @since 3.7.0
+ * @since 3.8.0
  *
  * @param {int}     length  New secret length
  * @param {boolean} symbols Use symbols or not, default: false
