@@ -30,7 +30,7 @@ function AddEditInterface(settingsModel) {
             settings = {},
             storePath = "",
             stores = [],
-            symbols = false,
+            symbols = true,
             canTree = false,
             storeTree = new Tree(),
             storeDirs = [],
@@ -221,10 +221,11 @@ function AddEditInterface(settingsModel) {
                     // use current password length for default length
                     if (password.length > 0) {
                         this.setPasswordLength(password.length);
-                    }
-                    // if has symbols, include them in options
-                    if (password.search(symbolsRegEx) > -1) {
-                        this.setSymbols(true);
+
+                        // if not blank and not using symbols, disable them for initial options
+                        if (password.search(symbolsRegEx) == -1) {
+                            this.setSymbols(false);
+                        }
                     }
                     m.redraw();
                 }
