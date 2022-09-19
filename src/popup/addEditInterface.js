@@ -10,7 +10,7 @@ const dialog = require("./modalDialog");
 module.exports = AddEditInterface;
 
 var persistSettingsModel = {};
-const symbolsRegEx = RegExp(/[^a-z0-9]+/, "i");
+const containsSymbolsRegEx = RegExp(/[#$%&'()*+,./:;<=>?@^_`{|}~."\[\]\\-]/, "gi");
 
 function AddEditInterface(settingsModel) {
     persistSettingsModel = settingsModel;
@@ -223,7 +223,7 @@ function AddEditInterface(settingsModel) {
                         this.setPasswordLength(password.length);
 
                         // if not blank and not using symbols, disable them for initial options
-                        if (password.search(symbolsRegEx) == -1) {
+                        if (password.search(containsSymbolsRegEx) == -1) {
                             this.setSymbols(false);
                         }
                     }
