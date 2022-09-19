@@ -48,7 +48,6 @@ function handleError(error, type = "error") {
             notify.errorMsg(error.toString(), 0);
             break;
 
-        case "warn":
         case "warning":
             notify.warningMsg(error.toString());
             break;
