@@ -438,7 +438,7 @@ function AddEditInterface(settingsModel) {
                             m(
                                 "div.details",
                                 m("textarea", {
-                                    placeholder: `secret
+                                    placeholder: `yourSecretPassword
 
 user: johnsmith`,
                                     value: loginObj.raw,
