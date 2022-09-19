@@ -499,12 +499,13 @@ user: johnsmith`,
                                                       return;
                                                   }
 
-                                                  notify.infoMsg(
+                                                  const uuid = notify.infoMsg(
                                                       m.trust(
                                                           `Please wait, while we save: <strong>${loginObj.login}</strong>`
                                                       )
                                                   );
                                                   await Login.prototype.save(loginObj);
+                                                  notify.removeMsg(uuid);
                                                   notify.successMsg(
                                                       m.trust(
                                                           `Password entry, <strong>${loginObj.login}</strong>, has been saved to <strong>${loginObj.store.name}</strong>.`
@@ -532,12 +533,13 @@ user: johnsmith`,
                                                               return;
                                                           }
 
-                                                          notify.warningMsg(
+                                                          const uuid = notify.warningMsg(
                                                               m.trust(
                                                                   `Please wait, while we delete: <strong>${loginObj.login}</strong>`
                                                               )
                                                           );
                                                           await Login.prototype.delete(loginObj);
+                                                          notify.removeMsg(uuid);
                                                           notify.successMsg(
                                                               m.trust(
                                                                   `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
