@@ -486,7 +486,7 @@ body {
             cursor: pointer;
             font-weight: bolder;
             font-size: medium;
-            padding: 0.5rem 1rem;
+            padding: 0.25rem 0.75rem;
             border-radius: 0.25rem;
         }
 
@@ -570,7 +570,8 @@ body {
 
 div#tree-dirs {
     position: absolute;
-    overflow: hidden;
+    overflow-y: scroll;
+    max-height: 265px;
     margin-top: -13px;
 
     div.dropdown {
