@@ -71,9 +71,11 @@ function addMessage(text, timeout, type = "info") {
 function addSuccess(text, timeout = 3500) {
     return addMessage(text, timeout, "success");
 }
+
 function addInfo(text, timeout = 3500) {
     return addMessage(text, timeout, "info");
 }
+
 function addWarning(text, timeout = 4000) {
     return addMessage(text, timeout, "warning");
 }
