@@ -118,8 +118,6 @@ async function withLogin(action, params = {}) {
                 break;
         }
 
-        // Firefox requires data to be serializable,
-        // this removes everything offending such as functions
         const login = deepCopy(this.login);
 
         // hand off action to background script
