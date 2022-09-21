@@ -18,7 +18,11 @@ const fieldsPrefix = {
     url: ["url", "uri", "website", "site", "link", "launch"],
 };
 
+const containsNumbersRegEx = RegExp(/[0-9]/);
+const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
+
 module.exports = {
+    containsSymbolsRegEx,
     fieldsPrefix,
     filterSortLogins,
     handleError,
@@ -252,9 +256,9 @@ function prepareLogin(settings, storeId, file, index = 0, origin = undefined) {
  */
 function highlight(secret = "") {
     return secret.split("").map((c) => {
-        if (c.match(/[0-9]/)) {
+        if (c.match(containsNumbersRegEx)) {
             return m("span.char.num", c);
-        } else if (c.match(/[^\w\s]/)) {
+        } else if (c.match(containsSymbolsRegEx)) {
             return m("span.char.punct", c);
         }
         return m("span.char", c);
