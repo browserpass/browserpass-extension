@@ -264,7 +264,7 @@ async function saveRecent(settings, login, remove = false) {
  * @return array list of filled fields
  */
 async function dispatchFill(settings, request, allFrames, allowForeign, allowNoSecret) {
-    request = Object.assign(deepCopy(request), {
+    request = Object.assign(helpers.deepCopy(request), {
         allowForeign: allowForeign,
         allowNoSecret: allowNoSecret,
         foreignFills: settings.foreignFills[settings.origin] || {},
@@ -309,7 +309,7 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
  * @return void
  */
 async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign) {
-    request = Object.assign(deepCopy(request), {
+    request = Object.assign(helpers.deepCopy(request), {
         allowForeign: allowForeign,
         foreignFills: settings.foreignFills[settings.origin] || {},
     });
@@ -473,7 +473,7 @@ async function fillFields(settings, login, fields) {
  * @return object Local settings from the extension
  */
 function getLocalSettings() {
-    var settings = deepCopy(defaultSettings);
+    var settings = helpers.deepCopy(defaultSettings);
     for (var key in settings) {
         var value = localStorage.getItem(key);
         if (value !== null) {
@@ -493,7 +493,7 @@ function getLocalSettings() {
  */
 async function getFullSettings() {
     var settings = getLocalSettings();
-    var configureSettings = Object.assign(deepCopy(settings), {
+    var configureSettings = Object.assign(helpers.deepCopy(settings), {
         defaultStore: {},
     });
     var response = await hostAction(configureSettings, "configure");
@@ -589,18 +589,6 @@ function getSetting(key, login, settings) {
     }
 
     return settings[key];
-}
-
-/**
- * Deep copy an object
- *
- * @since 3.0.0
- *
- * @param object obj an object to copy
- * @return object a new deep copy
- */
-function deepCopy(obj) {
-    return JSON.parse(JSON.stringify(obj));
 }
 
 /**
@@ -968,7 +956,7 @@ async function parseFields(settings, login) {
     login.raw = response.data.contents;
 
     // parse lines
-    login.fields = deepCopy(helpers.fieldsPrefix);
+    login.fields = helpers.deepCopy(helpers.fieldsPrefix);
     login.settings = {
         autoSubmit: { name: "autosubmit", type: "bool" },
     };
@@ -1135,7 +1123,7 @@ async function clearUsageData() {
  * @return void
  */
 async function saveSettings(settings) {
-    let settingsToSave = deepCopy(settings);
+    let settingsToSave = helpers.deepCopy(settings);
 
     // 'default' is our reserved name for the default store
     delete settingsToSave.stores.default;

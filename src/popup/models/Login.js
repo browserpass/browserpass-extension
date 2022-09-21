@@ -81,9 +81,7 @@ Login.prototype.isNew = function (login) {
  */
 Login.prototype.delete = async function (login) {
     if (Login.prototype.isValid(login)) {
-        // Firefox requires data to be serializable,
-        // this removes everything offending such as functions
-        const request = JSON.parse(JSON.stringify(login));
+        const request = helpers.deepCopy(login);
 
         let response = await chrome.runtime.sendMessage({
             action: "delete", login: request
@@ -350,9 +348,7 @@ Login.prototype.isValid = function(login) {
  */
 Login.prototype.save = async function(login) {
     if (Login.prototype.isValid(login)) {
-        // Firefox requires data to be serializable,
-        // this removes everything offending such as functions
-        const request = JSON.parse(JSON.stringify(login));
+        const request = helpers.deepCopy(login);
         const action = (this.isNew(login)) ? "add" : "save";
 
         let response = await chrome.runtime.sendMessage({

@@ -24,6 +24,7 @@ const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
 module.exports = {
     containsSymbolsRegEx,
     fieldsPrefix,
+    deepCopy,
     filterSortLogins,
     handleError,
     highlight,
@@ -35,6 +36,21 @@ module.exports = {
 };
 
 //----------------------------------- Function definitions ----------------------------------//
+
+/**
+ * Deep copy an object
+ *
+ * Firefox requires data to be serializable,
+ * this removes everything offending such as functions
+ *
+ * @since 3.0.0 moved to helpers.js 3.8.0
+ *
+ * @param object obj an object to copy
+ * @return object a new deep copy
+ */
+function deepCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
 
 /**
  * Handle an error
@@ -104,7 +120,7 @@ async function withLogin(action, params = {}) {
 
         // Firefox requires data to be serializable,
         // this removes everything offending such as functions
-        const login = JSON.parse(JSON.stringify(this.login));
+        const login = deepCopy(this.login);
 
         // hand off action to background script
         var response = await chrome.runtime.sendMessage({ action, login, params });
