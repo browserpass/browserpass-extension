@@ -229,16 +229,17 @@ function getSecretDetails(text = "") {
     }
 
     if (typeof text == 'string' && text.length > 0) {
-        const index = text.search(multiLineSecretRegEx);
+        let index = text.search(multiLineSecretRegEx);
 
         // assume first line
         if (index == -1) {
             results.password = text.split(/[\n\r]+/, 1)[0].trim();
         } else {
             const secret = text.substring(index).split(/[\n\r]+/, 1)[0].trim();
-            const parts = secret.split(': ');
-            results.prefix = parts[0];
-            results.password = parts[1].trim();
+            // only take first instance of "prefix: "
+            index = secret.search(": ");
+            results.prefix = secret.substring(0, index);
+            results.password = secret.substring(index+2);
         }
     }
 
