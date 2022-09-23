@@ -233,7 +233,13 @@
         div.dropdown {
             a {
                 background-color: @treeopt-bg-color;
+
                 color: #fff;
+                &:hover,
+                &:focus-visible {
+                    filter: invert(15%);
+                    outline: none;
+                }
             }
         }
     }
