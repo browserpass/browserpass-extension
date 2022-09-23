@@ -389,10 +389,6 @@ function AddEditInterface(settingsModel) {
                     ]),
                     m(
                         "div.contents",
-                        {
-                            // onclick: clearStoreDirsV2,
-                            // onfocus: clearStoreDirsV2,
-                        },
                         [
                             m("div.password", [
                                 m("label", { for: "secret" }, "Secret"),
