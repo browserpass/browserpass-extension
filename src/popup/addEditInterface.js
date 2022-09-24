@@ -288,6 +288,7 @@ function AddEditInterface(settingsModel) {
                 if (editing) {
                     storePath = loginObj.store.path;
                     storeTree = canTree ? layout.getStoreTree(loginObj.store.id) : null;
+                    stores = new Array(loginObj.store);
                 } else if (Settings.prototype.isSettings(settings)) {
                     if (typeof storeId == "string") {
                         loginObj.store = settings.stores[storeId];
