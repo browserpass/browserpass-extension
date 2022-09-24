@@ -322,9 +322,17 @@ function AddEditInterface(settingsModel) {
                 nodes.push(
                     m("div.title", [
                         m("div.btn.back", {
-                            title: "Back to list",
+                            title: editing ? "Back to details" : "Back to list",
                             onclick: () => {
-                                m.route.set("/list");
+                                if (editing) {
+                                    m.route.set(
+                                        `/details/${loginObj.store.id}/${encodeURIComponent(
+                                            loginObj.login
+                                        )}`
+                                    );
+                                } else {
+                                    m.route.set("/list");
+                                }
                             },
                         }),
                         m("span", editing ? "Edit credentials" : "Add credentials"),
@@ -387,59 +395,56 @@ function AddEditInterface(settingsModel) {
                               )
                             : null,
                     ]),
-                    m(
-                        "div.contents",
-                        [
-                            m("div.password", [
-                                m("label", { for: "secret" }, "Secret"),
-                                m(
-                                    "div.chars",
-                                    loginObj.hasOwnProperty("fields")
-                                        ? helpers.highlight(loginObj.fields.secret)
-                                        : ""
-                                ),
-                                m("div.btn.generate", {
-                                    title: "Generate password",
-                                    onclick: () => {
-                                        loginObj.setPassword(
-                                            loginObj.generateSecret(passwordLength, symbols)
-                                        );
-                                    },
-                                }),
-                            ]),
-                            m("div.options", [
-                                m("label", { for: "include_symbols" }, "Symbols"),
-                                m("input[type=checkbox]", {
-                                    id: "include_symbols",
-                                    checked: symbols,
-                                    onchange: m.withAttr("checked", this.setSymbols),
-                                    onclick: (e) => {
-                                        // disable redraw, otherwise check is cleared too fast
-                                        e.redraw = false;
-                                    },
-                                    title: "Include symbols in generated password",
-                                    value: 1,
-                                }),
-                                m("label", { for: "length" }, "Length"),
-                                m("input[type=number]", {
-                                    id: "length",
-                                    title: "Length of generated password",
-                                    value: passwordLength,
-                                    oninput: m.withAttr("value", this.setPasswordLength),
-                                }),
-                            ]),
+                    m("div.contents", [
+                        m("div.password", [
+                            m("label", { for: "secret" }, "Secret"),
                             m(
-                                "div.details",
-                                m("textarea", {
-                                    placeholder: `yourSecretPassword
+                                "div.chars",
+                                loginObj.hasOwnProperty("fields")
+                                    ? helpers.highlight(loginObj.fields.secret)
+                                    : ""
+                            ),
+                            m("div.btn.generate", {
+                                title: "Generate password",
+                                onclick: () => {
+                                    loginObj.setPassword(
+                                        loginObj.generateSecret(passwordLength, symbols)
+                                    );
+                                },
+                            }),
+                        ]),
+                        m("div.options", [
+                            m("label", { for: "include_symbols" }, "Symbols"),
+                            m("input[type=checkbox]", {
+                                id: "include_symbols",
+                                checked: symbols,
+                                onchange: m.withAttr("checked", this.setSymbols),
+                                onclick: (e) => {
+                                    // disable redraw, otherwise check is cleared too fast
+                                    e.redraw = false;
+                                },
+                                title: "Include symbols in generated password",
+                                value: 1,
+                            }),
+                            m("label", { for: "length" }, "Length"),
+                            m("input[type=number]", {
+                                id: "length",
+                                title: "Length of generated password",
+                                value: passwordLength,
+                                oninput: m.withAttr("value", this.setPasswordLength),
+                            }),
+                        ]),
+                        m(
+                            "div.details",
+                            m("textarea", {
+                                placeholder: `yourSecretPassword
 
 user: johnsmith`,
-                                    value: loginObj.raw,
-                                    oninput: m.withAttr("value", this.setRawDetails),
-                                })
-                            ),
-                        ]
-                    )
+                                value: loginObj.raw,
+                                oninput: m.withAttr("value", this.setRawDetails),
+                            })
+                        ),
+                    ])
                 );
 
                 if (

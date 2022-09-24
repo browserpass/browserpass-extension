@@ -51,13 +51,23 @@ function DetailsInterface(settingsModel) {
              */
             oninit: async function (vnode) {
                 settings = await viewSettingsModel.get();
-
                 try {
-                    loginObj = await Login.prototype.get(
-                        settings,
-                        vnode.attrs.context.storeid,
-                        vnode.attrs.context.login
-                    );
+                    let tmpLogin = layout.getCurrentLogin();
+                    if (
+                        tmpLogin != null &&
+                        Login.prototype.isLogin(tmpLogin) &&
+                        tmpLogin.store.id == vnode.attrs.context.storeid &&
+                        tmpLogin.login == vnode.attrs.context.login
+                    ) {
+                        // when returning from edit page
+                        loginObj = tmpLogin;
+                    } else {
+                        loginObj = await Login.prototype.get(
+                            settings,
+                            vnode.attrs.context.storeid,
+                            vnode.attrs.context.login
+                        );
+                    }
                 } catch (error) {
                     console.log(error);
                     notify.errorMsg(error.toString(), 0);
