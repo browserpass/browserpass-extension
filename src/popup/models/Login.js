@@ -52,7 +52,7 @@ function Login(settings, login = {}) {
     }
 
     this.settings = settings;
-    // ensure doAction works in detailInterface,
+    // This ensures doAction works in detailInterface,
     // and any other view in which it is necessary.
     this.doAction = helpers.withLogin.bind({
         settings: settings, login: login
