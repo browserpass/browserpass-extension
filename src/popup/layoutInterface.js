@@ -10,7 +10,7 @@ const Tree = require("./models/Tree");
 /**
  * Page / layout wrapper component. Used to share global
  * message and ui component functionality with any child
- * compoenents.
+ * components.
  *
  * Also maintain a pseudo session state.
  */
