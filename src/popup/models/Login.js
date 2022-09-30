@@ -275,6 +275,25 @@ Login.prototype.getStore = function(login, property = "") {
 }
 
 /**
+ * Build style string for a login's store colors with which
+ * to apply to an html element
+ *
+ * @since 3.8.0
+ *
+ * @param {object} login to pull store color settings from
+ * @returns {string}
+ */
+Login.prototype.getStoreStyle = function (login) {
+    if (!Login.prototype.isLogin(login)) {
+        return "";
+    }
+    const color = Login.prototype.getStore(login, "color");
+    const bgColor = Login.prototype.getStore(login, "bgColor");
+
+    return `color: ${color}; background-color: ${bgColor};`
+}
+
+/**
  * Determine if secretPrefix property has been set for
  * the current Login object: "this"
  *

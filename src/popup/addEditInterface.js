@@ -168,6 +168,28 @@ function AddEditInterface(settingsModel) {
             }
         }
 
+        /**
+         * Build css style using store color settings
+         *
+         * @since 3.8.0
+         *
+         * @param {object} store to retrieve color settings from
+         * @returns {string}
+         */
+        function getStoreStyle(store = {}) {
+            let style = ``;
+
+            if (store.hasOwnProperty("color")) {
+                style = `color: ${store.color};`;
+            }
+
+            if (store.hasOwnProperty("bgColor")) {
+                style = `${style} background-color: ${store.bgColor};`;
+            }
+
+            return style;
+        }
+
         return {
             oncreate: function (vnode) {
                 let elems = ["div.title", "div.location div.store", "div.contents"];
@@ -349,6 +371,7 @@ function AddEditInterface(settingsModel) {
                                     title: "Select which password-store to save credentials in.",
                                     onchange: m.withAttr("value", this.setStorePath),
                                     onfocus: clearStoreDirs,
+                                    style: Login.prototype.getStoreStyle(loginObj),
                                 },
                                 stores.map(function (store) {
                                     return m(
@@ -356,6 +379,7 @@ function AddEditInterface(settingsModel) {
                                         {
                                             value: store.id,
                                             selected: store.id == vnode.attrs.storeid,
+                                            style: getStoreStyle(store),
                                         },
                                         store.name
                                     );
