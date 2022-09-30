@@ -30,7 +30,8 @@ function Interface(settings, logins) {
     this.logins = logins;
 
     this.results = [];
-    this.currentDomainOnly = !settings.tab.url.match(/^(chrome|about):/);
+    // check for chromium based browsers setting tab
+    this.currentDomainOnly = !settings.tab.url.match(/^(chrome|brave|edge|opera|vivaldi|about):/);
     this.searchPart = new SearchInterface(this);
 
     // initialise with empty search
