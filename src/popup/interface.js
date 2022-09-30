@@ -7,7 +7,7 @@ const layout = require("./layoutInterface");
 const helpers = require("../helpers");
 const Settings = require("./models/Settings");
 
-const LATEST_NATIVE_APP_VERSION = 3000003;
+const LATEST_NATIVE_APP_VERSION = 3001000;
 
 /**
  * Popup main interface
