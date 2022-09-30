@@ -207,7 +207,7 @@ function DetailsInterface(settingsModel) {
                             m(
                                 "textarea",
                                 {
-                                    disabled: true, // disable edit here
+                                    disabled: true,
                                 },
                                 (login.raw || "").trim()
                             )
