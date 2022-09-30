@@ -22,7 +22,7 @@ const
  */
 function Login(settings, login = {}) {
     if (Login.prototype.isLogin(login)) {
-        // content sha used to determine if login has changes
+        // content sha used to determine if login has changes, see Login.prototype.isNew
         this.contentSha = sha1(login.login + sha1(login.raw || ''));
     } else {
         this.allowFill = true;
@@ -33,7 +33,7 @@ function Login(settings, login = {}) {
             when: 0,
             count: 0,
         };
-        // a null content sha identifies this a new entry
+        // a null content sha identifies this a new entry, see Login.prototype.isNew
         this.contentSha = null;
     }
 
