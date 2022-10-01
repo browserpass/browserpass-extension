@@ -417,10 +417,17 @@ body {
             font-size: 12px;
         }
 
+        .path {
+            border: 1px solid;
+
+            input {
+                padding-right: 0;
+            }
+        }
+
         .suffix {
-            font-size: 12px;
-            padding: 5px 4px;
-            margin-right: -5px;
+            font-size: 13px;
+            font-family: Source Code Pro, monospace;
         }
 
         select {
@@ -431,7 +438,8 @@ body {
         }
 
         input[disabled],
-        select[disabled] {
+        select[disabled],
+        .suffix.disabled {
             color: grey;
             cursor: default;
         }
@@ -582,7 +590,7 @@ div#tree-dirs {
     position: absolute;
     overflow-y: scroll;
     max-height: 265px;
-    margin-top: -13px;
+    margin-top: -8px;
 
     div.dropdown {
         padding: 2px;

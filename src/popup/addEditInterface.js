@@ -44,7 +44,7 @@ function AddEditInterface(settingsModel) {
          * @param {object} e key event
          */
         function pathKeyHandler(e) {
-            let inputEl = document.querySelector("input.path");
+            let inputEl = document.querySelector("input.filePath");
 
             switch (e.code) {
                 // Tab already handled
@@ -188,6 +188,22 @@ function AddEditInterface(settingsModel) {
             }
 
             return style;
+        }
+
+        /**
+         * Build css width details for login file path
+         *
+         * @since 3.8.0
+         *
+         * @param {object} login current secret details
+         * @returns {string} css width of file path input
+         */
+        function getPathWidth(login = {}) {
+            let length = 0;
+            if (Login.prototype.isLogin(login)) {
+                length = login.login.length;
+            }
+            return `min-width: 65px; max-width: 442px; width: ${length * 8}px;`;
         }
 
         return {
@@ -388,16 +404,17 @@ function AddEditInterface(settingsModel) {
                             m("div.storePath", storePath),
                         ]),
                         m("div.path", [
-                            m("input[type=text].path", {
+                            m("input[type=text].filePath", {
                                 disabled: editing,
                                 title: "File path of credentials within password-store.",
                                 placeholder: "filename",
                                 value: loginObj.login,
+                                style: `${getPathWidth(loginObj)}`,
                                 oninput: m.withAttr("value", this.setLogin),
                                 onfocus: m.withAttr("value", this.setLogin),
                                 onkeydown: pathKeyHandler.bind(vnode),
                             }),
-                            m("div.suffix", ".gpg"),
+                            m(`div.suffix${editing ? ".disabled" : ""}`, ".gpg"),
                         ]),
                         canTree && storeDirs.length > 0
                             ? m(
