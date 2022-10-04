@@ -23,17 +23,32 @@ function AddEditInterface(settingsModel) {
      */
     return function (vnode) {
         // do some basic initialization
-        var editing = false,
-            passwordLength = 16,
+        var canTree = false,
+            editing = false,
             loginObj = {},
+            passwordGenerated = false,
+            passwordLength = 16,
             settings = {},
+            storeDirs = [],
             storePath = "",
             stores = [],
-            symbols = true,
-            canTree = false,
             storeTree = new Tree(),
-            storeDirs = [],
+            symbols = true,
             viewSettingsModel = persistSettingsModel;
+
+        /**
+         * Auto re-generate password
+         *
+         * If the generatebutton has been clicked during the current
+         * add/edit view, auto update when options are changed
+         *
+         * @since 3.8.0
+         */
+        function autoUpdatePassword() {
+            if (passwordGenerated) {
+                loginObj.setPassword(loginObj.generateSecret(passwordLength, symbols));
+            }
+        }
 
         /**
          * Event handler for onkeydown, browse and select listed directory
@@ -291,6 +306,7 @@ function AddEditInterface(settingsModel) {
              */
             setPasswordLength: function (length) {
                 passwordLength = length > 0 ? length : 1;
+                autoUpdatePassword();
             },
             /**
              * Update login raw text and secret when "raw text" changes.
@@ -350,6 +366,7 @@ function AddEditInterface(settingsModel) {
              */
             setSymbols: function (checked) {
                 symbols = checked;
+                autoUpdatePassword();
             },
             /**
              * Mithril component view
@@ -452,6 +469,7 @@ function AddEditInterface(settingsModel) {
                                     loginObj.setPassword(
                                         loginObj.generateSecret(passwordLength, symbols)
                                     );
+                                    passwordGenerated = true;
                                 },
                             }),
                         ]),
