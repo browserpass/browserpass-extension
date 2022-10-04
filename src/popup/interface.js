@@ -231,7 +231,7 @@ function keyHandler(e) {
             } else if (e.target.nextElementSibling) {
                 e.target.nextElementSibling.focus();
             } else {
-                this.doAction("getDetails");
+                e.target.click();
             }
             break;
         case "ArrowLeft":
@@ -244,6 +244,8 @@ function keyHandler(e) {
         case "Enter":
             if (e.target.hasAttribute("action")) {
                 this.doAction(e.target.getAttribute("action"));
+            } else if (e.target.classList.contains("details")) {
+                e.target.click();
             } else {
                 this.doAction("fill");
             }
