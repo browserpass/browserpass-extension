@@ -6,15 +6,15 @@
  * @since 3.8.0
  *
  * @param {string} storeId
- * @param {array} dirs string array of directories relative to
+ * @param {array} paths string array of directories relative to
  * password store root directory
  */
-function Tree(storeId = "", dirs = []) {
+function Tree(storeId = "", paths = []) {
     this.id = storeId;
     this.tree = new Map();
-    dirs.forEach((path) => {
-        let paths = path.split("/");
-        insert(this.tree, paths);
+    paths.forEach((path) => {
+        let dirs = path.split("/");
+        insert(this.tree, dirs);
     });
 }
 
@@ -33,6 +33,11 @@ function insert(parentNode, dirs = []) {
     // done, no more dirs to add
     if (dir == undefined) {
         return;
+    }
+
+    // exclude hidden directories
+    if (dir[0] == ".") {
+        return
     }
 
     let node = parentNode.get(dir);
@@ -85,8 +90,8 @@ Tree.prototype.getAll = async function(settings) {
     return trees;
 }
 
-Tree.prototype.search = function(fullPath = "") {
-    let paths = fullPath.split("/");
+Tree.prototype.search = function(searchPath = "") {
+    let paths = searchPath.split("/");
     return searchTree(this.tree, paths);
 }
 
