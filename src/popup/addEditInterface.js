@@ -527,6 +527,42 @@ user: johnsmith`,
                                 },
                             },
                             [
+                                editing && Settings.prototype.canDelete(settings)
+                                    ? m(
+                                          "button.delete",
+                                          {
+                                              title: "Delete credentials",
+                                              onclick: (e) => {
+                                                  e.preventDefault();
+
+                                                  dialog.open(
+                                                      `Are you sure you want to delete the file from <strong>${loginObj.store.name}</strong>? <strong>${loginObj.login}</strong>`,
+                                                      async (remove) => {
+                                                          if (!remove) {
+                                                              return;
+                                                          }
+
+                                                          const uuid = notify.warningMsg(
+                                                              m.trust(
+                                                                  `Please wait, while we delete: <strong>${loginObj.login}</strong>`
+                                                              )
+                                                          );
+                                                          await Login.prototype.delete(loginObj);
+                                                          notify.removeMsg(uuid);
+                                                          notify.successMsg(
+                                                              m.trust(
+                                                                  `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
+                                                              )
+                                                          );
+                                                          setTimeout(window.close, 3000);
+                                                          m.route.set("/list");
+                                                      }
+                                                  );
+                                              },
+                                          },
+                                          "Delete"
+                                      )
+                                    : null,
                                 Settings.prototype.canSave(settings)
                                     ? m(
                                           "button.save",
@@ -575,42 +611,6 @@ user: johnsmith`,
                                               },
                                           },
                                           "Save"
-                                      )
-                                    : null,
-                                editing && Settings.prototype.canDelete(settings)
-                                    ? m(
-                                          "button.delete",
-                                          {
-                                              title: "Delete credentials",
-                                              onclick: (e) => {
-                                                  e.preventDefault();
-
-                                                  dialog.open(
-                                                      `Are you sure you want to delete the file from <strong>${loginObj.store.name}</strong>? <strong>${loginObj.login}</strong>`,
-                                                      async (remove) => {
-                                                          if (!remove) {
-                                                              return;
-                                                          }
-
-                                                          const uuid = notify.warningMsg(
-                                                              m.trust(
-                                                                  `Please wait, while we delete: <strong>${loginObj.login}</strong>`
-                                                              )
-                                                          );
-                                                          await Login.prototype.delete(loginObj);
-                                                          notify.removeMsg(uuid);
-                                                          notify.successMsg(
-                                                              m.trust(
-                                                                  `Deleted password entry, <strong>${loginObj.login}</strong>, from <strong>${loginObj.store.name}</strong>.`
-                                                              )
-                                                          );
-                                                          setTimeout(window.close, 3000);
-                                                          m.route.set("/list");
-                                                      }
-                                                  );
-                                              },
-                                          },
-                                          "Delete"
                                       )
                                     : null,
                             ]
