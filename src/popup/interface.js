@@ -171,8 +171,53 @@ function renderMainView(ctl, params) {
             ? m(
                   "div.part.add",
                   {
-                      onclick: (e) => {
-                          m.route.set("/add");
+                      tabindex: 0,
+                      title: "Add new login | <Ctrl+A>",
+                      oncreate: m.route.link,
+                      onupdate: m.route.link,
+                      href: `/add`,
+                      onkeydown: (e) => {
+                          e.preventDefault();
+
+                          function goToElement(element) {
+                              element.focus();
+                              element.scrollIntoView();
+                          }
+
+                          let lastLogin = document.querySelector(".logins").lastChild;
+                          let searchInput = document.querySelector(".part.search input[type=text]");
+                          switch (e.code) {
+                              case "Tab":
+                                  if (e.shiftKey) {
+                                      goToElement(lastLogin);
+                                  } else {
+                                      goToElement(searchInput);
+                                  }
+                                  break;
+                              case "Home":
+                                  goToElement(searchInput);
+                                  break;
+                              case "ArrowUp":
+                                  goToElement(lastLogin);
+                                  //   lastLogin.focus();
+                                  //   lastLogin.scrollIntoView();
+                                  break;
+                              case "ArrowDown":
+                                  goToElement(searchInput);
+                                  //   searchInput.focus();
+                                  //   searchInput.scrollIntoView();
+                                  break;
+                              case "Enter":
+                                  e.target.click();
+                              case "KeyA":
+                                  if (e.ctrlKey) {
+                                      e.target.click();
+                                      //   document.querySelector(".part.add").click();
+                                  }
+                                  break;
+                              default:
+                                  break;
+                          }
                       },
                   },
                   "Add credentials"
@@ -203,12 +248,15 @@ function search(searchQuery) {
 function keyHandler(e) {
     e.preventDefault();
     var login = e.target.classList.contains("login") ? e.target : e.target.closest(".login");
+
     switch (e.code) {
         case "Tab":
             var partElement = e.target.closest(".part");
             var targetElement = e.shiftKey ? "previousElementSibling" : "nextElementSibling";
             if (partElement[targetElement] && partElement[targetElement].hasAttribute("tabindex")) {
                 partElement[targetElement].focus();
+            } else if (e.target == document.querySelector(".logins").lastChild) {
+                document.querySelector(".part.add").focus();
             } else {
                 document.querySelector(".part.search input[type=text]").focus();
             }
@@ -216,6 +264,8 @@ function keyHandler(e) {
         case "ArrowDown":
             if (login.nextElementSibling) {
                 login.nextElementSibling.focus();
+            } else {
+                document.querySelector(".part.add").focus();
             }
             break;
         case "ArrowUp":
@@ -250,6 +300,11 @@ function keyHandler(e) {
                 this.doAction("fill");
             }
             break;
+        case "KeyA":
+            if (e.ctrlKey) {
+                document.querySelector(".part.add").click();
+            }
+            break;
         case "KeyC":
             if (e.ctrlKey) {
                 if (e.shiftKey || document.activeElement.classList.contains("copy-user")) {
@@ -279,9 +334,9 @@ function keyHandler(e) {
             let logins = document.querySelectorAll(".login");
             if (logins.length) {
                 let target = logins.item(logins.length - 1);
-                target.focus();
                 target.scrollIntoView();
             }
+            document.querySelector(".part.add").focus();
             break;
         }
     }

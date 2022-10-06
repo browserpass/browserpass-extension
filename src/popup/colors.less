@@ -120,7 +120,9 @@
 
     .part.add {
         background-color: @bg-color;
-        &:hover {
+        &:hover,
+        &:focus {
+            outline: none;
             background-color: @hover-bg-color;
         }
     }
