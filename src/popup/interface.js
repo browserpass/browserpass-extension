@@ -199,20 +199,15 @@ function renderMainView(ctl, params) {
                                   break;
                               case "ArrowUp":
                                   goToElement(lastLogin);
-                                  //   lastLogin.focus();
-                                  //   lastLogin.scrollIntoView();
                                   break;
                               case "ArrowDown":
                                   goToElement(searchInput);
-                                  //   searchInput.focus();
-                                  //   searchInput.scrollIntoView();
                                   break;
                               case "Enter":
                                   e.target.click();
                               case "KeyA":
                                   if (e.ctrlKey) {
                                       e.target.click();
-                                      //   document.querySelector(".part.add").click();
                                   }
                                   break;
                               default:
