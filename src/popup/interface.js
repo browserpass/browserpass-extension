@@ -7,8 +7,6 @@ const layout = require("./layoutInterface");
 const helpers = require("../helpers");
 const Settings = require("./models/Settings");
 
-const LATEST_NATIVE_APP_VERSION = 3001000;
-
 /**
  * Popup main interface
  *
@@ -66,7 +64,7 @@ function view(ctl, params) {
 
     nodes.push(...this.renderMainView(ctl, params));
 
-    if (this.settings.version < LATEST_NATIVE_APP_VERSION) {
+    if (this.settings.version < helpers.LATEST_NATIVE_APP_VERSION) {
         nodes.push(
             m("div.updates", [
                 m("span", "Update native host app: "),
@@ -167,57 +165,55 @@ function renderMainView(ctl, params) {
                 );
             })
         ),
-        Settings.prototype.canSave(this.settings)
-            ? m(
-                  "div.part.add",
-                  {
-                      tabindex: 0,
-                      title: "Add new login | <Ctrl+A>",
-                      oncreate: m.route.link,
-                      onupdate: m.route.link,
-                      href: `/add`,
-                      onkeydown: (e) => {
-                          e.preventDefault();
+        m(
+            "div.part.add",
+            {
+                tabindex: 0,
+                title: "Add new login | <Ctrl+A>",
+                oncreate: m.route.link,
+                onupdate: m.route.link,
+                href: `/add`,
+                onkeydown: (e) => {
+                    e.preventDefault();
 
-                          function goToElement(element) {
-                              element.focus();
-                              element.scrollIntoView();
-                          }
+                    function goToElement(element) {
+                        element.focus();
+                        element.scrollIntoView();
+                    }
 
-                          let lastLogin = document.querySelector(".logins").lastChild;
-                          let searchInput = document.querySelector(".part.search input[type=text]");
-                          switch (e.code) {
-                              case "Tab":
-                                  if (e.shiftKey) {
-                                      goToElement(lastLogin);
-                                  } else {
-                                      goToElement(searchInput);
-                                  }
-                                  break;
-                              case "Home":
-                                  goToElement(searchInput);
-                                  break;
-                              case "ArrowUp":
-                                  goToElement(lastLogin);
-                                  break;
-                              case "ArrowDown":
-                                  goToElement(searchInput);
-                                  break;
-                              case "Enter":
-                                  e.target.click();
-                              case "KeyA":
-                                  if (e.ctrlKey) {
-                                      e.target.click();
-                                  }
-                                  break;
-                              default:
-                                  break;
-                          }
-                      },
-                  },
-                  "Add credentials"
-              )
-            : null
+                    let lastLogin = document.querySelector(".logins").lastChild;
+                    let searchInput = document.querySelector(".part.search input[type=text]");
+                    switch (e.code) {
+                        case "Tab":
+                            if (e.shiftKey) {
+                                goToElement(lastLogin);
+                            } else {
+                                goToElement(searchInput);
+                            }
+                            break;
+                        case "Home":
+                            goToElement(searchInput);
+                            break;
+                        case "ArrowUp":
+                            goToElement(lastLogin);
+                            break;
+                        case "ArrowDown":
+                            goToElement(searchInput);
+                            break;
+                        case "Enter":
+                            e.target.click();
+                        case "KeyA":
+                            if (e.ctrlKey) {
+                                e.target.click();
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                },
+            },
+            "Add credentials"
+        )
     );
 
     return nodes;

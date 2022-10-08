@@ -236,6 +236,18 @@ function AddEditInterface(settingsModel) {
                 tmpLogin = layout.getCurrentLogin();
                 settings = await viewSettingsModel.get();
 
+                if (settings.version < helpers.LATEST_NATIVE_APP_VERSION) {
+                    notify.warningMsg(
+                        m.trust(
+                            `The currently installed native-host application does not support adding or editing passwords. ` +
+                                `Please visit <a href="https://github.com/browserpass/browserpass-native#installation" target="_blank">github.com/browserpass-native#install</a> ` +
+                                `for instructions on how to install the latest version.`
+                        ),
+                        0
+                    );
+                    m.route.set("/list");
+                }
+
                 Object.keys(settings.stores).forEach((k) => {
                     stores.push(settings.stores[k]);
                 });
