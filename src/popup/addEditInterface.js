@@ -141,7 +141,7 @@ function AddEditInterface(settingsModel) {
          */
         function clickDirectoryHandler(e) {
             e.preventDefault();
-            var inputEl = document.querySelector("input.path");
+            var inputEl = document.querySelector("input.filePath");
 
             // replace search term with selected directory
             inputEl.value = `${addDirToLoginPath(loginObj.login, e.target.getAttribute("value"))}/`;
