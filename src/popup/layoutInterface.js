@@ -38,6 +38,7 @@ let LayoutInterface = {
         ) {
             session.trees = await Tree.prototype.getAll(session.settings);
         }
+        document.addEventListener("keydown", esacpeKeyHandler);
     },
     view: function (vnode) {
         vnode.children.push(m(Notifications));
@@ -128,6 +129,38 @@ function getSessionSettings() {
 
 function getStoreTree(storeId) {
     return session.trees[storeId];
+}
+
+/**
+ * Handle all keydown events on the dom for the Escape key
+ *
+ * @since 3.8.0
+ *
+ * @param {object} e keydown event
+ */
+function esacpeKeyHandler(e) {
+    switch (e.code) {
+        case "Escape":
+            // stop escape from closing pop up
+            e.preventDefault();
+            let path = m.route.get();
+
+            if (path == "/add") {
+                if (document.querySelector("#tree-dirs") == null) {
+                    // dir tree already hidden, go to previous page
+                    m.route.set("/list");
+                } else {
+                    // trigger click on an element other than input filename
+                    // which does not have a click handler, to close drop down
+                    document.querySelector(".store .storePath").click();
+                }
+            } else if (path.startsWith("/details")) {
+                m.route.set("/list");
+            } else if (path.startsWith("/edit")) {
+                m.route.set(path.replace(/^\/edit/, "/details"));
+            }
+            break;
+    }
 }
 
 module.exports = {
