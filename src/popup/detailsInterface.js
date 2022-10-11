@@ -109,15 +109,13 @@ function DetailsInterface(settingsModel) {
                             },
                         }),
                         m("span", "View credentials"),
-                        Settings.prototype.canSave(settings)
-                            ? m("div.btn.edit", {
-                                  title: `Edit ${login.basename}`,
-                                  oncreate: m.route.link,
-                                  href: `/edit/${loginObj.store.id}/${encodeURIComponent(
-                                      loginObj.login
-                                  )}`,
-                              })
-                            : null,
+                        m("div.btn.edit", {
+                            title: `Edit ${login.basename}`,
+                            oncreate: m.route.link,
+                            href: `/edit/${loginObj.store.id}/${encodeURIComponent(
+                                loginObj.login
+                            )}`,
+                        }),
                     ]),
                     m("div.part.login.details-header", [
                         m("div.name", [

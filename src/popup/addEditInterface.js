@@ -236,7 +236,11 @@ function AddEditInterface(settingsModel) {
                 tmpLogin = layout.getCurrentLogin();
                 settings = await viewSettingsModel.get();
 
-                if (settings.version < helpers.LATEST_NATIVE_APP_VERSION) {
+                // if native host does not support add/edit/save, redirect to previous page and notify user to update
+                if (
+                    settings.version < helpers.LATEST_NATIVE_APP_VERSION ||
+                    !Settings.prototype.canSave(settings)
+                ) {
                     notify.warningMsg(
                         m.trust(
                             `The currently installed native-host application does not support adding or editing passwords. ` +
@@ -245,7 +249,17 @@ function AddEditInterface(settingsModel) {
                         ),
                         0
                     );
-                    m.route.set("/list");
+
+                    // redirect to previous page
+                    if (tmpLogin !== null && tmpLogin.login == vnode.attrs.context.login) {
+                        m.route.set(
+                            `/details/${vnode.attrs.context.storeid}/${encodeURIComponent(
+                                vnode.attrs.context.login
+                            )}`
+                        );
+                    } else {
+                        m.route.set("/list");
+                    }
                 }
 
                 Object.keys(settings.stores).forEach((k) => {
