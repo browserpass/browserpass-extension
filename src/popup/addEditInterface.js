@@ -459,7 +459,7 @@ function AddEditInterface(settingsModel) {
                                                   onkeydown: pathKeyHandler.bind(vnode),
                                                   onclick: clickDirectoryHandler.bind(vnode),
                                               },
-                                              dirText
+                                              `${dirText}/`
                                           );
                                       })
                                   )
