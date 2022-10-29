@@ -526,7 +526,7 @@ function AddEditInterface(settingsModel) {
                                 placeholder: `yourSecretPassword
 
 user: johnsmith`,
-                                value: (loginObj.raw || "").trim(),
+                                value: loginObj.raw || "", //.trim(),
                                 oninput: m.withAttr("value", this.setRawDetails),
                             })
                         ),
