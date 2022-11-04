@@ -8,7 +8,8 @@ const Settings = require("./Settings");
 // Search for one of the secret prefixes
 // from Array helpers.fieldsPrefix.secret
 const
-    multiLineSecretRegEx = RegExp(`^(${helpers.fieldsPrefix.secret.join("|")}): `, 'mi')
+    multiLineSecretRegEx = RegExp(`^(${helpers.fieldsPrefix.secret.join("|")}): `, 'mi'),
+    lastNewLine = RegExp(`[\r\n]$`)
 ;
 
 /**
@@ -48,7 +49,9 @@ function Login(settings, login = {}) {
     }
 
     if (setRaw) {
-        this.setRawDetails(login['raw']);
+        // The native host captures secret from stdout which includes
+        // an extra new line, remove it or else every save adds new line
+        this.setRawDetails(login['raw'].replace(lastNewLine, ''));
     }
 
     this.settings = settings;
