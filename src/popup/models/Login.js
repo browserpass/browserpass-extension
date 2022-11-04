@@ -52,6 +52,8 @@ function Login(settings, login = {}) {
         // The native host captures secret from stdout which includes
         // an extra new line, remove it or else every save adds new line
         this.setRawDetails(login['raw'].replace(lastNewLine, ''));
+        console.log(`== native host ==\n'${(login.hasOwnProperty('original')) ? login['original'] : null}'`);
+        console.log(`== newline removed if present ==\n'${(login.hasOwnProperty('original')) ? login['original'].replace(lastNewLine, '') : null}'`);
     }
 
     this.settings = settings;
