@@ -724,7 +724,7 @@ async function handleMessage(settings, message, sendResponse) {
             }
             break;
         case "copyOTP":
-            if (settings.enableOTP) {
+            if (helpers.getSetting("enableOTP", message.login, settings)) {
                 try {
                     if (!message.login.fields.otp) {
                         throw new Exception("No OTP seed available");
@@ -796,8 +796,8 @@ async function handleMessage(settings, message, sendResponse) {
 
                 // copy OTP token after fill
                 if (
-                    settings.enableOTP &&
                     typeof message.login !== "undefined" &&
+                    helpers.getSetting("enableOTP", message.login, settings) &&
                     message.login.fields.hasOwnProperty("otp")
                 ) {
                     copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
@@ -963,7 +963,7 @@ async function parseFields(settings, login) {
     }
 
     // preprocess otp
-    if (settings.enableOTP && login.fields.hasOwnProperty("otp")) {
+    if (helpers.getSetting("enableOTP", login, settings) && login.fields.hasOwnProperty("otp")) {
         if (login.fields.otp.match(/^otpauth:\/\/.+/i)) {
             // attempt to parse otp data as URI
             try {
