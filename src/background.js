@@ -450,7 +450,7 @@ async function fillFields(settings, login, fields) {
     // build focus or submit request
     let focusOrSubmitRequest = {
         origin: new BrowserpassURL(settings.tab.url).origin,
-        autoSubmit: getSetting("autoSubmit", login, settings),
+        autoSubmit: helpers.getSetting("autoSubmit", login, settings),
         filledFields: filledFields,
     };
 
@@ -559,25 +559,6 @@ async function getFullSettings() {
     } catch (e) {}
 
     return settings;
-}
-
-/**
- * Get most relevant setting value
- *
- * @param string key      Setting key
- * @param object login    Login object
- * @param object settings Settings object
- * @return object Setting value
- */
-function getSetting(key, login, settings) {
-    if (typeof login.settings[key] !== "undefined") {
-        return login.settings[key];
-    }
-    if (typeof settings.stores[login.store.id].settings[key] !== "undefined") {
-        return settings.stores[login.store.id].settings[key];
-    }
-
-    return settings[key];
 }
 
 /**
@@ -968,7 +949,7 @@ async function parseFields(settings, login) {
             if (key === "secret" && lines.length) {
                 login.fields.secret = lines[0];
             } else if (key === "login") {
-                const defaultUsername = getSetting("username", login, settings);
+                const defaultUsername = helpers.getSetting("username", login, settings);
                 login.fields[key] = defaultUsername || login.login.match(/([^\/]+)$/)[1];
             } else {
                 delete login.fields[key];
