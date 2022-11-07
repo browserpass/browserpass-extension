@@ -954,7 +954,6 @@ async function parseFields(settings, login) {
 
     // save raw data inside login
     login.raw = response.data.contents;
-    login.original = helpers.deepCopy(response.data.contents);
 
     // parse lines
     login.fields = helpers.deepCopy(helpers.fieldsPrefix);
