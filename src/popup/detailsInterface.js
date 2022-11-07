@@ -207,7 +207,7 @@ function DetailsInterface(settingsModel) {
                                 {
                                     disabled: true,
                                 },
-                                (login.raw || "").trim()
+                                login.raw || ""
                             )
                         ),
                     ])
