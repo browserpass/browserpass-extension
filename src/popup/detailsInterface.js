@@ -103,7 +103,7 @@ function view(ctl, params) {
             ]),
             (() => {
                 if (
-                    this.settings.enableOTP &&
+                    helpers.getSetting("enableOTP", login, this.settings) &&
                     login.fields.otp &&
                     login.fields.otp.params.type === "totp"
                 ) {
