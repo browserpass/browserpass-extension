@@ -87,10 +87,14 @@ function prepareLogins(files, settings) {
     for (let storeId in files) {
         for (let key in files[storeId]) {
             // set login fields
+            const loginPath = files[storeId][key];
+            // remove the file-type extension
+            const loginName = loginPath.replace(/\.[^.]+$/u, "");
             const login = {
                 index: index++,
                 store: settings.stores[storeId],
-                login: files[storeId][key].replace(/\.gpg$/i, ""),
+                login: loginName,
+                loginPath: loginPath,
                 allowFill: true,
             };
 

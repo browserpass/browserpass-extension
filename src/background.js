@@ -870,7 +870,7 @@ function hostAction(settings, action, params = {}) {
 async function parseFields(settings, login) {
     var response = await hostAction(settings, "fetch", {
         storeId: login.store.id,
-        file: login.login + ".gpg",
+        file: login.loginPath,
     });
     if (response.status != "ok") {
         throw new Error(JSON.stringify(response)); // TODO handle host error
