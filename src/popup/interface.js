@@ -61,69 +61,91 @@ function view(ctl, params) {
     nodes.push(
         m(
             "div.logins",
-            this.results.map(function (result) {
-                const storeBgColor = result.store.bgColor || result.store.settings.bgColor;
-                const storeColor = result.store.color || result.store.settings.color;
+            this.results
+                .filter((result) => {
+                    return !this.currentDomainOnly || result.inCurrentHost || result.recent.when;
+                })
+                .map(function (result) {
+                    console.log(result);
+                    const storeBgColor = result.store.bgColor || result.store.settings.bgColor;
+                    const storeColor = result.store.color || result.store.settings.color;
 
-                return m(
-                    "div.part.login",
-                    {
-                        key: result.index,
-                        tabindex: 0,
-                        onclick: function (e) {
-                            var action = e.target.getAttribute("action");
-                            if (action) {
-                                result.doAction(action);
-                            } else {
-                                result.doAction("fill");
-                            }
+                    return m(
+                        "div.part.login",
+                        {
+                            key: result.index,
+                            tabindex: 0,
+                            onclick: function (e) {
+                                var action = e.target.getAttribute("action");
+                                if (action) {
+                                    result.doAction(action);
+                                } else {
+                                    result.doAction("fill");
+                                }
+                            },
+                            onkeydown: keyHandler.bind(result),
                         },
-                        onkeydown: keyHandler.bind(result),
-                    },
-                    [
-                        m("div.name", { title: "Fill username / password | <Enter>" }, [
-                            m("div.line1", [
-                                m(
-                                    "div.store.badge",
-                                    {
-                                        style: `background-color: ${storeBgColor};
+                        [
+                            m("div.name", { title: "Fill username / password | <Enter>" }, [
+                                m("div.line1", [
+                                    m(
+                                        "div.store.badge",
+                                        {
+                                            style: `background-color: ${storeBgColor};
                                                 color: ${storeColor}`,
-                                    },
-                                    result.store.name
-                                ),
-                                m("div.path", [m.trust(result.path)]),
-                                result.recent.when > 0
-                                    ? m("div.recent", {
-                                          title:
-                                              "Used here " +
-                                              result.recent.count +
-                                              " time" +
-                                              (result.recent.count > 1 ? "s" : "") +
-                                              ", last " +
-                                              Moment(new Date(result.recent.when)).fromNow(),
-                                      })
-                                    : null,
+                                        },
+                                        result.store.name
+                                    ),
+                                    m("div.path", [m.trust(result.path)]),
+                                    result.recent.when > 0
+                                        ? [
+                                              m("div.recent", {
+                                                  title:
+                                                      "Used here " +
+                                                      result.recent.count +
+                                                      " time" +
+                                                      (result.recent.count > 1 ? "s" : "") +
+                                                      ", last " +
+                                                      Moment(
+                                                          new Date(result.recent.when)
+                                                      ).fromNow(),
+                                              }),
+                                              m("div.clear-recent", {
+                                                  title: "Forget recent usage here",
+                                                  onclick: (e) => {
+                                                      e.stopPropagation();
+                                                      result.recent.when = 0;
+                                                      document
+                                                          .querySelector(
+                                                              ".part.search input[type='text']"
+                                                          )
+                                                          .dispatchEvent(new Event("input"));
+                                                      result.doAction("clearRecent");
+                                                  },
+                                              }),
+                                          ]
+                                        : null,
+                                ]),
+                                m("div.line2", [m.trust(result.display)]),
                             ]),
-                            m("div.line2", [m.trust(result.display)]),
-                        ]),
-                        m("div.action.copy-user", {
-                            tabindex: 0,
-                            title: "Copy username | <Ctrl+Shift+C>",
-                            action: "copyUsername",
-                        }),
-                        m("div.action.copy-password", {
-                            tabindex: 0,
-                            title: "Copy password | <Ctrl+C>",
-                            action: "copyPassword",
-                        }),
-                        m("div.action.details", {
-                            tabindex: 0,
-                            title: "Open Details | <Ctrl+O>",
-                            action: "getDetails",
-                        }),
-                    ]
-                );
-            })
+                            m("div.action.copy-user", {
+                                tabindex: 0,
+                                title: "Copy username | <Ctrl+Shift+C>",
+                                action: "copyUsername",
+                            }),
+                            m("div.action.copy-password", {
+                                tabindex: 0,
+                                title: "Copy password | <Ctrl+C>",
+                                action: "copyPassword",
+                            }),
+                            m("div.action.details", {
+                                tabindex: 0,
+                                title: "Open Details | <Ctrl+O>",
+                                action: "getDetails",
+                            }),
+                        ]
+                    );
+                })
         )
     );
 

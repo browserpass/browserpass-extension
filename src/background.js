@@ -214,23 +214,30 @@ function readFromClipboard() {
  */
 async function saveRecent(settings, login, remove = false) {
     var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
+    var key = sha1(settings.origin + sha1(login.store.id + sha1(login.login)));
 
-    // save store timestamp
-    localStorage.setItem("recent:" + login.store.id, JSON.stringify(Date.now()));
+    if (remove) {
+        login.recent.count = 0;
+        if (settings.recent.hasOwnProperty(key)) {
+            delete settings.recent[key];
+        }
+    } else {
+        // save store timestamp
+        localStorage.setItem("recent:" + login.store.id, JSON.stringify(Date.now()));
 
-    // update login usage count & timestamp
-    if (Date.now() > login.recent.when + ignoreInterval) {
-        login.recent.count++;
+        // update login usage count & timestamp
+        if (Date.now() > login.recent.when + ignoreInterval) {
+            login.recent.count++;
+        }
+        login.recent.when = Date.now();
+        settings.recent[key] = login.recent;
     }
-    login.recent.when = Date.now();
-    settings.recent[sha1(settings.origin + sha1(login.store.id + sha1(login.login)))] =
-        login.recent;
 
     // save to local storage
     localStorage.setItem("recent", JSON.stringify(settings.recent));
 
-    // a new entry was added to the popup matching list, need to refresh the count
-    if (!login.inCurrentHost && login.recent.count === 1) {
+    // an entry was added / removed to the popup matching list, need to refresh the count
+    if (!login.inCurrentHost) {
         updateMatchingPasswordsCount(settings.tab.id, true);
     }
 
@@ -819,6 +826,17 @@ async function handleMessage(settings, message, sendResponse) {
         case "clearUsageData":
             try {
                 await clearUsageData();
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: e.message,
+                });
+            }
+            break;
+        case "clearRecent":
+            try {
+                await saveRecent(settings, message.login, true);
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
