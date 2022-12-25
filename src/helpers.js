@@ -30,6 +30,7 @@ module.exports = {
     filterSortLogins,
     handleError,
     highlight,
+    getSetting,
     ignoreFiles,
     makeTOTP,
     prepareLogin,
@@ -141,6 +142,25 @@ async function withLogin(action, params = {}) {
     }
 }
 
+/*
+ * Get most relevant setting value
+ *
+ * @param string key      Setting key
+ * @param object login    Login object
+ * @param object settings Settings object
+ * @return object Setting value
+ */
+function getSetting(key, login, settings) {
+    if (typeof login.settings[key] !== "undefined") {
+        return login.settings[key];
+    }
+    if (typeof settings.stores[login.store.id].settings[key] !== "undefined") {
+        return settings.stores[login.store.id].settings[key];
+    }
+
+    return settings[key];
+}
+
 /**
  * Get the deepest available domain component of a path
  *
@@ -216,7 +236,8 @@ function prepareLogin(settings, storeId, file, index = 0, origin = undefined) {
     const login = {
         index: index > -1 ? parseInt(index) : 0,
         store: settings.stores[storeId],
-        login: file.replace(/\.gpg$/i, ""),
+        login: file.replace(/\.[^.]+$/u, ""),
+        loginPath: file,
         allowFill: true,
     };
 
