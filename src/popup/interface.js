@@ -159,7 +159,9 @@ function renderMainView(ctl, params) {
                             title: "Open Details | <Ctrl+O>",
                             oncreate: m.route.link,
                             onupdate: m.route.link,
-                            href: `/details/${result.store.id}/${encodeURIComponent(result.login)}`,
+                            href: `/details/${result.store.id}/${encodeURIComponent(
+                                result.loginPath
+                            )}`,
                         }),
                     ]
                 );

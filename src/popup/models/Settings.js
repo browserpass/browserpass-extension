@@ -113,7 +113,11 @@ Settings.prototype.getStore = function (settingsObj, property = "") {
             break;
 
         default:
-            value = store;
+            if (property != "" && store.hasOwnProperty(property)) {
+                value = store[property];
+            } else {
+                value = store;
+            }
             break;
     }
 

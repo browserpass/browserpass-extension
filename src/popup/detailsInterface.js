@@ -164,7 +164,7 @@ function DetailsInterface(settingsModel) {
                         (() => {
                             if (
                                 Settings.prototype.isSettings(settings) &&
-                                helpers.getSetting("enableOTP", login, this.settings) &&
+                                Login.prototype.getStore(login, "enableOTP") &&
                                 login.fields.otp &&
                                 login.fields.otp.params.type === "totp"
                             ) {

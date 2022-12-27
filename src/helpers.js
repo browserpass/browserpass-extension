@@ -236,6 +236,7 @@ function prepareLogin(settings, storeId, file, index = 0, origin = undefined) {
     const login = {
         index: index > -1 ? parseInt(index) : 0,
         store: settings.stores[storeId],
+        // remove the file-type extension
         login: file.replace(/\.[^.]+$/u, ""),
         loginPath: file,
         allowFill: true,

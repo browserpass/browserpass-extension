@@ -161,7 +161,7 @@ Login.prototype.getAll = async function(settings) {
  *
  * @param {object} settings Settings object
  * @param {string} storeid  store id
- * @param {string} lpath    relative file path of login in store
+ * @param {string} lpath    relative file path, with extension, of login in store
  * @returns Login object
  */
 Login.prototype.get = async function(settings, storeid, lpath) {
@@ -268,6 +268,9 @@ Login.prototype.getStore = function(login, property = "") {
             break;
 
         default:
+            if (property != "" && store.hasOwnProperty(property)) {
+                value = store[property];
+            }
             break;
     }
 
