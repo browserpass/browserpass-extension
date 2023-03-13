@@ -11,11 +11,31 @@ const BrowserpassURL = require("@browserpass/url");
 module.exports = {
     prepareLogins,
     filterSortLogins,
+    getSetting,
     ignoreFiles,
     makeTOTP,
 };
 
 //----------------------------------- Function definitions ----------------------------------//
+
+/**
+ * Get most relevant setting value
+ *
+ * @param string key      Setting key
+ * @param object login    Login object
+ * @param object settings Settings object
+ * @return object Setting value
+ */
+function getSetting(key, login, settings) {
+    if (typeof login.settings[key] !== "undefined") {
+        return login.settings[key];
+    }
+    if (typeof settings.stores[login.store.id].settings[key] !== "undefined") {
+        return settings.stores[login.store.id].settings[key];
+    }
+
+    return settings[key];
+}
 
 /**
  * Get the deepest available domain component of a path
@@ -67,10 +87,14 @@ function prepareLogins(files, settings) {
     for (let storeId in files) {
         for (let key in files[storeId]) {
             // set login fields
+            const loginPath = files[storeId][key];
+            // remove the file-type extension
+            const loginName = loginPath.replace(/\.[^.]+$/u, "");
             const login = {
                 index: index++,
                 store: settings.stores[storeId],
-                login: files[storeId][key].replace(/\.gpg$/i, ""),
+                login: loginName,
+                loginPath: loginPath,
                 allowFill: true,
             };
 

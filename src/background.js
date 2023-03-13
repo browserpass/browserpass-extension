@@ -463,7 +463,7 @@ async function fillFields(settings, login, fields) {
     // build focus or submit request
     let focusOrSubmitRequest = {
         origin: new BrowserpassURL(settings.tab.url).origin,
-        autoSubmit: getSetting("autoSubmit", login, settings),
+        autoSubmit: helpers.getSetting("autoSubmit", login, settings),
         filledFields: filledFields,
     };
 
@@ -572,25 +572,6 @@ async function getFullSettings() {
     } catch (e) {}
 
     return settings;
-}
-
-/**
- * Get most relevant setting value
- *
- * @param string key      Setting key
- * @param object login    Login object
- * @param object settings Settings object
- * @return object Setting value
- */
-function getSetting(key, login, settings) {
-    if (typeof login.settings[key] !== "undefined") {
-        return login.settings[key];
-    }
-    if (typeof settings.stores[login.store.id].settings[key] !== "undefined") {
-        return settings.stores[login.store.id].settings[key];
-    }
-
-    return settings[key];
 }
 
 /**
@@ -756,7 +737,7 @@ async function handleMessage(settings, message, sendResponse) {
             }
             break;
         case "copyOTP":
-            if (settings.enableOTP) {
+            if (helpers.getSetting("enableOTP", message.login, settings)) {
                 try {
                     if (!message.login.fields.otp) {
                         throw new Exception("No OTP seed available");
@@ -828,8 +809,8 @@ async function handleMessage(settings, message, sendResponse) {
 
                 // copy OTP token after fill
                 if (
-                    settings.enableOTP &&
                     typeof message.login !== "undefined" &&
+                    helpers.getSetting("enableOTP", message.login, settings) &&
                     message.login.fields.hasOwnProperty("otp")
                 ) {
                     copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
@@ -902,7 +883,7 @@ function hostAction(settings, action, params = {}) {
 async function parseFields(settings, login) {
     var response = await hostAction(settings, "fetch", {
         storeId: login.store.id,
-        file: login.login + ".gpg",
+        file: login.loginPath,
     });
     if (response.status != "ok") {
         throw new Error(JSON.stringify(response)); // TODO handle host error
@@ -981,7 +962,7 @@ async function parseFields(settings, login) {
             if (key === "secret" && lines.length) {
                 login.fields.secret = lines[0];
             } else if (key === "login") {
-                const defaultUsername = getSetting("username", login, settings);
+                const defaultUsername = helpers.getSetting("username", login, settings);
                 login.fields[key] = defaultUsername || login.login.match(/([^\/]+)$/)[1];
             } else {
                 delete login.fields[key];
@@ -995,7 +976,7 @@ async function parseFields(settings, login) {
     }
 
     // preprocess otp
-    if (settings.enableOTP && login.fields.hasOwnProperty("otp")) {
+    if (helpers.getSetting("enableOTP", login, settings) && login.fields.hasOwnProperty("otp")) {
         if (login.fields.otp.match(/^otpauth:\/\/.+/i)) {
             // attempt to parse otp data as URI
             try {
