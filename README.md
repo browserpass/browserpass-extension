@@ -221,6 +221,7 @@ The list of available options:
 | --------------------------------------------------------------- | ------------------------------------------------------------- |
 | Automatically submit forms after filling (aka `autoSubmit`)     | Make Browserpass automatically submit the login form for you  |
 | Enable support for OTP tokens (aka `enableOTP`)                 | Generate TOTP codes if a TOTP seed is found in the pass entry |
+| Hide badge counter on the toolbar icon (aka `hideBadge`)        | Do not show badge with number of matching password entries    |
 | Default username (aka `username`)                               | Username to use when it's not defined in the password file    |
 | Custom gpg binary (aka `gpgPath`)                               | Path to a custom `gpg` binary to use                          |
 | Custom store locations                                          | List of password stores to use                                |
@@ -234,6 +235,7 @@ Browserpass allows configuring certain settings in different places places using
     - `autoSubmit`
 1. Options defined in `.browserpass.json` file located in the root of a password store:
     - `autoSubmit`
+    - `hideBadge`
     - `enableOTP`
     - `gpgPath`
     - `username`
@@ -243,6 +245,7 @@ Browserpass allows configuring certain settings in different places places using
 1. Options defined in browser extension options:
     - Automatically submit forms after filling (aka `autoSubmit`)
     - Enable support for OTP tokens (aka `enableOTP`)
+    - Hide badge counter on the toolbar icon (aka `hideBadge`)
     - Default username (aka `username`)
     - Custom gpg binary (aka `gpgPath`)
     - Custom store locations
