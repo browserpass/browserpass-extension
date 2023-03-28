@@ -151,7 +151,7 @@ async function updateContextMenu(tabId) {
     const logins = helpers.prepareLogins(files, settings);
     const loginsForThisHost = helpers.filterSortLogins(logins, "", true);
 
-    await createContextMenuChildren(tabId, loginsForThisHost, settings);
+    await createContextMenuChildren(tabId, settings, loginsForThisHost);
     contextMenuCache[tabId].isRefreshing = false;
 }
 
@@ -160,12 +160,12 @@ async function updateContextMenu(tabId) {
  *
  * @since 3.8.0
  *
- * @param string    tabId    ID of the Tab
- * @param object    settings    Full settings object
- * @param object    login       Login object
+ * @param string    tabId               ID of the Tab
+ * @param object    settings            Full settings object
+ * @param object    loginsForThisHost   Login object
  * @return void
  */
-async function createContextMenuChildren(tabId, loginsForThisHost, settings) {
+async function createContextMenuChildren(tabId, settings, loginsForThisHost) {
     if (loginsForThisHost.length > 0) {
         try {
             contextMenuCache[tabId].children = [];
