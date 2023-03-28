@@ -10,6 +10,10 @@ const helpers = require("./helpers");
 // native application id
 var appID = "com.github.browserpass.native";
 
+const INTERNAL_PAGES = /^(chrome|about):/;
+const CACHE_TTL_MS = 60 * 1000;
+const CONTEXT_MENU_PARENT = "ContextMenuParent";
+
 // default settings
 var defaultSettings = {
     autoSubmit: false,
@@ -30,10 +34,8 @@ var badgeCache = {
     isRefreshing: false,
 };
 
-let contextMenu = {
-    activeTabId: null,
-    isRefreshing: false,
-};
+// stores login data per tab, for use in context menu
+let contextMenuCache = {};
 
 // the last text copied to the clipboard is stored here in order to be cleared after 60 seconds
 let lastCopiedText = null;
@@ -43,7 +45,7 @@ chrome.browserAction.setBadgeBackgroundColor({
 });
 
 // watch for tab updates
-chrome.tabs.onUpdated.addListener((tabId, info) => {
+chrome.tabs.onUpdated.addListener(async (tabId, info) => {
     // unregister any auth listeners for this tab
     if (info.status === "complete") {
         if (authListeners[tabId]) {
@@ -55,14 +57,203 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
     // redraw badge counter
     updateMatchingPasswordsCount(tabId);
 
-    // create right-click menu
-    createContextMenu(tabId);
+    // update context menu
+    await updateContextMenu(tabId.toString());
 });
 
-chrome.tabs.onActivated.addListener((parameters) => {
-    contextMenu.activeTabId = parameters.tabId;
-    createContextMenu(parameters.tabId);
+chrome.contextMenus.create({
+    contexts: ["all"],
+    id: CONTEXT_MENU_PARENT,
+    title: "Browserpass",
+    type: "normal",
+    visible: false,
 });
+
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+    await chrome.contextMenus.update(CONTEXT_MENU_PARENT, {
+        visible: false,
+    });
+    await updateContextMenu(activeInfo.tabId.toString());
+});
+
+/**
+ * Update the context menu
+ *
+ * @since 3.8.0
+ *
+ * @param string    tabId    ID of the Tab
+ * @return void
+ */
+
+async function updateContextMenu(tabId) {
+    let tabUrl = null;
+
+    await chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+        tabUrl = tabs[0].url;
+    });
+
+    if (
+        (contextMenuCache[tabId]?.tabUrl !== tabUrl && tabUrl.match(INTERNAL_PAGES)) ||
+        tabUrl.match(INTERNAL_PAGES)
+    ) {
+        await chrome.contextMenus.update(CONTEXT_MENU_PARENT, {
+            visible: false,
+        });
+        return;
+    }
+
+    if (contextMenuCache[tabId]?.isRefreshing || tabUrl === "") {
+        return;
+    }
+
+    contextMenuCache[tabId] = { ...contextMenuCache[tabId], isRefreshing: true };
+
+    if (contextMenuCache[tabId]?.tabUrl !== tabUrl && contextMenuCache[tabId]?.children) {
+        const oldChildren = contextMenuCache[tabId].children;
+
+        if (oldChildren?.length) {
+            Promise.all(
+                oldChildren.map(async (children) => {
+                    await chrome.contextMenus.remove(children.id);
+                })
+            );
+        }
+        contextMenuCache[tabId].children = [];
+        contextMenuCache[tabId].expires = Date.now();
+    }
+
+    if (Date.now() < contextMenuCache[tabId]?.expires) {
+        await changeContextMenuChildrenVisibility(tabId);
+        contextMenuCache[tabId].isRefreshing = false;
+        return;
+    }
+
+    contextMenuCache[tabId] = {
+        ...contextMenuCache[tabId],
+        expires: Date.now() + CACHE_TTL_MS,
+        tabUrl,
+    };
+
+    const settings = await getFullSettings();
+    const response = await hostAction(settings, "list");
+
+    if (response.status != "ok") {
+        throw new Error(JSON.stringify(response));
+    }
+
+    const files = helpers.ignoreFiles(response.data.files, settings);
+    const logins = helpers.prepareLogins(files, settings);
+    const loginsForThisHost = helpers.filterSortLogins(logins, "", true);
+
+    contextMenuCache[tabId] = {
+        ...contextMenuCache[tabId],
+        loginsForThisHost,
+        settings,
+    };
+
+    await createContextMenuChildren(tabId);
+    contextMenuCache[tabId].isRefreshing = false;
+}
+
+/**
+ * Create context menu children
+ *
+ * @since 3.8.0
+ * 
+ * @param string    tabId    ID of the Tab
+ * @return void
+ */
+async function createContextMenuChildren(tabId) {
+    const loginsForThisHost = contextMenuCache[tabId].loginsForThisHost;
+    const settings = contextMenuCache[tabId].settings;
+
+    if (loginsForThisHost.length > 0) {
+        try {
+            contextMenuCache[tabId].children = [];
+
+            await Promise.all(
+                loginsForThisHost.map(async (logins, index) => {
+                    const contextMenuChild = {
+                        contexts: ["all"],
+                        id: `child_${tabId}_${index}`,
+                        onclick: () => clickMenuEntry(settings, logins),
+                        parentId: CONTEXT_MENU_PARENT,
+                        title: logins.login,
+                        type: "normal",
+                        visible: true,
+                    };
+
+                    await chrome.contextMenus.create(contextMenuChild);
+                    contextMenuCache[tabId].children.push(contextMenuChild);
+                })
+            );
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    await changeContextMenuChildrenVisibility(tabId);
+}
+
+/**
+ * Change the visibility of the context menu's child items
+ *
+ * @since 3.8.0
+ * 
+ * @param string    tabId    ID of the Tab
+ * @return void
+ */
+async function changeContextMenuChildrenVisibility(tabId) {
+    const keys = Object.keys(contextMenuCache);
+    let isParentVisible = false;
+
+    await Promise.all(
+        keys.map(async (key) => {
+            const children = contextMenuCache[key].children;
+            if (children === undefined || children?.length === 0) {
+                return;
+            }
+
+            const visible = key === tabId;
+
+            if (visible) {
+                await chrome.contextMenus.update(CONTEXT_MENU_PARENT, {
+                    visible,
+                });
+                isParentVisible = true;
+            }
+
+            await Promise.all(
+                children.map(async (c) => {
+                    await chrome.contextMenus.update(c.id, { visible });
+                })
+            );
+        })
+    );
+
+    if (!isParentVisible) {
+        await chrome.contextMenus.update(CONTEXT_MENU_PARENT, {
+            visible: false,
+        });
+    }
+}
+
+/**
+ * Handle the click of a context menu item
+ *
+ * @since 3.8.0
+ *
+ * @param object    settings    Full settings object
+ * @param object    login       Login object
+ * @return void
+ */
+async function clickMenuEntry(settings, login) {
+    await handleMessage(settings, { action: "fill", login }, (response) => {
+        if (response.status != "ok") {
+            throw new Error(JSON.stringify(response));
+        }
+    });
+}
 
 // handle incoming messages
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
@@ -78,7 +269,7 @@ chrome.commands.onCommand.addListener(async (command) => {
         case "fillBest":
             try {
                 const settings = await getFullSettings();
-                if (settings.tab.url.match(/^(chrome|about):/)) {
+                if (settings.tab.url.match(INTERNAL_PAGES)) {
                     // only fill on real domains
                     return;
                 }
@@ -134,7 +325,6 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
                 throw new Error(JSON.stringify(response));
             }
 
-            const CACHE_TTL_MS = 60 * 1000;
             badgeCache = {
                 files: response.data.files,
                 settings: settings,
@@ -1149,74 +1339,4 @@ function onExtensionInstalled(details) {
                 }
             });
     }
-}
-
-/**
- * Create a context menu, also called right-click menu
- *
- * @since 3.8.0
- *
- * @return void
- */
-async function createContextMenu(tabId) {
-    if (
-        (contextMenu.isRefreshing && tabId === contextMenu.activeTabId) ||
-        contextMenu.activeTabId !== tabId
-    ) {
-        return;
-    }
-    contextMenu.isRefreshing = true;
-    await chrome.contextMenus.removeAll();
-    const menuEntryProps = {
-        contexts: ["all"],
-        type: "normal",
-    };
-    const parentId = "parent";
-    const settings = await getFullSettings();
-    const response = await hostAction(settings, "list");
-
-    if (response.status != "ok") {
-        throw new Error(JSON.stringify(response));
-    }
-
-    const files = helpers.ignoreFiles(response.data.files, settings);
-    const logins = helpers.prepareLogins(files, settings);
-    const loginsForThisHost = helpers.filterSortLogins(logins, "", true);
-    const numberOfLoginsForThisHost = loginsForThisHost.length;
-
-    if (numberOfLoginsForThisHost > 0) {
-        await chrome.contextMenus.create({
-            ...menuEntryProps,
-            title: "Browserpass",
-            id: parentId,
-        });
-
-        for (let i = 0; i < numberOfLoginsForThisHost; i++) {
-            await chrome.contextMenus.create({
-                ...menuEntryProps,
-                parentId: parentId,
-                id: "child" + i,
-                title: loginsForThisHost[i].login,
-                onclick: () => clickMenuEntry(settings, loginsForThisHost[i]),
-            });
-        }
-    }
-    contextMenu.isRefreshing = false;
-}
-
-/**
- * Handle the click of a context menu item
- *
- * @since 3.8.0
- *
- * @param object    settings    Full settings object
- * @param object    login       Login object
- * @return void
- */
-async function clickMenuEntry(settings, login) {
-    await handleMessage(settings, { action: "fill", login }, (response) => {
-        if (response.status != "ok") {
-            throw new Error(JSON.stringify(response));
-        }
-    });
 }
