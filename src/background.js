@@ -108,11 +108,14 @@ async function updateContextMenu(tabId) {
 
     contextMenuCache[tabId] = { ...contextMenuCache[tabId], isRefreshing: true };
 
-    if (contextMenuCache[tabId]?.tabUrl !== tabUrl && contextMenuCache[tabId]?.children) {
+    if (
+        (contextMenuCache[tabId]?.tabUrl !== tabUrl && contextMenuCache[tabId]?.children) ||
+        Date.now() >= contextMenuCache[tabId]?.expires
+    ) {
         const oldChildren = contextMenuCache[tabId].children;
 
         if (oldChildren?.length) {
-            Promise.all(
+            await Promise.all(
                 oldChildren.map(async (children) => {
                     await chrome.contextMenus.remove(children.id);
                 })
@@ -122,7 +125,10 @@ async function updateContextMenu(tabId) {
         contextMenuCache[tabId].expires = Date.now();
     }
 
-    if (Date.now() < contextMenuCache[tabId]?.expires) {
+    if (
+        contextMenuCache[tabId]?.tabUrl === tabUrl &&
+        Date.now() < contextMenuCache[tabId]?.expires
+    ) {
         await changeContextMenuChildrenVisibility(tabId);
         contextMenuCache[tabId].isRefreshing = false;
         return;
@@ -159,7 +165,7 @@ async function updateContextMenu(tabId) {
  * Create context menu children
  *
  * @since 3.8.0
- * 
+ *
  * @param string    tabId    ID of the Tab
  * @return void
  */
@@ -199,7 +205,7 @@ async function createContextMenuChildren(tabId) {
  * Change the visibility of the context menu's child items
  *
  * @since 3.8.0
- * 
+ *
  * @param string    tabId    ID of the Tab
  * @return void
  */
