@@ -23,13 +23,6 @@ var defaultSettings = {
 
 var authListeners = {};
 
-var badgeCache = {
-    files: null,
-    settings: null,
-    expires: Date.now(),
-    isRefreshing: false,
-};
-
 // the last text copied to the clipboard is stored here in order to be cleared after 60 seconds
 let lastCopiedText = null;
 
@@ -46,9 +39,6 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
             delete authListeners[tabId];
         }
     }
-
-    // redraw badge counter
-    updateMatchingPasswordsCount(tabId);
 });
 
 // handle incoming messages
@@ -96,64 +86,6 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 chrome.runtime.onInstalled.addListener(onExtensionInstalled);
 
 //----------------------------------- Function definitions ----------------------------------//
-
-/**
- * Set badge text with the number of matching password entries
- *
- * @since 3.0.0
- *
- * @param int  tabId Tab id
- * @param bool forceRefresh force invalidate cache
- * @return void
- */
-async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
-    if (badgeCache.isRefreshing) {
-        return;
-    }
-
-    try {
-        if (forceRefresh || Date.now() > badgeCache.expires) {
-            badgeCache.isRefreshing = true;
-
-            let settings = await getFullSettings();
-            let response = await hostAction(settings, "list");
-            if (response.status != "ok") {
-                throw new Error(JSON.stringify(response));
-            }
-
-            const CACHE_TTL_MS = 60 * 1000;
-            badgeCache = {
-                files: response.data.files,
-                settings: settings,
-                expires: Date.now() + CACHE_TTL_MS,
-                isRefreshing: false,
-            };
-        }
-
-        try {
-            const tab = await chrome.tabs.get(tabId);
-            badgeCache.settings.origin = new BrowserpassURL(tab.url).origin;
-        } catch (e) {
-            throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
-        }
-
-        // Compule badge counter
-        const files = helpers.ignoreFiles(badgeCache.files, badgeCache.settings);
-        const logins = helpers.prepareLogins(files, badgeCache.settings);
-        const matchedPasswordsCount = logins.reduce(
-            (acc, login) => acc + (login.recent.count || login.inCurrentHost ? 1 : 0),
-            0
-        );
-
-        // Set badge for the current tab
-        chrome.browserAction.setBadgeText({
-            text: "" + (matchedPasswordsCount || ""),
-            tabId: tabId,
-        });
-    } catch (e) {
-        console.log(e);
-    }
-}
 
 /**
  * Copy text to clipboard and optionally clear it from the clipboard after one minute
@@ -228,11 +160,6 @@ async function saveRecent(settings, login, remove = false) {
 
     // save to local storage
     localStorage.setItem("recent", JSON.stringify(settings.recent));
-
-    // a new entry was added to the popup matching list, need to refresh the count
-    if (!login.inCurrentHost && login.recent.count === 1) {
-        updateMatchingPasswordsCount(settings.tab.id, true);
-    }
 
     // save to usage log
     try {
