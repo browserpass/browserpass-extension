@@ -2,30 +2,22 @@
 "use strict";
 
 require("chrome-extension-async");
-const Interface = require("./interface");
-const DetailsInterface = require("./detailsInterface");
+
+// models
+const Login = require("./models/Login");
+const Settings = require("./models/Settings");
+// utils, libs
 const helpers = require("../helpers");
 const m = require("mithril");
+// components
+const AddEditInterface = require("./addEditInterface");
+const DetailsInterface = require("./detailsInterface");
+const Interface = require("./interface");
+const layout = require("./layoutInterface");
 
 run();
 
 //----------------------------------- Function definitions ----------------------------------//
-
-/**
- * Handle an error
- *
- * @since 3.0.0
- *
- * @param Error error Error object
- * @param string type Error type
- */
-function handleError(error, type = "error") {
-    if (type == "error") {
-        console.log(error);
-    }
-    var node = { view: () => m(`div.part.${type}`, error.toString()) };
-    m.mount(document.body, node);
-}
 
 /**
  * Run the main popup logic
@@ -36,106 +28,44 @@ function handleError(error, type = "error") {
  */
 async function run() {
     try {
-        var response = await chrome.runtime.sendMessage({ action: "getSettings" });
-        if (response.status != "ok") {
-            throw new Error(response.message);
-        }
-        var settings = response.settings;
+        /**
+         * Create instance of settings, which will cache
+         * first request of settings which will be re-used
+         * for subsequent requests. Pass this settings
+         * instance pre-cached to each of the views.
+         */
+        let settingsModel = new Settings();
 
-        var root = document.getElementsByTagName("html")[0];
+        // get user settings
+        var logins = [],
+            settings = await settingsModel.get(),
+            root = document.getElementsByTagName("html")[0];
         root.classList.remove("colors-dark");
         root.classList.add(`colors-${settings.theme}`);
 
-        if (settings.hasOwnProperty("hostError")) {
-            throw new Error(settings.hostError.params.message);
-        }
-
-        if (typeof settings.origin === "undefined") {
-            throw new Error("Unable to retrieve current tab information");
-        }
-
         // get list of logins
-        response = await chrome.runtime.sendMessage({ action: "listFiles" });
-        if (response.status != "ok") {
-            throw new Error(response.message);
-        }
+        logins = await Login.prototype.getAll(settings);
+        layout.setSessionSettings(settings);
+        // save list of logins to validate when adding
+        // a new one will not overwrite any existing ones
+        layout.setStoreLogins(logins.raw);
 
-        const logins = helpers.prepareLogins(response.files, settings);
-        for (let login of logins) {
-            login.doAction = withLogin.bind({ settings: settings, login: login });
-        }
-
-        var popup = new Interface(settings, logins);
-        popup.attach(document.body);
+        const LoginView = new AddEditInterface(settingsModel);
+        m.route(document.body, "/list", {
+            "/list": page(new Interface(settings, logins.processed)),
+            "/details/:storeid/:login": page(new DetailsInterface(settingsModel)),
+            "/edit/:storeid/:login": page(LoginView),
+            "/add": page(LoginView),
+        });
     } catch (e) {
-        handleError(e);
+        helpers.handleError(e);
     }
 }
 
-/**
- * Do a login action
- *
- * @since 3.0.0
- *
- * @param string action Action to take
- * @return void
- */
-async function withLogin(action) {
-    try {
-        // replace popup with a "please wait" notice
-        switch (action) {
-            case "fill":
-                handleError("Filling login details...", "notice");
-                break;
-            case "launch":
-                handleError("Launching URL...", "notice");
-                break;
-            case "launchInNewTab":
-                handleError("Launching URL in a new tab...", "notice");
-                break;
-            case "copyPassword":
-                handleError("Copying password to clipboard...", "notice");
-                break;
-            case "copyUsername":
-                handleError("Copying username to clipboard...", "notice");
-                break;
-            case "copyOTP":
-                handleError("Copying OTP token to clipboard...", "notice");
-                break;
-            case "getDetails":
-                handleError("Loading entry details...", "notice");
-                break;
-            default:
-                handleError("Please wait...", "notice");
-                break;
-        }
-
-        // Firefox requires data to be serializable,
-        // this removes everything offending such as functions
-        const login = JSON.parse(JSON.stringify(this.login));
-
-        // hand off action to background script
-        var response = await chrome.runtime.sendMessage({
-            action: action,
-            login: login,
-        });
-        if (response.status != "ok") {
-            throw new Error(response.message);
-        } else {
-            if (response.login && typeof response.login === "object") {
-                response.login.doAction = withLogin.bind({
-                    settings: this.settings,
-                    login: response.login,
-                });
-            }
-            if (action === "getDetails") {
-                var details = new DetailsInterface(this.settings, response.login);
-                details.attach(document.body);
-            } else {
-                window.close();
-            }
-        }
-    } catch (e) {
-        handleError(e);
-    }
+function page(component) {
+    return {
+        render: function (vnode) {
+            return m(layout.LayoutInterface, m(component, { context: vnode.attrs }));
+        },
+    };
 }

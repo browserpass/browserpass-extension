@@ -39,7 +39,7 @@ function view(ctl, params) {
                     case "Tab":
                         e.preventDefault();
                         if (e.shiftKey) {
-                            document.querySelector(".part.login:last-child").focus();
+                            document.querySelector(".part.add").focus();
                             break;
                         }
                     // fall through to ArrowDown
@@ -47,6 +47,16 @@ function view(ctl, params) {
                         e.preventDefault();
                         if (self.popup.results.length) {
                             document.querySelector("*[tabindex]").focus();
+                        }
+                        break;
+                    case "ArrowUp":
+                        e.preventDefault();
+                        document.querySelector(".part.add").focus();
+                        break;
+                    case "End":
+                        if (!e.shiftKey) {
+                            e.preventDefault();
+                            document.querySelector(".part.add").focus();
                         }
                         break;
                     case "Enter":

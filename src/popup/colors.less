@@ -17,7 +17,23 @@
     @snack-color,
     @snack-label-color,
     @progress-color,
-    @edit-bg-color) {
+    @edit-bg-color,
+    // tree browser colors
+    @treeopt-bg-color,
+    // notification colors
+    @ntfy-hover-shadow,
+    @ntfy-info-color,
+    @ntfy-info-bgcolor,
+    @ntfy-info-border,
+    @ntfy-warning-color,
+    @ntfy-warning-bgcolor,
+    @ntfy-warning-border,
+    @ntfy-error-color,
+    @ntfy-error-bgcolor,
+    @ntfy-error-border,
+    @ntfy-success-color,
+    @ntfy-success-bgcolor,
+    @ntfy-success-border) {
     html,
     body {
         background-color: @bg-color;
@@ -28,8 +44,87 @@
         background-color: @badge-color;
     }
 
+    .addEdit,
+    .details {
+        .btn {
+            &:hover,
+            &:focus {
+                background-color: @hover-bg-color;
+            }
+
+            &.generate {
+                background-color: @edit-bg-color;
+            }
+        }
+
+        .contents {
+            .password {
+                background-color: @edit-bg-color;
+            }
+
+            .password,
+            .details {
+                border-color: @snack-color;
+            }
+        }
+
+        .location {
+            select {
+                background-color: @input-bg-color;
+                color: @input-text-color;
+            }
+
+            .path {
+                background-color: @edit-bg-color;
+                border-color: @snack-color;
+                color: @text-color;
+            }
+        }
+
+        .actions {
+            .save {
+                background-color: @ntfy-success-bgcolor;
+                border: 2px solid @ntfy-success-border;
+                color: @ntfy-success-color;
+            }
+            .delete {
+                background-color: @ntfy-error-bgcolor;
+                border: 2px solid @ntfy-error-border;
+                color: @ntfy-error-color;
+            }
+            .save,
+            .delete {
+                &:hover {
+                    box-shadow: 1px 1px 2px @ntfy-hover-shadow;
+                }
+            }
+        }
+
+        label {
+            background-color: @snack-label-color;
+            color: @invert-text-color;
+        }
+
+        input[type="number"],
+        input[type="text"],
+        textarea {
+            background-color: @edit-bg-color;
+            border-color: @snack-color;
+            color: @text-color;
+        }
+    }
+
     .part.error {
         color: @error-text-color;
+    }
+
+    .part.add {
+        background-color: @bg-color;
+        &:hover,
+        &:focus {
+            outline: none;
+            background-color: @hover-bg-color;
+        }
     }
 
     .part.details {
@@ -40,10 +135,6 @@
                 .label {
                     background-color: @snack-label-color;
                     color: @invert-text-color;
-                }
-                .char.num,
-                .char.punct {
-                    color: @match-text-color;
                 }
                 .progress-container {
                     background: transparent;
@@ -58,6 +149,11 @@
                 color: @text-color;
             }
         }
+    }
+
+    .char.num,
+    .char.punct {
+        color: @match-text-color;
     }
 
     .part.search {
@@ -105,6 +201,69 @@
         span,
         a {
             color: @error-text-color;
+        }
+    }
+
+    .m-notifications {
+        .m-notification {
+            &:hover {
+                box-shadow: 1px 1px 2px @ntfy-hover-shadow;
+            }
+
+            &.info {
+                color: @ntfy-info-color;
+                background-color: @ntfy-info-bgcolor;
+                border: 1px solid @ntfy-info-border;
+            }
+
+            &.warning {
+                color: @ntfy-warning-color;
+                background-color: @ntfy-warning-bgcolor;
+                border: 1px solid @ntfy-warning-border;
+            }
+
+            &.error {
+                color: @ntfy-error-color;
+                background-color: @ntfy-error-bgcolor;
+                border: 1px solid @ntfy-error-border;
+            }
+
+            &.success {
+                color: @ntfy-success-color;
+                background-color: @ntfy-success-bgcolor;
+                border: 1px solid @ntfy-success-border;
+            }
+        }
+    }
+
+    div#tree-dirs {
+        div.dropdown {
+            a {
+                background-color: @treeopt-bg-color;
+
+                color: #fff;
+                &:hover,
+                &:focus-visible {
+                    filter: invert(15%);
+                    outline: none;
+                }
+            }
+        }
+    }
+
+    dialog#browserpass-modal {
+        color: @ntfy-info-color;
+        background-color: @ntfy-info-bgcolor;
+        border: 3px solid @ntfy-info-border;
+
+        button {
+            &:hover {
+                box-shadow: 1px 1px 2px @ntfy-hover-shadow;
+            }
+
+            color: @ntfy-warning-color;
+            background-color: @ntfy-warning-bgcolor;
+            border: 1px solid @ntfy-warning-border;
         }
     }
 }

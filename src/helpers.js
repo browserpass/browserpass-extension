@@ -5,20 +5,144 @@ const FuzzySort = require("fuzzysort");
 const sha1 = require("sha1");
 const ignore = require("ignore");
 const hash = require("hash.js");
+const m = require("mithril");
+const notify = require("./popup/notifications");
 const Authenticator = require("otplib").authenticator.Authenticator;
 const BrowserpassURL = require("@browserpass/url");
 
+const fieldsPrefix = {
+    secret: ["secret", "password", "pass"],
+    login: ["login", "username", "user"],
+    openid: ["openid"],
+    otp: ["otp", "totp"],
+    url: ["url", "uri", "website", "site", "link", "launch"],
+};
+
+const containsNumbersRegEx = RegExp(/[0-9]/);
+const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
+const LATEST_NATIVE_APP_VERSION = 3001000;
+
 module.exports = {
-    prepareLogins,
+    containsSymbolsRegEx,
+    fieldsPrefix,
+    LATEST_NATIVE_APP_VERSION,
+    deepCopy,
     filterSortLogins,
+    handleError,
+    highlight,
     getSetting,
     ignoreFiles,
     makeTOTP,
+    prepareLogin,
+    prepareLogins,
+    withLogin,
 };
 
 //----------------------------------- Function definitions ----------------------------------//
 
 /**
+ * Deep copy an object
+ *
+ * Firefox requires data to be serializable,
+ * this removes everything offending such as functions
+ *
+ * @since 3.0.0 moved to helpers.js 3.8.0
+ *
+ * @param object obj an object to copy
+ * @return object a new deep copy
+ */
+function deepCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+
+/**
+ * Handle an error
+ *
+ * @since 3.0.0
+ *
+ * @param Error error Error object
+ * @param string type Error type
+ */
+function handleError(error, type = "error") {
+    switch (type) {
+        case "error":
+            console.log(error);
+            // disable error timeout, to allow necessary user action
+            notify.errorMsg(error.toString(), 0);
+            break;
+
+        case "warning":
+            notify.warningMsg(error.toString());
+            break;
+
+        case "success":
+            notify.successMsg(error.toString());
+            break;
+
+        case "info":
+        default:
+            notify.infoMsg(error.toString());
+            break;
+    }
+}
+
+/**
+ * Do a login action
+ *
+ * @since 3.0.0
+ *
+ * @param string action Action to take
+ * @param object params Action parameters
+ * @return void
+ */
+async function withLogin(action, params = {}) {
+    try {
+        switch (action) {
+            case "fill":
+                handleError("Filling login details...", "info");
+                break;
+            case "launch":
+                handleError("Launching URL...", "info");
+                break;
+            case "launchInNewTab":
+                handleError("Launching URL in a new tab...", "info");
+                break;
+            case "copyPassword":
+                handleError("Copying password to clipboard...", "info");
+                break;
+            case "copyUsername":
+                handleError("Copying username to clipboard...", "info");
+                break;
+            case "copyOTP":
+                handleError("Copying OTP token to clipboard...", "info");
+                break;
+            default:
+                handleError("Please wait...", "info");
+                break;
+        }
+
+        const login = deepCopy(this.login);
+
+        // hand off action to background script
+        var response = await chrome.runtime.sendMessage({ action, login, params });
+        if (response.status != "ok") {
+            throw new Error(response.message);
+        } else {
+            if (response.login && typeof response.login === "object") {
+                response.login.doAction = withLogin.bind({
+                    settings: this.settings,
+                    login: response.login,
+                });
+            } else {
+                window.close();
+            }
+        }
+    } catch (e) {
+        handleError(e);
+    }
+}
+
+/*
  * Get most relevant setting value
  *
  * @param string key      Setting key
@@ -87,62 +211,96 @@ function prepareLogins(files, settings) {
     for (let storeId in files) {
         for (let key in files[storeId]) {
             // set login fields
-            const loginPath = files[storeId][key];
-            // remove the file-type extension
-            const loginName = loginPath.replace(/\.[^.]+$/u, "");
-            const login = {
-                index: index++,
-                store: settings.stores[storeId],
-                login: loginName,
-                loginPath: loginPath,
-                allowFill: true,
-            };
-
-            // extract url info from path
-            let pathInfo = pathToInfo(storeId + "/" + login.login, origin);
-            if (pathInfo) {
-                // set assumed host
-                login.host = pathInfo.port
-                    ? `${pathInfo.hostname}:${pathInfo.port}`
-                    : pathInfo.hostname;
-
-                // check whether extracted path info matches the current origin
-                login.inCurrentHost = origin.hostname === pathInfo.hostname;
-
-                // check whether the current origin is subordinate to extracted path info, meaning:
-                //  - that the path info is not a single level domain (e.g. com, net, local)
-                //  - and that the current origin is a subdomain of that path info
-                if (
-                    pathInfo.hostname.includes(".") &&
-                    origin.hostname.endsWith(`.${pathInfo.hostname}`)
-                ) {
-                    login.inCurrentHost = true;
-                }
-
-                // filter out entries with a non-matching port
-                if (pathInfo.port && pathInfo.port !== origin.port) {
-                    login.inCurrentHost = false;
-                }
-            } else {
-                login.host = null;
-                login.inCurrentHost = false;
-            }
-
-            // update recent counter
-            login.recent =
-                settings.recent[sha1(settings.origin + sha1(login.store.id + sha1(login.login)))];
-            if (!login.recent) {
-                login.recent = {
-                    when: 0,
-                    count: 0,
-                };
-            }
+            const login = prepareLogin(settings, storeId, files[storeId][key], index++, origin);
 
             logins.push(login);
         }
     }
 
     return logins;
+}
+
+/**
+ * Prepare a single login based settings, storeId, and path
+ *
+ * @since 3.8.0
+ *
+ * @param string settings   Settings object
+ * @param string storeId    Store ID alphanumeric ID
+ * @param string file       Relative path in store to password
+ * @param number index      An array index for login, if building an array of logins (optional, default: 0)
+ * @param object origin     Instance of BrowserpassURL (optional, default: new BrowserpassURL(settings.origin))
+ * @return object of login
+ */
+function prepareLogin(settings, storeId, file, index = 0, origin = undefined) {
+    const login = {
+        index: index > -1 ? parseInt(index) : 0,
+        store: settings.stores[storeId],
+        // remove the file-type extension
+        login: file.replace(/\.[^.]+$/u, ""),
+        loginPath: file,
+        allowFill: true,
+    };
+
+    origin = BrowserpassURL.prototype.isPrototypeOf(origin)
+        ? origin
+        : new BrowserpassURL(settings.origin);
+
+    // extract url info from path
+    let pathInfo = pathToInfo(storeId + "/" + login.login, origin);
+    if (pathInfo) {
+        // set assumed host
+        login.host = pathInfo.port ? `${pathInfo.hostname}:${pathInfo.port}` : pathInfo.hostname;
+
+        // check whether extracted path info matches the current origin
+        login.inCurrentHost = origin.hostname === pathInfo.hostname;
+
+        // check whether the current origin is subordinate to extracted path info, meaning:
+        //  - that the path info is not a single level domain (e.g. com, net, local)
+        //  - and that the current origin is a subdomain of that path info
+        if (pathInfo.hostname.includes(".") && origin.hostname.endsWith(`.${pathInfo.hostname}`)) {
+            login.inCurrentHost = true;
+        }
+
+        // filter out entries with a non-matching port
+        if (pathInfo.port && pathInfo.port !== origin.port) {
+            login.inCurrentHost = false;
+        }
+    } else {
+        login.host = null;
+        login.inCurrentHost = false;
+    }
+
+    // update recent counter
+    login.recent =
+        settings.recent[sha1(settings.origin + sha1(login.store.id + sha1(login.login)))];
+    if (!login.recent) {
+        login.recent = {
+            when: 0,
+            count: 0,
+        };
+    }
+
+    return login;
+}
+
+/**
+ * Highlight password characters
+ *
+ * @since 3.8.0
+ *
+ * @param {string} secret a string to be split by character
+ * @return {array} mithril vnodes to be rendered
+ */
+function highlight(secret = "") {
+    return secret.split("").map((c) => {
+        if (c.match(containsNumbersRegEx)) {
+            return m("span.char.num", c);
+        } else if (c.match(containsSymbolsRegEx)) {
+            return m("span.char.punct", c);
+        }
+        return m("span.char", c);
+    });
 }
 
 /**

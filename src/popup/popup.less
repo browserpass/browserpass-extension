@@ -136,15 +136,23 @@ body {
                 align-items: center;
                 font-family: Source Code Pro, monospace;
             }
-            & > .copy {
+            & > .copy,
+            & > .generate {
                 cursor: pointer;
                 flex-grow: 0;
                 padding: 0 24px 0 0;
-                background-image: url("/popup/icon-copy.svg");
                 background-position: top 4px right 4px;
                 background-repeat: no-repeat;
                 background-size: 16px;
                 margin: 2px;
+            }
+
+            & > .copy {
+                background-image: url("/popup/icon-copy.svg");
+            }
+
+            & > .generate {
+                background-image: url("/popup/icon-generate.svg");
             }
 
             & > .progress-container {
@@ -270,9 +278,14 @@ body {
         background-position: center;
         background-repeat: no-repeat;
         background-size: 19px;
+        cursor: pointer;
         width: 30px;
         height: @login-part-height;
         padding: @login-part-padding;
+
+        &.back {
+            background-image: url("/popup/icon-back.svg");
+        }
 
         &.copy-password {
             background-image: url("/popup/icon-key.svg");
@@ -285,6 +298,18 @@ body {
         &.details {
             background-image: url("/popup/icon-details.svg");
         }
+
+        &.edit {
+            background-image: url("/popup/icon-edit.svg");
+        }
+
+        &.save {
+            background-image: url("/popup/icon-save.svg");
+        }
+
+        &.delete {
+            background-image: url("/popup/icon-delete.svg");
+        }
     }
 }
 
@@ -292,6 +317,336 @@ body {
     font-style: normal;
 }
 
+.part.add {
+    display: flex;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+}
+
+.chars {
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+    font-family: Source Code Pro, monospace;
+    .char {
+        white-space: pre;
+    }
+}
+
+.addEdit,
+.details {
+    .loading {
+        width: 300px;
+        height: 300px;
+        display: flex;
+        align-items: flex-end;
+        p {
+            margin: 50px auto;
+            font-size: large;
+        }
+    }
+
+    .title {
+        display: flex;
+        box-sizing: border-box;
+        // justify-content: space-between;
+
+        span {
+            // align-self: center;
+            margin: auto;
+        }
+    }
+
+    .btn {
+        cursor: pointer;
+        background-position: center;
+        background-repeat: no-repeat;
+        padding: 6px;
+        background-size: 19px;
+        height: 21px;
+
+        &:hover,
+        &:focus {
+            outline: none;
+        }
+
+        &.back {
+            background-image: url("/popup/icon-back.svg");
+            width: 20px;
+        }
+
+        &.edit {
+            background-image: url("/popup/icon-edit.svg");
+            width: 25px;
+        }
+
+        &.alignment {
+            width: 20px;
+            cursor: default;
+            background: none !important;
+        }
+
+        &.generate {
+            width: 15px;
+            padding-right: 10px;
+            background-image: url("/popup/icon-generate.svg");
+        }
+    }
+
+    .location {
+        margin: 6px;
+
+        .store,
+        .path {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            padding-right: 5px;
+        }
+
+        .store {
+            select {
+                border-radius: 4px;
+            }
+        }
+
+        .storePath {
+            margin-left: 10px;
+            font-size: 12px;
+        }
+
+        .path {
+            border: 1px solid;
+
+            input {
+                padding-right: 0;
+            }
+        }
+
+        .suffix {
+            font-size: 13px;
+            font-family: Source Code Pro, monospace;
+        }
+
+        select {
+            border: none;
+            outline: none;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        input[disabled],
+        select[disabled],
+        .suffix.disabled {
+            color: grey;
+            cursor: default;
+        }
+    }
+
+    .contents {
+        display: flex;
+        flex-direction: column;
+        margin: 0 6px 5px;
+
+        label {
+            display: flex;
+            flex-grow: 0;
+            justify-content: flex-end;
+            font-weight: bold;
+            padding: 6px 6px;
+            margin-right: 8px;
+            border: none;
+            min-width: 55px;
+        }
+
+        .password,
+        .options,
+        .details {
+            display: flex;
+            margin-bottom: 6px;
+            border-radius: 2px;
+        }
+
+        .password,
+        .details {
+            border: 1px solid;
+        }
+
+        .options {
+            align-items: center;
+
+            label {
+                margin-right: 0;
+            }
+
+            input[type="checkbox"] {
+                margin: 3px 6px;
+                height: 25px;
+                width: 20px;
+            }
+
+            input[type="number"] {
+                font-size: 12px;
+                width: 40px;
+                height: 20px;
+            }
+        }
+    }
+
+    .actions {
+        display: flex;
+        margin-bottom: 10px;
+
+        .save,
+        .delete {
+            cursor: pointer;
+            font-weight: bolder;
+            font-size: medium;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+        }
+
+        .save::after,
+        .delete::after {
+            display: inline-block;
+            width: 15px;
+            margin-left: 5px;
+        }
+
+        .save {
+            margin-left: auto;
+            margin-right: 5px;
+        }
+        .save::after {
+            content: url("/popup/icon-save.svg");
+        }
+
+        .delete {
+            margin-left: 5px;
+            margin-right: auto;
+        }
+        .delete::after {
+            content: url("/popup/icon-delete.svg");
+        }
+    }
+
+    input[type="number"],
+    input[type="text"],
+    textarea {
+        border: none;
+        outline: none;
+        width: 100%;
+        font-family: "Open Sans";
+        padding: 5px 8px;
+        font-family: Source Code Pro, monospace;
+    }
+
+    textarea {
+        resize: none;
+        min-height: 110px;
+        min-width: 340px;
+    }
+}
+
 .updates {
     padding: @login-part-padding;
+}
+
+.m-notifications {
+    position: fixed;
+    top: 20px;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    z-index: 10;
+
+    .m-notification {
+        width: auto;
+        margin: 0 10px 3px;
+        cursor: pointer;
+        animation: fade-in 0.3s;
+        white-space: normal;
+        // display errors in notifications nicely
+        overflow-wrap: anywhere;
+
+        &.destroy {
+            animation: fade-out 0.3s;
+        }
+
+        &.info,
+        &.warning,
+        &.error,
+        &.success {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.25rem;
+        }
+    }
+}
+
+div#tree-dirs {
+    position: absolute;
+    overflow-y: scroll;
+    max-height: 265px;
+    margin-top: -8px;
+
+    div.dropdown {
+        padding: 2px;
+
+        a {
+            display: block;
+            text-align: left;
+            padding: 2px 6px;
+        }
+    }
+}
+
+dialog#browserpass-modal {
+    margin: auto 6px;
+    width: auto;
+    border-radius: 0.25rem;
+
+    .modal-content {
+        margin-bottom: 15px;
+        white-space: pre-wrap;
+    }
+
+    .modal-actions {
+        display: flex;
+
+        button {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 0.25rem;
+
+            &.cancel {
+                margin-right: auto;
+            }
+            &.confirm {
+                margin-left: auto;
+            }
+        }
+    }
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fade-out {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
 }

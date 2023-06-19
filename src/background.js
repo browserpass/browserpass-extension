@@ -19,6 +19,11 @@ var defaultSettings = {
     username: null,
     theme: "dark",
     enableOTP: false,
+    caps: {
+        save: false,
+        delete: false,
+        tree: false,
+    },
 };
 
 var authListeners = {};
@@ -259,7 +264,7 @@ async function saveRecent(settings, login, remove = false) {
  * @return array list of filled fields
  */
 async function dispatchFill(settings, request, allFrames, allowForeign, allowNoSecret) {
-    request = Object.assign(deepCopy(request), {
+    request = Object.assign(helpers.deepCopy(request), {
         allowForeign: allowForeign,
         allowNoSecret: allowNoSecret,
         foreignFills: settings.foreignFills[settings.origin] || {},
@@ -304,7 +309,7 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
  * @return void
  */
 async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign) {
-    request = Object.assign(deepCopy(request), {
+    request = Object.assign(helpers.deepCopy(request), {
         allowForeign: allowForeign,
         foreignFills: settings.foreignFills[settings.origin] || {},
     });
@@ -468,7 +473,7 @@ async function fillFields(settings, login, fields) {
  * @return object Local settings from the extension
  */
 function getLocalSettings() {
-    var settings = deepCopy(defaultSettings);
+    var settings = helpers.deepCopy(defaultSettings);
     for (var key in settings) {
         var value = localStorage.getItem(key);
         if (value !== null) {
@@ -488,7 +493,7 @@ function getLocalSettings() {
  */
 async function getFullSettings() {
     var settings = getLocalSettings();
-    var configureSettings = Object.assign(deepCopy(settings), {
+    var configureSettings = Object.assign(helpers.deepCopy(settings), {
         defaultStore: {},
     });
     var response = await hostAction(configureSettings, "configure");
@@ -496,6 +501,12 @@ async function getFullSettings() {
         settings.hostError = response;
     }
     settings.version = response.version;
+    const EDIT_VERSION = 3 * 1000000 + 1 * 1000 + 0;
+
+    // host capabilities
+    settings.caps.save = settings.version >= EDIT_VERSION;
+    settings.caps.delete = settings.version >= EDIT_VERSION;
+    settings.caps.tree = settings.version >= EDIT_VERSION;
 
     // Fill store settings, only makes sense if 'configure' succeeded
     if (response.status === "ok") {
@@ -562,15 +573,22 @@ async function getFullSettings() {
 }
 
 /**
- * Deep copy an object
+ * Get most relevant setting value
  *
- * @since 3.0.0
- *
- * @param object obj an object to copy
- * @return object a new deep copy
+ * @param string key      Setting key
+ * @param object login    Login object
+ * @param object settings Settings object
+ * @return object Setting value
  */
-function deepCopy(obj) {
-    return JSON.parse(JSON.stringify(obj));
+function getSetting(key, login, settings) {
+    if (typeof login.settings[key] !== "undefined") {
+        return login.settings[key];
+    }
+    if (typeof settings.stores[login.store.id].settings[key] !== "undefined") {
+        return settings.stores[login.store.id].settings[key];
+    }
+
+    return settings[key];
 }
 
 /**
@@ -654,7 +672,8 @@ async function handleMessage(settings, message, sendResponse) {
 
     // fetch file & parse fields if a login entry is present
     try {
-        if (typeof message.login !== "undefined") {
+        // do not fetch file for new login entries
+        if (typeof message.login !== "undefined" && message.action != "add") {
             await parseFields(settings, message.login);
         }
     } catch (e) {
@@ -695,7 +714,62 @@ async function handleMessage(settings, message, sendResponse) {
             } catch (e) {
                 sendResponse({
                     status: "error",
-                    message: "Unable to enumerate password files" + e.toString(),
+                    message: "Unable to enumerate password files. " + e.toString(),
+                });
+            }
+            break;
+        case "listDirs":
+            try {
+                var response = await hostAction(settings, "tree");
+                if (response.status != "ok") {
+                    throw new Error(JSON.stringify(response));
+                }
+                let dirs = response.data.directories;
+                sendResponse({ status: "ok", dirs });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to enumerate directory trees. " + e.toString(),
+                });
+            }
+            break;
+        case "add":
+        case "save":
+            try {
+                var response = await hostAction(settings, "save", {
+                    storeId: message.login.store.id,
+                    file: `${message.login.login}.gpg`,
+                    contents: message.params.rawContents,
+                });
+
+                if (response.status != "ok") {
+                    alert(`Save failed: ${response.params.message}`);
+                    throw new Error(JSON.stringify(response)); // TODO handle host error
+                }
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to save password file" + e.toString(),
+                });
+            }
+            break;
+        case "delete":
+            try {
+                var response = await hostAction(settings, "delete", {
+                    storeId: message.login.store.id,
+                    file: `${message.login.login}.gpg`,
+                });
+
+                if (response.status != "ok") {
+                    alert(`Delete failed: ${response.params.message}`);
+                    throw new Error(JSON.stringify(response));
+                }
+                sendResponse({ status: "ok" });
+            } catch (e) {
+                sendResponse({
+                    status: "error",
+                    message: "Unable to delete password file" + e.toString(),
                 });
             }
             break;
@@ -882,13 +956,7 @@ async function parseFields(settings, login) {
     login.raw = response.data.contents;
 
     // parse lines
-    login.fields = {
-        secret: ["secret", "password", "pass"],
-        login: ["login", "username", "user"],
-        openid: ["openid"],
-        otp: ["otp", "totp"],
-        url: ["url", "uri", "website", "site", "link", "launch"],
-    };
+    login.fields = helpers.deepCopy(helpers.fieldsPrefix);
     login.settings = {
         autoSubmit: { name: "autosubmit", type: "bool" },
     };
@@ -1055,7 +1123,7 @@ async function clearUsageData() {
  * @return void
  */
 async function saveSettings(settings) {
-    let settingsToSave = deepCopy(settings);
+    let settingsToSave = helpers.deepCopy(settings);
 
     // 'default' is our reserved name for the default store
     delete settingsToSave.stores.default;
