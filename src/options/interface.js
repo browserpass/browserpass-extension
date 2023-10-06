@@ -64,6 +64,7 @@ function view(ctl, params) {
     nodes.push(m("h3", "Theme"));
     nodes.push(
         createDropdown.call(this, "theme", [
+            m("option", { value: "auto" }, "Auto"),
             m("option", { value: "dark" }, "Dark"),
             m("option", { value: "light" }, "Light"),
         ])

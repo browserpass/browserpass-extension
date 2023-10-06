@@ -17,7 +17,7 @@ var defaultSettings = {
     stores: {},
     foreignFills: {},
     username: null,
-    theme: "dark",
+    theme: "auto",
     enableOTP: false,
     caps: {
         save: false,
