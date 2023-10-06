@@ -72,7 +72,6 @@ async function run() {
     }
 }
 
-
 function page(component) {
     return {
         render: function (vnode) {
