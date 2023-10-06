@@ -450,9 +450,10 @@ function makeTOTP(params) {
  */
 function highlightMatches(entry, fuzzyResults, substringFilters) {
     // Add all positions of the fuzzy search to the array
-    let matches = (fuzzyResults[entry.login] && fuzzyResults[entry.login][0]
-        ? fuzzyResults[entry.login][0].indexes
-        : []
+    let matches = (
+        fuzzyResults[entry.login] && fuzzyResults[entry.login][0]
+            ? fuzzyResults[entry.login][0].indexes
+            : []
     ).slice();
 
     // Add all positions of substring searches to the array
