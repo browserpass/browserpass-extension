@@ -43,16 +43,15 @@ async function run() {
         root.classList.remove("colors-dark");
         root.classList.add(`colors-${settings.theme}`);
 
-        if (settings.theme == "auto") {
-            const darkThemeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-            updateTheme(root, darkThemeMediaQuery.matches);
-
-            darkThemeMediaQuery.addEventListener("change", (e) => {
-                updateTheme(root, e.matches);
-            });
-        } else {
-            updateTheme(root, settings.theme == "dark");
-        }
+        // set theme
+        const theme =
+            settings.theme === "auto"
+                ? window.matchMedia("(prefers-color-scheme: dark)").matches
+                    ? "dark"
+                    : "light"
+                : settings.theme;
+        root.classList.remove("colors-light", "colors-dark");
+        root.classList.add(`colors-${theme}`);
 
         // get list of logins
         logins = await Login.prototype.getAll(settings);
@@ -72,6 +71,7 @@ async function run() {
         helpers.handleError(e);
     }
 }
+
 
 function page(component) {
     return {
