@@ -215,6 +215,12 @@ Browserpass is able to automatically detect your password store location: it fir
 
 Using the `Custom store locations` setting in the browser extension options, you are able to define one or more custom locations for password stores. There are no restrictions on where these may be located; they can be subfolders of the main password store, gopass mounts, or any other folder that contains password entries.
 
+#### OTP usage
+
+TOTP seeds may be provided either as an otpauth URL (e.g. `otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example`) or as a plain seed (e.g. `totp: JBSWY3DPEHPK3PXP`). Please note that the plain form is unsuitable for any TOTP implementation that does not use a period of 30 seconds and a length of 6 digits.
+
+The OTP code may be accessed by clicking on the Browserpass popup « Open Details ». In addition, the generated OTP code will be copied to the clipboard immediately after Browserpass is invoked, unless Browserpass is already using the clipboard for something else.
+
 ## Options
 
 The list of available options:
@@ -268,12 +274,6 @@ Browserpass is opinionated, it does not promote `pass-otp` and by default does n
 There are valid scenarios for using `pass-otp` (e.g. it gives protection against intercepting your password during transmission), but users are strongly advised to very carefully consider whether `pass-otp` is really an appropriate solution - and if so, come up with their own ways of accessing OTP codes that conforms to their security requirements. For the majority of people `pass-otp` is not recommended; using any phone app like Authy will be a much better and more secure alternative, because this way attackers would have to not only break into your password store, but they would _also_ have to break into your phone.
 
 If you still want the OTP support regardless, you may enable it in the Browserpass settings.
-
-#### OTP usage
-
-TOTP seeds may be provided either as an otpauth URL (e.g. `otpauth://totp/Example:alice@google.com?secret=JBSWY3DPEHPK3PXP&issuer=Example`) or as a plain seed (e.g. `totp: JBSWY3DPEHPK3PXP`). Please note that the plain form is unsuitable for any TOTP implementation that does not use a period of 30 seconds and a length of 6 digits.
-
-The OTP code may be accessed by clicking on the Browserpass popup « Open Details ». In addition, the generated OTP code will be copied to the clipboard immediately after Browserpass is invoked, unless Browserpass is already using the clipboard for something else.
 
 ## Usage data
 
