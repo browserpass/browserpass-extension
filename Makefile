@@ -76,7 +76,7 @@ crx-github:
 dist: clean extension chromium firefox crx-webstore crx-github
 	mkdir -p dist
 
-	git archive -o dist/browserpass-extension-$(VERSION).tar.gz --format tar.gz --prefix=browserpass-extension-$(VERSION)/ $(VERSION)
+	git -c tar.tar.gz.command="gzip -cn" archive -o dist/browserpass-extension-$(VERSION).tar.gz --format tar.gz --prefix=browserpass-extension-$(VERSION)/ $(VERSION)
 
 	(cd chromium && zip -r ../dist/browserpass-chromium-$(VERSION).zip *)
 	(cd firefox  && zip -r ../dist/browserpass-firefox-$(VERSION).zip  *)
