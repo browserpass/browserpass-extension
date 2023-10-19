@@ -207,7 +207,7 @@ OpenID is often used when someone doesn't trust (or doesn't want to need to trus
 
 Due to the way browsers are implemented, browser extensions are only able to fill modal credentials (e.g. a popup for basic HTTP auth) for a website if the website in question has been opened by the extension. For this reason alone Browserpass contains functionality to open a URL associated with a password entry in the current or a new browser tab. However, please note that Browserpass is not intended as a bookmark manager.
 
-If you want Browserpass to handle modal authentication, you must open these websites using Browserpass. This will cause Browserpass to open the target site, and transparently intercept and fill the authentication request. You will not normally see a login popup unless the credentials are incorrect.
+If you want Browserpass to handle modal authentication, you must open these websites using Browserpass with <kbd>Ctrl+G</kbd> or <kbd>Ctrl+Shift+G</kbd>. This will cause Browserpass to open the target site, and transparently intercept and fill the authentication request. You will not normally see a login popup unless the credentials are incorrect.
 
 ### Password store locations
 
