@@ -90,7 +90,7 @@ Settings.prototype.get = async function () {
 }
 
 /**
- * Retreive store object. Can optionally return just the sub path value.
+ * Retrieve store object. Can optionally return just the sub path value.
  *
  * @since 3.8.0
  *
