@@ -391,7 +391,7 @@ Login.prototype.save = async function(login) {
  *
  * @since 3.8.0
  *
- * @param {string} password Value of password to be assgined.
+ * @param {string} password Value of password to be assigned.
  */
 Login.prototype.setPassword = function(password = "") {
     // secret is either entire raw text or defaults to blank string

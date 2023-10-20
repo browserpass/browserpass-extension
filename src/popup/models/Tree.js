@@ -19,7 +19,7 @@ function Tree(storeId = "", paths = []) {
 }
 
 /**
- * Recurssively inserts directories into the Tree
+ * Recursively inserts directories into the Tree
  *
  * @since 3.8.0
  *
@@ -52,7 +52,7 @@ function insert(parentNode, dirs = []) {
 }
 
 /**
- * Recurssively loop over entire tree and return sum of nodes
+ * Recursively loop over entire tree and return sum of nodes
  *
  * @since 3.8.0
  *

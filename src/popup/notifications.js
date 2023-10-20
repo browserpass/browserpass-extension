@@ -53,7 +53,7 @@ let state = {
 
 /**
  * Creates new notification message and adds it to current
- * notificatino state.
+ * notification state.
  *
  * @since 3.8.0
  *

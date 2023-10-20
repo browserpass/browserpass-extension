@@ -451,7 +451,7 @@
             el.dispatchEvent(new Event(eventName, { bubbles: true }));
         }
 
-        // Focus may have triggered unvealing a true input, find it again
+        // Focus may have triggered unveiling a true input, find it again
         el = find(field, form);
         if (!el) {
             return false;

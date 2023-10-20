@@ -142,7 +142,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
             throw new Error(`Unable to determine domain of the tab with id ${tabId}`);
         }
 
-        // Compule badge counter
+        // Compute badge counter
         const files = helpers.ignoreFiles(badgeCache.files, badgeCache.settings);
         const logins = helpers.prepareLogins(files, badgeCache.settings);
         const matchedPasswordsCount = logins.reduce(

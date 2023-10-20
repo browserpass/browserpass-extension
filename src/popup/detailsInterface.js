@@ -43,7 +43,7 @@ function DetailsInterface(settingsModel) {
         return {
             // public methods
             /**
-             * Initialize compoenent: get settings and login
+             * Initialize component: get settings and login
              *
              * @since 3.8.0
              *
