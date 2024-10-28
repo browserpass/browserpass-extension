@@ -136,6 +136,23 @@
     };
 
     /**
+     * Highlight fields to be filled for login & password
+     *
+     * @since 3.8.1
+     *
+     * @return void
+     */
+    function highlightLoginFields() {
+        let loginForm = form(INPUT_FIELDS),
+            login = find(USERNAME_FIELDS, loginForm),
+            secret = find(PASSWORD_FIELDS, loginForm),
+            openid = find(OPENID_FIELDS, loginForm);
+        if (login) login.style.outline = "2px solid #1A7B84";
+        if (secret) secret.style.outline = "2px solid #1A7B84";
+        if (openid) openid.style.outline = "2px solid #1A7B84";
+    }
+
+    /**
      * Fill password
      *
      * @since 3.0.0
@@ -498,5 +515,6 @@
     window.browserpass = {
         fillLogin: fillLogin,
         focusOrSubmit: focusOrSubmit,
+        highlightLoginFields: highlightLoginFields,
     };
 })();
