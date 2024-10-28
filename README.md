@@ -56,7 +56,7 @@ In order to install Browserpass correctly, you have to install two of its compon
     -   Install using a package manager for your OS (which will provide auto-update and keep extension in sync with native host app):
         -   Arch Linux: [browserpass-chromium](https://www.archlinux.org/packages/community/any/browserpass-chromium/), [browserpass-chrome](https://aur.archlinux.org/packages/browserpass-chrome/)
         -   Debian: [webext-browserpass](https://packages.debian.org/stable/webext-browserpass) includes Chromium extension
-    -   Install the extension from [Chrome Web Store](https://chrome.google.com/webstore/detail/browserpass-ce/naepdomgkenhinolocfifgehidddafch) (which will provide auto-updates)
+    -   Install the extension from [Chrome Web Store](https://chromewebstore.google.com/detail/browserpass/naepdomgkenhinolocfifgehidddafch) (which will provide auto-updates)
     -   Download `browserpass-webstore.crx` from the latest release and drag'n'drop it into `chrome://extensions`
         -   This extension has the same ID as the one in Chrome Web Store, so when a new version will appear in Web Store, it will auto-update! Use if you want to be on latest and greatest version.
     -   Download `browserpass-github.crx` from the latest release and drag'n'drop it into `chrome://extensions`
