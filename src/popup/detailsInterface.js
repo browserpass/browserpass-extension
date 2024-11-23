@@ -3,6 +3,7 @@ module.exports = DetailsInterface;
 const m = require("mithril");
 const Moment = require("moment");
 const helpers = require("../helpers");
+const helpersUI = require("../helpers.ui");
 const layout = require("./layoutInterface");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
@@ -97,7 +98,7 @@ function DetailsInterface(settingsModel) {
                 const storeColor = Login.prototype.getStore(loginObj, "color");
                 const secret =
                     (loginObj.hasOwnProperty("fields") ? loginObj.fields.secret : null) || "";
-                const passChars = helpers.highlight(secret);
+                const passChars = helpersUI.highlight(secret);
 
                 var nodes = [];
                 nodes.push(

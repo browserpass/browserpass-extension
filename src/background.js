@@ -39,7 +39,7 @@ var badgeCache = {
 // the last text copied to the clipboard is stored here in order to be cleared after 60 seconds
 let lastCopiedText = null;
 
-chrome.browserAction.setBadgeBackgroundColor({
+chrome.action.setBadgeBackgroundColor({
     color: "#666",
 });
 
@@ -156,7 +156,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
         );
 
         // Set badge for the current tab
-        chrome.browserAction.setBadgeText({
+        chrome.action.setBadgeText({
             text: "" + (matchedPasswordsCount || ""),
             tabId: tabId,
         });
@@ -227,7 +227,8 @@ async function saveRecent(settings, login, remove = false) {
     var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
 
     // save store timestamp
-    localStorage.setItem("recent:" + login.store.id, JSON.stringify(Date.now()));
+    const ts = `recent${login.store.id}`;
+    chrome.storage.local.set({ ts: JSON.stringify(Date.now()) });
 
     // update login usage count & timestamp
     if (Date.now() > login.recent.when + ignoreInterval) {
@@ -238,7 +239,7 @@ async function saveRecent(settings, login, remove = false) {
         login.recent;
 
     // save to local storage
-    localStorage.setItem("recent", JSON.stringify(settings.recent));
+    chrome.storage.local.set({ recent: JSON.stringify(settings.recent) });
 
     // a new entry was added to the popup matching list, need to refresh the count
     if (!login.inCurrentHost && login.recent.count === 1) {
@@ -478,12 +479,30 @@ async function fillFields(settings, login, fields) {
  *
  * @return object Local settings from the extension
  */
-function getLocalSettings() {
+async function getLocalSettings() {
     var settings = helpers.deepCopy(defaultSettings);
-    for (var key in settings) {
-        var value = localStorage.getItem(key);
-        if (value !== null) {
-            settings[key] = JSON.parse(value);
+
+    try {
+        // use for debugging only, since dev tools does not show extension storage
+        await chrome.storage.local.get(console.dir);
+    } catch (err) {
+        console.warn("could not display extension local storage");
+    }
+
+    var items = await chrome.storage.local.get(Object.keys(defaultSettings));
+    for (var key in defaultSettings) {
+        var value = null;
+        if (Object.prototype.hasOwnProperty.call(items, key)) {
+            value = items[key];
+        }
+        console.info(`getLocalSettings(), response for ${key}=`, value);
+
+        if (value !== null && Boolean(value)) {
+            try {
+                settings[key] = value;
+            } catch (err) {
+                console.error(`getLocalSettings(), error JSON.parse(value):`, err, { key, value });
+            }
         }
     }
 
@@ -498,7 +517,7 @@ function getLocalSettings() {
  * @return object Full settings object
  */
 async function getFullSettings() {
-    var settings = getLocalSettings();
+    var settings = await getLocalSettings();
     var configureSettings = Object.assign(helpers.deepCopy(settings), {
         defaultStore: {},
     });
@@ -554,16 +573,30 @@ async function getFullSettings() {
 
     // Fill recent data
     for (var storeId in settings.stores) {
-        var when = localStorage.getItem("recent:" + storeId);
-        if (when) {
-            settings.stores[storeId].when = JSON.parse(when);
+        const whenKey = `recent:${storeId}`;
+        var when = await chrome.storage.local.get([whenKey]);
+        if (when && Object.prototype.hasOwnProperty.call(when, whenKey)) {
+            try {
+                settings.stores[storeId].when = JSON.parse(when[whenKey]);
+            } catch (err) {
+                console.error(
+                    `getFullSettings() error fill stores recent data (${whenKey})`,
+                    err,
+                    when
+                );
+            }
         } else {
             settings.stores[storeId].when = 0;
         }
     }
-    settings.recent = localStorage.getItem("recent");
-    if (settings.recent) {
-        settings.recent = JSON.parse(settings.recent);
+    const recentKey = "recent";
+    const recent = await chrome.storage.local.get(recentKey);
+    if (recent && Object.prototype.hasOwnProperty.call(recent, recentKey)) {
+        try {
+            settings.recent = JSON.parse(recent[recentKey]);
+        } catch (err) {
+            console.error(`getFullSettings() error recent`, err, recent);
+        }
     } else {
         settings.recent = {};
     }
@@ -1154,7 +1187,13 @@ async function saveSettings(settings) {
 
     for (var key in defaultSettings) {
         if (settingsToSave.hasOwnProperty(key)) {
-            localStorage.setItem(key, JSON.stringify(settingsToSave[key]));
+            const save = {};
+            save[key] = settingsToSave[key];
+            // chrome.storage.local.set(key, JSON.stringify(settingsToSave[key]));
+            console.info(`saving ${key}`, save);
+            await chrome.storage.local.set(save).then(() => {
+                console.log("saved setting");
+            });
         }
     }
 
@@ -1186,8 +1225,8 @@ function onExtensionInstalled(details) {
     };
 
     if (details.reason === "install") {
-        if (localStorage.getItem("installed") === null) {
-            localStorage.setItem("installed", Date.now());
+        if (chrome.storage.local.get("installed") === null) {
+            chrome.storage.local.set({ installed: Date.now() });
             show(
                 "installed",
                 "browserpass: Install native host app",

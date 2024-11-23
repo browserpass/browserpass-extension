@@ -5,8 +5,7 @@ const FuzzySort = require("fuzzysort");
 const sha1 = require("sha1");
 const ignore = require("ignore");
 const hash = require("hash.js");
-const m = require("mithril");
-const notify = require("./popup/notifications");
+// const notify = require("./popup/notifications");
 const Authenticator = require("otplib").authenticator.Authenticator;
 const BrowserpassURL = require("@browserpass/url");
 
@@ -18,7 +17,6 @@ const fieldsPrefix = {
     url: ["url", "uri", "website", "site", "link", "launch"],
 };
 
-const containsNumbersRegEx = RegExp(/[0-9]/);
 const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
 const LATEST_NATIVE_APP_VERSION = 3001000;
 
@@ -29,7 +27,6 @@ module.exports = {
     deepCopy,
     filterSortLogins,
     handleError,
-    highlight,
     getSetting,
     ignoreFiles,
     makeTOTP,
@@ -68,20 +65,23 @@ function handleError(error, type = "error") {
         case "error":
             console.log(error);
             // disable error timeout, to allow necessary user action
-            notify.errorMsg(error.toString(), 0);
+            // notify.errorMsg(error.toString(), 0);
             break;
 
         case "warning":
-            notify.warningMsg(error.toString());
+            // notify.warningMsg(error.toString());
+            console.warn(error.toString());
             break;
 
         case "success":
-            notify.successMsg(error.toString());
+            // notify.successMsg(error.toString());
+            console.info(error.toString());
             break;
 
         case "info":
         default:
-            notify.infoMsg(error.toString());
+            // notify.infoMsg(error.toString());
+            console.info(error.toString());
             break;
     }
 }
@@ -282,25 +282,6 @@ function prepareLogin(settings, storeId, file, index = 0, origin = undefined) {
     }
 
     return login;
-}
-
-/**
- * Highlight password characters
- *
- * @since 3.8.0
- *
- * @param {string} secret a string to be split by character
- * @return {array} mithril vnodes to be rendered
- */
-function highlight(secret = "") {
-    return secret.split("").map((c) => {
-        if (c.match(containsNumbersRegEx)) {
-            return m("span.char.num", c);
-        } else if (c.match(containsSymbolsRegEx)) {
-            return m("span.char.punct", c);
-        }
-        return m("span.char", c);
-    });
 }
 
 /**
