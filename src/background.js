@@ -19,6 +19,7 @@ var defaultSettings = {
     username: null,
     theme: "auto",
     enableOTP: false,
+    hideBadge: false,
     caps: {
         save: false,
         delete: false,
@@ -120,15 +121,19 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
         if (forceRefresh || Date.now() > badgeCache.expires) {
             badgeCache.isRefreshing = true;
 
+            let files = [];
             let settings = await getFullSettings();
-            let response = await hostAction(settings, "list");
-            if (response.status != "ok") {
-                throw new Error(JSON.stringify(response));
+            if (!settings.hideBadge) {
+                let response = await hostAction(settings, "list");
+                if (response.status != "ok") {
+                    throw new Error(JSON.stringify(response));
+                }
+                files = response.data.files;
             }
 
             const CACHE_TTL_MS = 60 * 1000;
             badgeCache = {
-                files: response.data.files,
+                files: files,
                 settings: settings,
                 expires: Date.now() + CACHE_TTL_MS,
                 isRefreshing: false,
@@ -156,6 +161,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
             tabId: tabId,
         });
     } catch (e) {
+        badgeCache.isRefreshing = false;
         console.log(e);
     }
 }
@@ -1151,6 +1157,9 @@ async function saveSettings(settings) {
             localStorage.setItem(key, JSON.stringify(settingsToSave[key]));
         }
     }
+
+    // refresh in case user has just toggled showing badge counter
+    updateMatchingPasswordsCount(settings.tab.id, true);
 }
 
 /**

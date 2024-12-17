@@ -58,6 +58,7 @@ function view(ctl, params) {
     nodes.push(
         createCheckbox.call(this, "enableOTP", "Enable support for OTP tokens (not recommended)")
     );
+    nodes.push(createCheckbox.call(this, "hideBadge", "Hide badge counter on the toolbar icon"));
     nodes.push(createInput.call(this, "username", "Default username", "john.smith"));
     nodes.push(createInput.call(this, "gpgPath", "Custom gpg binary", "/path/to/gpg"));
 
