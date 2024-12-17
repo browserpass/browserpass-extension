@@ -1035,9 +1035,8 @@ async function parseFields(settings, login) {
         if (login.fields.otp.match(/^otpauth:\/\/.+/i)) {
             // attempt to parse otp data as URI
             try {
-                // change otpauth:// to http:// to work around the fact
-                // that in older firefox versions there is a bug (fixed in
-                // 133) where the hostname is read as an empty string for
+                // change otpauth:// to http:// to work around a bug in firefox versions
+                // between 122 and 132 where the hostname is read as an empty string for
                 // urls that use a custom protocol like otpauth:// so the
                 // parsing behavior of such urls changes depending on
                 // browser version, while if we change it to http:// first
