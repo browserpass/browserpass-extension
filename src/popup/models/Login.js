@@ -3,6 +3,7 @@
 require("chrome-extension-async");
 const sha1 = require("sha1");
 const helpers = require("../../helpers");
+const helpersUI = require("../../helpers.ui");
 const Settings = require("./Settings");
 
 // Search for one of the secret prefixes
@@ -54,7 +55,7 @@ function Login(settings, login = {}) {
     this.settings = settings;
     // This ensures doAction works in detailInterface,
     // and any other view in which it is necessary.
-    this.doAction = helpers.withLogin.bind({
+    this.doAction = helpersUI.withLogin.bind({
         settings: settings, login: login
     });
 }

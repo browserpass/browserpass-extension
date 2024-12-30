@@ -90,9 +90,9 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 // handle fired alarms
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "clearClipboard") {
-        if (readFromClipboard() === lastCopiedText) {
+        if ((await readFromClipboard()) === lastCopiedText) {
             copyToClipboard("", false);
         }
         lastCopiedText = null;
@@ -175,16 +175,13 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
  * @param boolean clear Whether to clear the clipboard after one minute
  * @return void
  */
-function copyToClipboard(text, clear = true) {
-    document.addEventListener(
-        "copy",
-        function (e) {
-            e.clipboardData.setData("text/plain", text);
-            e.preventDefault();
-        },
-        { once: true }
-    );
-    document.execCommand("copy");
+async function copyToClipboard(text, clear = true) {
+    await setupOffscreenDocument("offscreen/offscreen.html");
+    chrome.runtime.sendMessage({
+        type: "copy-data-to-clipboard",
+        target: "offscreen-doc",
+        data: text,
+    });
 
     if (clear) {
         lastCopiedText = text;
@@ -199,17 +196,57 @@ function copyToClipboard(text, clear = true) {
  *
  * @return string The current plaintext content of the clipboard
  */
-function readFromClipboard() {
-    const ta = document.createElement("textarea");
-    // these lines are carefully crafted to make paste work in both Chrome and Firefox
-    ta.contentEditable = true;
-    ta.textContent = "";
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("paste");
-    const content = ta.value;
-    document.body.removeChild(ta);
-    return content;
+async function readFromClipboard() {
+    await setupOffscreenDocument("offscreen/offscreen.html");
+
+    const response = await chrome.runtime.sendMessage({
+        type: "read-from-clipboard",
+        target: "offscreen-doc",
+    });
+
+    if (response.status != "ok") {
+        console.error(
+            "failure reading from clipboard in offscreen document",
+            response.message || undefined
+        );
+        return;
+    }
+
+    return response.message;
+}
+
+/**
+ * Setup offscreen document
+ * @since 3.10.0
+ * @param string path - location of html document to be created
+ */
+let creatingOffscreen; // A global promise to avoid concurrency issues
+async function setupOffscreenDocument(path) {
+    // Check all windows controlled by the service worker to see if one
+    // of them is the offscreen document with the given path
+    const offscreenUrl = chrome.runtime.getURL(path);
+    const existingContexts = await chrome.runtime.getContexts({
+        contextTypes: ["OFFSCREEN_DOCUMENT"],
+        documentUrls: [offscreenUrl],
+    });
+
+    if (existingContexts.length > 0) {
+        return;
+    }
+
+    // create offscreen document
+    if (!creatingOffscreen) {
+        creatingOffscreen = chrome.offscreen.createDocument({
+            url: path,
+            reasons: [chrome.offscreen.Reason.CLIPBOARD],
+            justification: "Read / write text to the clipboard",
+        });
+    }
+
+    if (creatingOffscreen) {
+        await creatingOffscreen;
+        creatingOffscreen = null;
+    }
 }
 
 /**
@@ -277,9 +314,18 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
         foreignFills: settings.foreignFills[settings.origin] || {},
     });
 
-    let perFrameResults = await chrome.tabs.executeScript(settings.tab.id, {
-        allFrames: allFrames,
-        code: `window.browserpass.fillLogin(${JSON.stringify(request)});`,
+    try {
+        await injectScript(settings, allFrames);
+    } catch {
+        throw new Error("Unable to inject script in the top frame");
+    }
+
+    let perFrameResults = await chrome.scripting.executeScript({
+        target: { tabId: settings.tab.id, allFrames: allFrames },
+        func: function (request) {
+            window.browserpass.fillLogin(request);
+        },
+        args: [request],
     });
 
     // merge filled fields into a single array
@@ -321,9 +367,12 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
         foreignFills: settings.foreignFills[settings.origin] || {},
     });
 
-    await chrome.tabs.executeScript(settings.tab.id, {
-        allFrames: allFrames,
-        code: `window.browserpass.focusOrSubmit(${JSON.stringify(request)});`,
+    await chrome.scripting.executeScript({
+        target: { tabId: settings.tab.id, allFrames: allFrames },
+        func: function (request) {
+            window.browserpass.focusOrSubmit(request);
+        },
+        args: [request],
     });
 }
 
@@ -339,9 +388,9 @@ async function injectScript(settings, allFrames) {
 
     return new Promise(async (resolve, reject) => {
         const waitTimeout = setTimeout(reject, MAX_WAIT);
-        await chrome.tabs.executeScript(settings.tab.id, {
-            allFrames: allFrames,
-            file: "js/inject.dist.js",
+        await chrome.scripting.executeScript({
+            target: { tabId: settings.tab.id, allFrames: allFrames },
+            files: ["js/inject.dist.js"],
         });
         clearTimeout(waitTimeout);
         resolve(true);
@@ -814,7 +863,7 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "copyPassword":
             try {
-                copyToClipboard(message.login.fields.secret);
+                await copyToClipboard(message.login.fields.secret);
                 await saveRecent(settings, message.login);
                 sendResponse({ status: "ok" });
             } catch (e) {
@@ -826,7 +875,7 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "copyUsername":
             try {
-                copyToClipboard(message.login.fields.login);
+                await copyToClipboard(message.login.fields.login);
                 await saveRecent(settings, message.login);
                 sendResponse({ status: "ok" });
             } catch (e) {
@@ -842,7 +891,7 @@ async function handleMessage(settings, message, sendResponse) {
                     if (!message.login.fields.otp) {
                         throw new Exception("No OTP seed available");
                     }
-                    copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
+                    await copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
                     sendResponse({ status: "ok" });
                 } catch (e) {
                     sendResponse({
@@ -913,7 +962,7 @@ async function handleMessage(settings, message, sendResponse) {
                     helpers.getSetting("enableOTP", message.login, settings) &&
                     message.login.fields.hasOwnProperty("otp")
                 ) {
-                    copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
+                    await copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
                 }
             } catch (e) {
                 try {
@@ -1128,6 +1177,13 @@ async function receiveMessage(message, sender, sendResponse) {
     }
 
     try {
+        const msgLen = Object.keys(message).length;
+        const sendLen = Object.keys(sender).length;
+        const sendRes = typeof sendResponse;
+        console.debug(
+            `receiveMessage(message..${msgLen}, sender..${sendLen}, sendResponse..${sendRes})`,
+            { message, sender, sendResponse }
+        );
         const settings = await getFullSettings();
         handleMessage(settings, message, sendResponse);
     } catch (e) {
@@ -1189,11 +1245,8 @@ async function saveSettings(settings) {
         if (settingsToSave.hasOwnProperty(key)) {
             const save = {};
             save[key] = settingsToSave[key];
-            // chrome.storage.local.set(key, JSON.stringify(settingsToSave[key]));
             console.info(`saving ${key}`, save);
-            await chrome.storage.local.set(save).then(() => {
-                console.log("saved setting");
-            });
+            await chrome.storage.local.set(save);
         }
     }
 

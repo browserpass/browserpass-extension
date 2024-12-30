@@ -32,6 +32,8 @@
         "clipboardWrite",
         "nativeMessaging",
         "notifications",
+        "offscreen",
+        "scripting",
         "storage",
         "webRequest"
     ],

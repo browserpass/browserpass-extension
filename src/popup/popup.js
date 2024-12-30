@@ -7,7 +7,7 @@ require("chrome-extension-async");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
 // utils, libs
-const helpers = require("../helpers");
+const helpers = require("../helpers.ui");
 const m = require("mithril");
 // components
 const AddEditInterface = require("./addEditInterface");
