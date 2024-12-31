@@ -1,19 +1,18 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "Browserpass",
     "description": "Browser extension for zx2c4's pass (password manager)",
     "version": "3.9.0",
     "author": "Maxim Baz <browserpass@maximbaz.com>, Steve Gilberd <steve@erayd.net>",
     "homepage_url": "https://github.com/browserpass/browserpass-extension",
     "background": {
-        "persistent": true,
         "scripts": ["js/background.dist.js"]
     },
     "icons": {
         "16": "icon16.png",
         "128": "icon.png"
     },
-    "browser_action": {
+    "action": {
         "default_icon": {
             "16": "icon16.png",
             "128": "icon.svg"
@@ -32,20 +31,22 @@
         "clipboardWrite",
         "nativeMessaging",
         "notifications",
-        "webRequest",
-        "webRequestBlocking",
-        "http://*/*",
-        "https://*/*"
+        "scripting",
+        "storage",
+        "webRequest"
     ],
-    "content_security_policy": "default-src 'none'; font-src 'self'; img-src 'self' data:; script-src 'self'; style-src 'self'",
-    "applications": {
+    "host_permissions": ["http://*/*", "https://*/*"],
+    "content_security_policy": {
+        "extension_pages": "default-src 'none'; font-src 'self'; img-src 'self' data:; script-src 'self'"
+    },
+    "browser_specific_settings": {
         "gecko": {
             "id": "browserpass@maximbaz.com",
             "strict_min_version": "58.0"
         }
     },
     "commands": {
-        "_execute_browser_action": {
+        "_execute_action": {
             "suggested_key": {
                 "default": "Ctrl+Shift+L"
             }

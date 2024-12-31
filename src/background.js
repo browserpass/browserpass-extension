@@ -176,17 +176,45 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
  * @return void
  */
 async function copyToClipboard(text, clear = true) {
-    await setupOffscreenDocument("offscreen/offscreen.html");
-    chrome.runtime.sendMessage({
-        type: "copy-data-to-clipboard",
-        target: "offscreen-doc",
-        data: text,
-    });
+    console.debug(`copyToClipboard(${text}, ${clear})`);
+    if (isChrome()) {
+        await setupOffscreenDocument("offscreen/offscreen.html");
+        chrome.runtime.sendMessage({
+            type: "copy-data-to-clipboard",
+            target: "offscreen-doc",
+            data: text,
+        });
+    } else {
+        document.addEventListener(
+            "copy",
+            function (e) {
+                e.clipboardData.setData("text/plain", text);
+                e.preventDefault();
+            },
+            { once: true }
+        );
+        document.execCommand("copy");
+    }
 
+    // @TODO: not sure alarm is firing when background is idle/inactive
     if (clear) {
         lastCopiedText = text;
         chrome.alarms.create("clearClipboard", { delayInMinutes: 1 });
     }
+}
+
+/**
+ *
+ */
+function isChrome() {
+    const ua = navigator.userAgent;
+    const matches = ua.match(/(chrom)/i) || [];
+    if (Object.keys(matches).length > 2 && /chrom/i.test(matches[1])) {
+        console.debug(`'isChrome == true`);
+        return true;
+    }
+    console.debug(`isChrome == false`);
+    return false;
 }
 
 /**
@@ -197,22 +225,35 @@ async function copyToClipboard(text, clear = true) {
  * @return string The current plaintext content of the clipboard
  */
 async function readFromClipboard() {
-    await setupOffscreenDocument("offscreen/offscreen.html");
+    if (isChrome()) {
+        await setupOffscreenDocument("offscreen/offscreen.html");
 
-    const response = await chrome.runtime.sendMessage({
-        type: "read-from-clipboard",
-        target: "offscreen-doc",
-    });
+        const response = await chrome.runtime.sendMessage({
+            type: "read-from-clipboard",
+            target: "offscreen-doc",
+        });
 
-    if (response.status != "ok") {
-        console.error(
-            "failure reading from clipboard in offscreen document",
-            response.message || undefined
-        );
-        return;
+        if (response.status != "ok") {
+            console.error(
+                "failure reading from clipboard in offscreen document",
+                response.message || undefined
+            );
+            return;
+        }
+
+        return response.message;
+    } else {
+        const ta = document.createElement("textarea");
+        // these lines are carefully crafted to make paste work in both Chrome and Firefox
+        ta.contentEditable = true;
+        ta.textContent = "";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("paste");
+        const content = ta.value;
+        document.body.removeChild(ta);
+        return content;
     }
-
-    return response.message;
 }
 
 /**
@@ -571,6 +612,12 @@ async function getFullSettings() {
         defaultStore: {},
     });
     var response = await hostAction(configureSettings, "configure");
+    console.debug(
+        `getFullSettings => hostAction(configureSettings..${
+            Object.keys(configureSettings).length
+        }, configure)`,
+        { configureSettings }
+    );
     if (response.status != "ok") {
         settings.hostError = response;
     }

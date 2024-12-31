@@ -42,7 +42,7 @@
         "extension_pages": "default-src 'none'; font-src 'self'; img-src 'self' data:; script-src 'self'"
     },
     "commands": {
-        "_execute_browser_action": {
+        "_execute_action": {
             "suggested_key": {
                 "default": "Ctrl+Shift+L"
             }
