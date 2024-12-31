@@ -221,7 +221,9 @@ async function copyToClipboard(text, clear = true) {
 }
 
 /**
+ * returns true if agent string is Chrome / Chromium
  *
+ * @since 3.10.0
  */
 function isChrome() {
     const ua = navigator.userAgent;
