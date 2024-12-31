@@ -46,7 +46,7 @@ function highlight(secret = "") {
 function handleError(error, type = "error") {
     switch (type) {
         case "error":
-            console.log(error);
+            console.error(error);
             // disable error timeout, to allow necessary user action
             notify.errorMsg(error.toString(), 0);
             break;

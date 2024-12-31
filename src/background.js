@@ -89,6 +89,16 @@ chrome.commands.onCommand.addListener(async (command) => {
     }
 });
 
+/**
+ * ensure service worker remains awake till clipboard is cleared
+ *
+ * @since 3.10.0
+ */
+async function keepAlive() {
+    chrome.alarms.create("keepAlive", { when: Date.now() + 25e3 });
+    await getFullSettings();
+}
+
 // handle fired alarms
 chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "clearClipboard") {
@@ -96,6 +106,13 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
             copyToClipboard("", false);
         }
         lastCopiedText = null;
+    } else if (alarm.name === "keepAlive") {
+        const current = await readFromClipboard();
+        console.debug("keepAlive fired", { current, lastCopiedText });
+        // stop if either value changes
+        if (current === lastCopiedText) {
+            await keepAlive()
+        }
     }
 });
 
@@ -176,7 +193,6 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
  * @return void
  */
 async function copyToClipboard(text, clear = true) {
-    console.debug(`copyToClipboard(${text}, ${clear})`);
     if (isChrome()) {
         await setupOffscreenDocument("offscreen/offscreen.html");
         chrome.runtime.sendMessage({
@@ -200,6 +216,7 @@ async function copyToClipboard(text, clear = true) {
     if (clear) {
         lastCopiedText = text;
         chrome.alarms.create("clearClipboard", { delayInMinutes: 1 });
+        await keepAlive()
     }
 }
 
@@ -210,10 +227,8 @@ function isChrome() {
     const ua = navigator.userAgent;
     const matches = ua.match(/(chrom)/i) || [];
     if (Object.keys(matches).length > 2 && /chrom/i.test(matches[1])) {
-        console.debug(`'isChrome == true`);
         return true;
     }
-    console.debug(`isChrome == false`);
     return false;
 }
 
