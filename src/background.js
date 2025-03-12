@@ -89,6 +89,61 @@ chrome.commands.onCommand.addListener(async (command) => {
     }
 });
 
+let currentAuthRequest = null;
+
+function resolveAuthRequest(message, url) {
+    if (currentAuthRequest) {
+        if (new URL(currentAuthRequest.url).href === new URL(url).href) {
+            console.info("resolve current auth request", url);
+            currentAuthRequest.resolve(message);
+            chrome.windows.onRemoved.removeListener(currentAuthRequest.handleCloseAuthModal);
+            currentAuthRequest = null;
+        }
+    } else {
+        console.warn("resolve auth request received without existing details", url);
+    }
+}
+
+async function createAuthRequestModal(url, callback) {
+    const popup = await chrome.windows.create({
+        url: url,
+        width: 450,
+        left: 450,
+        height: 280,
+        top: 280,
+        type: "popup",
+    });
+
+    const handleCloseAuthModal = function (windowId) {
+        if (popup.id == windowId) {
+            console.info("clean up after auth request", { popup, url, windowId });
+            resolveAuthRequest({ cancel: false }, url);
+        }
+    };
+
+    currentAuthRequest = { resolve: callback, url, handleCloseAuthModal };
+    chrome.windows.onRemoved.addListener(handleCloseAuthModal);
+}
+
+chrome.webRequest.onAuthRequired.addListener(
+    function (details, chromeOnlyAsyncCallback) {
+        console.debug("auth requested", { details, callback: chromeOnlyAsyncCallback });
+        const url = `/popup/popup.html?authUrl=${encodeURIComponent(details.url)}`;
+
+        return new Promise((resolvePromise, _) => {
+            const resolve = chromeOnlyAsyncCallback || resolvePromise;
+            if (currentAuthRequest) {
+                console.warn("another auth request is already in progress");
+                resolve({});
+            } else {
+                createAuthRequestModal(url, resolve);
+            }
+        });
+    },
+    { urls: ["<all_urls>"] },
+    helpers.isChrome() ? ["asyncBlocking"] : ["blocking"]
+);
+
 /**
  * ensure service worker remains awake till clipboard is cleared
  *
@@ -111,7 +166,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         console.debug("keepAlive fired", { current, lastCopiedText });
         // stop if either value changes
         if (current === lastCopiedText) {
-            await keepAlive()
+            await keepAlive();
         }
     }
 });
@@ -193,7 +248,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
  * @return void
  */
 async function copyToClipboard(text, clear = true) {
-    if (isChrome()) {
+    if (helpers.isChrome()) {
         await setupOffscreenDocument("offscreen/offscreen.html");
         chrome.runtime.sendMessage({
             type: "copy-data-to-clipboard",
@@ -212,26 +267,11 @@ async function copyToClipboard(text, clear = true) {
         document.execCommand("copy");
     }
 
-    // @TODO: not sure alarm is firing when background is idle/inactive
     if (clear) {
         lastCopiedText = text;
         chrome.alarms.create("clearClipboard", { delayInMinutes: 1 });
-        await keepAlive()
+        await keepAlive();
     }
-}
-
-/**
- * returns true if agent string is Chrome / Chromium
- *
- * @since 3.10.0
- */
-function isChrome() {
-    const ua = navigator.userAgent;
-    const matches = ua.match(/(chrom)/i) || [];
-    if (Object.keys(matches).length > 2 && /chrom/i.test(matches[1])) {
-        return true;
-    }
-    return false;
 }
 
 /**
@@ -242,7 +282,7 @@ function isChrome() {
  * @return string The current plaintext content of the clipboard
  */
 async function readFromClipboard() {
-    if (isChrome()) {
+    if (helpers.isChrome()) {
         await setupOffscreenDocument("offscreen/offscreen.html");
 
         const response = await chrome.runtime.sendMessage({
@@ -373,7 +413,7 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
     });
 
     try {
-        await injectScript(settings, allFrames);
+        await injectScript(settings.tab, allFrames);
     } catch {
         throw new Error("Unable to inject script in the top frame");
     }
@@ -437,17 +477,17 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
 /**
  * Inject script
  *
- * @param object settings Settings object
+ * @param object tab Tab object
  * @param boolean allFrames Inject in all frames
  * @return object Cancellable promise
  */
-async function injectScript(settings, allFrames) {
+async function injectScript(tab, allFrames) {
     const MAX_WAIT = 1000;
 
     return new Promise(async (resolve, reject) => {
         const waitTimeout = setTimeout(reject, MAX_WAIT);
         await chrome.scripting.executeScript({
-            target: { tabId: settings.tab.id, allFrames: allFrames },
+            target: { tabId: tab.id, allFrames: allFrames },
             files: ["js/inject.dist.js"],
         });
         clearTimeout(waitTimeout);
@@ -466,14 +506,14 @@ async function injectScript(settings, allFrames) {
 async function fillFields(settings, login, fields) {
     // inject script
     try {
-        await injectScript(settings, false);
+        await injectScript(settings.tab, false);
     } catch {
         throw new Error("Unable to inject script in the top frame");
     }
 
     let injectedAllFrames = false;
     try {
-        await injectScript(settings, true);
+        await injectScript(settings.tab, true);
         injectedAllFrames = true;
     } catch {
         // we'll proceed with trying to fill only the top frame
@@ -725,27 +765,10 @@ async function getFullSettings() {
 }
 
 /**
- * Get most relevant setting value
- *
- * @param string key      Setting key
- * @param object login    Login object
- * @param object settings Settings object
- * @return object Setting value
- */
-function getSetting(key, login, settings) {
-    if (typeof login.settings[key] !== "undefined") {
-        return login.settings[key];
-    }
-    if (typeof settings.stores[login.store.id].settings[key] !== "undefined") {
-        return settings.stores[login.store.id].settings[key];
-    }
-
-    return settings[key];
-}
-
-/**
  * Handle modal authentication requests (e.g. HTTP basic)
  *
+ * @deprecated 3.10.0 no longer supported by Chrome, due to removal
+ * of blocking webRequest
  * @since 3.0.0
  *
  * @param object requestDetails Auth request details

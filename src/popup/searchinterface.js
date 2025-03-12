@@ -1,6 +1,8 @@
 module.exports = SearchInterface;
 
 const BrowserpassURL = require("@browserpass/url");
+const helpers = require("../helpers");
+const helpersUI = require("../helpers.ui");
 const m = require("mithril");
 
 /**
@@ -30,7 +32,17 @@ function SearchInterface(popup) {
  */
 function view(ctl, params) {
     var self = this;
-    var host = new BrowserpassURL(this.popup.settings.origin).host;
+    const authUrl = helpersUI.parseAuthUrl();
+
+    let url = "";
+    if (authUrl) {
+        url = new BrowserpassURL(authUrl);
+    } else {
+        url = new BrowserpassURL(this.popup.settings.origin);
+    }
+    console.debug("SearchInterface", { authUrl, url });
+    var host = url.host;
+
     return m(
         "form.part.search",
         {

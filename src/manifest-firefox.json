@@ -33,7 +33,8 @@
         "notifications",
         "scripting",
         "storage",
-        "webRequest"
+        "webRequest",
+        "webRequestAuthProvider"
     ],
     "host_permissions": ["http://*/*", "https://*/*"],
     "content_security_policy": {

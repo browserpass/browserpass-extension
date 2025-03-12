@@ -25,8 +25,10 @@ module.exports = {
     LATEST_NATIVE_APP_VERSION,
     deepCopy,
     filterSortLogins,
+    getPopupUrl,
     getSetting,
     ignoreFiles,
+    isChrome,
     makeTOTP,
     prepareLogin,
     prepareLogins,
@@ -49,6 +51,17 @@ function deepCopy(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 
+/**
+ * Returns url string of the html popup page
+ * @since 3.10.0
+ *
+ * @returns string
+ */
+function getPopupUrl() {
+    const base = chrome || browser;
+    return base.runtime.getURL("popup/popup.html");
+}
+
 /*
  * Get most relevant setting value
  *
@@ -66,6 +79,21 @@ function getSetting(key, login, settings) {
     }
 
     return settings[key];
+}
+
+/**
+ * returns true if agent string is Chrome / Chromium
+ *
+ * @since 3.10.0
+ */
+function isChrome() {
+    // return chrome.browser.runtime.getURL('/').startsWith('chrome')
+    const ua = navigator.userAgent;
+    const matches = ua.match(/(chrom)/i) || [];
+    if (Object.keys(matches).length > 2 && /chrom/i.test(matches[1])) {
+        return true;
+    }
+    return false;
 }
 
 /**
