@@ -79,7 +79,9 @@ function parseAuthUrl() {
     const currentUrl = (window && `${window.location.origin}${window.location.pathname}`) || null;
     console.debug("parseAuthUrl", { currentUrl });
     if (currentUrl === helpers.getPopupUrl()) {
-        const encodedUrl = new URLSearchParams(window.location.search).get("authUrl");
+        const encodedUrl = new URLSearchParams(window.location.search).get(
+            helpers.AUTH_URL_QUERY_PARAM
+        );
         console.debug("parseAuthUrl", { encodedUrl });
         if (encodedUrl) {
             return decodeURIComponent(encodedUrl);

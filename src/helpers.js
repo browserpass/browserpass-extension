@@ -18,10 +18,12 @@ const fieldsPrefix = {
 
 const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
 const LATEST_NATIVE_APP_VERSION = 3001000;
+const AUTH_URL_QUERY_PARAM = "authUrl";
 
 module.exports = {
     containsSymbolsRegEx,
     fieldsPrefix,
+    AUTH_URL_QUERY_PARAM,
     LATEST_NATIVE_APP_VERSION,
     deepCopy,
     filterSortLogins,

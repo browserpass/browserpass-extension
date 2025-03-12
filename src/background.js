@@ -128,7 +128,9 @@ async function createAuthRequestModal(url, callback) {
 chrome.webRequest.onAuthRequired.addListener(
     function (details, chromeOnlyAsyncCallback) {
         console.debug("auth requested", { details, callback: chromeOnlyAsyncCallback });
-        const url = `${helpers.getPopupUrl()}?authUrl=${encodeURIComponent(details.url)}`;
+        const url =
+            `${helpers.getPopupUrl()}` +
+            `?${helpers.AUTH_URL_QUERY_PARAM}=${encodeURIComponent(details.url)}`;
 
         return new Promise((resolvePromise, _) => {
             const resolve = chromeOnlyAsyncCallback || resolvePromise;
