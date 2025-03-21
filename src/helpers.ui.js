@@ -11,7 +11,6 @@ const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
 module.exports = {
     handleError,
     highlight,
-    parseAuthUrl,
     withLogin,
 };
 
@@ -68,26 +67,6 @@ function handleError(error, type = "error") {
             console.info(error.toString());
             break;
     }
-}
-
-/**
- * Returns decoded url param for "authUrl" if present
- * @since 3.10.0
- * @returns string | null
- */
-function parseAuthUrl() {
-    const currentUrl = (window && `${window.location.origin}${window.location.pathname}`) || null;
-    console.debug("parseAuthUrl", { currentUrl });
-    if (currentUrl === helpers.getPopupUrl()) {
-        const encodedUrl = new URLSearchParams(window.location.search).get(
-            helpers.AUTH_URL_QUERY_PARAM
-        );
-        console.debug("parseAuthUrl", { encodedUrl });
-        if (encodedUrl) {
-            return decodeURIComponent(encodedUrl);
-        }
-    }
-    return null;
 }
 
 /**

@@ -5,7 +5,7 @@ const Moment = require("moment");
 const SearchInterface = require("./searchinterface");
 const layout = require("./layoutInterface");
 const helpers = require("../helpers");
-const Settings = require("./models/Settings");
+let overrideDefaultSearchOnce = true;
 
 /**
  * Popup main interface
@@ -228,7 +228,15 @@ function renderMainView(ctl, params) {
  * @return void
  */
 function search(searchQuery) {
-    this.results = helpers.filterSortLogins(this.logins, searchQuery, this.currentDomainOnly);
+    const authUrl = overrideDefaultSearchOnce && helpers.parseAuthUrl(this.settings.tab.url);
+
+    if (overrideDefaultSearchOnce && this.settings.authRequested && authUrl) {
+        const authUrlInfo = new URL(authUrl);
+        this.results = helpers.filterSortLogins(this.logins, authUrlInfo.host, true);
+    } else {
+        this.results = helpers.filterSortLogins(this.logins, searchQuery, this.currentDomainOnly);
+    }
+    overrideDefaultSearchOnce = false;
 }
 
 /**

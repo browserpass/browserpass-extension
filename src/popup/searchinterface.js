@@ -32,15 +32,15 @@ function SearchInterface(popup) {
  */
 function view(ctl, params) {
     var self = this;
-    const authUrl = helpersUI.parseAuthUrl();
 
     let url = "";
-    if (authUrl) {
+    const authUrl = helpers.parseAuthUrl((window && `${window.location.href}`) || null);
+    if (this.popup.settings.authRequested && authUrl) {
         url = new BrowserpassURL(authUrl);
     } else {
         url = new BrowserpassURL(this.popup.settings.origin);
     }
-    console.debug("SearchInterface", { authUrl, url });
+
     var host = url.host;
 
     return m(

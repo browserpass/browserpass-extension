@@ -93,6 +93,7 @@ let currentAuthRequest = null;
 
 function resolveAuthRequest(message, url) {
     if (currentAuthRequest) {
+        console.info("attempting to resolve auth request", { currentAuthRequest, message, url });
         if (new URL(currentAuthRequest.url).href === new URL(url).href) {
             console.info("resolve current auth request", url);
             currentAuthRequest.resolve(message);
@@ -105,13 +106,15 @@ function resolveAuthRequest(message, url) {
 }
 
 async function createAuthRequestModal(url, callback) {
+    // https://developer.chrome.com/docs/extensions/reference/api/windows
     const popup = await chrome.windows.create({
         url: url,
         width: 450,
         left: 450,
-        height: 280,
-        top: 280,
+        height: 300,
+        top: 300,
         type: "popup",
+        focused: true,
     });
 
     const handleCloseAuthModal = function (windowId) {
@@ -761,7 +764,16 @@ async function getFullSettings() {
         settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
         let originInfo = new BrowserpassURL(settings.tab.url);
         settings.origin = originInfo.origin;
-    } catch (e) {}
+
+        const authUrl = helpers.parseAuthUrl(settings.tab.url);
+        if (authUrl && currentAuthRequest && currentAuthRequest.url) {
+            settings.authRequested = authUrl.startsWith(
+                helpers.parseAuthUrl(currentAuthRequest.url)
+            );
+        }
+    } catch (e) {
+        console.error(`getFullsettings() failure getting tab: ${e}`, { e });
+    }
 
     return settings;
 }

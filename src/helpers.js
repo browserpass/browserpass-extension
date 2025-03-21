@@ -32,6 +32,7 @@ module.exports = {
     ignoreFiles,
     isChrome,
     makeTOTP,
+    parseAuthUrl,
     prepareLogin,
     prepareLogins,
 };
@@ -132,6 +133,25 @@ function pathToInfo(path, currentHost) {
 }
 
 /**
+ * Returns decoded url param for "authUrl" if present
+ * @since 3.10.0
+ * @param string url    string to parse and compare against extension popup url
+ * @returns string | null
+ */
+function parseAuthUrl(url) {
+    const currentUrl = url || null;
+
+    // query url not exact match when includes fragments, so must start with extension url
+    if (currentUrl && `${currentUrl}`.startsWith(getPopupUrl())) {
+        const encodedUrl = new URL(currentUrl).searchParams.get(AUTH_URL_QUERY_PARAM);
+        if (encodedUrl) {
+            return decodeURIComponent(encodedUrl);
+        }
+    }
+    return null;
+}
+
+/**
  * Prepare list of logins based on provided files
  *
  * @since 3.1.0
@@ -143,7 +163,9 @@ function pathToInfo(path, currentHost) {
 function prepareLogins(files, settings) {
     const logins = [];
     let index = 0;
-    let origin = new BrowserpassURL(settings.origin);
+    let origin = new BrowserpassURL(
+        settings.authRequested ? parseAuthUrl(settings.tab.url) : settings.origin
+    );
 
     for (let storeId in files) {
         for (let key in files[storeId]) {
