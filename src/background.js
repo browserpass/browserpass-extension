@@ -91,17 +91,15 @@ chrome.commands.onCommand.addListener(async (command) => {
 
 let currentAuthRequest = null;
 
-function resolveAuthRequest(message, url) {
+function resolveAuthRequest(message, senderUrl) {
     if (currentAuthRequest) {
-        console.info("attempting to resolve auth request", { currentAuthRequest, message, url });
-        if (new URL(url).href.startsWith(new URL(currentAuthRequest.url).href)) {
-            console.info("resolve current auth request", url);
+        if (new URL(senderUrl).href.startsWith(new URL(currentAuthRequest.url).href)) {
+            console.info("Resolve current auth request", senderUrl);
             currentAuthRequest.resolve(message);
-            chrome.windows.onRemoved.removeListener(currentAuthRequest.handleCloseAuthModal);
             currentAuthRequest = null;
         }
     } else {
-        console.warn("resolve auth request received without existing details", url);
+        console.warn("Resolve auth request received without existing details", senderUrl);
     }
 }
 
@@ -117,23 +115,11 @@ async function createAuthRequestModal(url, callback, details) {
         focused: true,
     });
 
-    const handleCloseAuthModal = function (windowId) {
-        console.info("pop up clean up called", { windowId });
-        if (popup.id == windowId) {
-            console.info("clean up after auth request", { popup, url, windowId });
-            resolveAuthRequest({ cancel: false }, url);
-        } else {
-            console.warn("pop window clean up did not match", { popup, windowId });
-        }
-    };
-
-    currentAuthRequest = { resolve: callback, url, details, handleCloseAuthModal };
-    chrome.windows.onRemoved.addListener(handleCloseAuthModal);
+    currentAuthRequest = { resolve: callback, url, details, popup };
 }
 
 chrome.webRequest.onAuthRequired.addListener(
     function (details, chromeOnlyAsyncCallback) {
-        console.debug("auth requested", { details, callback: chromeOnlyAsyncCallback });
         const url =
             `${helpers.getPopupUrl()}` +
             `?${helpers.AUTH_URL_QUERY_PARAM}=${encodeURIComponent(details.url)}`;
@@ -141,7 +127,7 @@ chrome.webRequest.onAuthRequired.addListener(
         return new Promise((resolvePromise, _) => {
             const resolve = chromeOnlyAsyncCallback || resolvePromise;
             if (currentAuthRequest) {
-                console.warn("another auth request is already in progress");
+                console.warn("Another auth request is already in progress");
                 resolve({});
             } else {
                 createAuthRequestModal(url, resolve, details);
@@ -677,12 +663,7 @@ async function getFullSettings() {
         defaultStore: {},
     });
     var response = await hostAction(configureSettings, "configure");
-    console.debug(
-        `getFullSettings => hostAction(configureSettings..${
-            Object.keys(configureSettings).length
-        }, configure)`,
-        { configureSettings }
-    );
+
     if (response.status != "ok") {
         settings.hostError = response;
     }
@@ -767,7 +748,12 @@ async function getFullSettings() {
         settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
         let originInfo = new BrowserpassURL(settings.tab.url);
         settings.origin = originInfo.origin;
+    } catch (e) {
+        console.error(`getFullsettings() failure getting tab: ${e}`, { e });
+    }
 
+    // check for auth url
+    try {
         const authUrl = helpers.parseAuthUrl(settings.tab.url);
         if (authUrl && currentAuthRequest && currentAuthRequest.url) {
             settings.authRequested = authUrl.startsWith(
@@ -775,7 +761,7 @@ async function getFullSettings() {
             );
         }
     } catch (e) {
-        console.error(`getFullsettings() failure getting tab: ${e}`, { e });
+        console.error(`getFullsettings() failure parsing auth url: ${e}`, { e });
     }
 
     return settings;
@@ -1054,11 +1040,6 @@ async function handleMessage(settings, message, sendResponse) {
                 let fields = message.login.fields.openid ? ["openid"] : ["login", "secret"];
 
                 if (settings.authRequested) {
-                    console.info("handleMessage() attempt to resolve current auth request: ", {
-                        currentAuthRequest,
-                        login: message.login,
-                        fields,
-                    });
                     resolveAuthRequest(
                         {
                             authCredentials: {
@@ -1069,7 +1050,7 @@ async function handleMessage(settings, message, sendResponse) {
                         settings.tab.url
                     );
                     await saveRecent(settings, message.login);
-                    // don't send response window is closed
+                    sendResponse({ status: "ok" });
                     break;
                 } else {
                     // dispatch initial fill request
@@ -1301,13 +1282,6 @@ async function receiveMessage(message, sender, sendResponse) {
     }
 
     try {
-        const msgLen = Object.keys(message).length;
-        const sendLen = Object.keys(sender).length;
-        const sendRes = typeof sendResponse;
-        console.debug(
-            `receiveMessage(message..${msgLen}, sender..${sendLen}, sendResponse..${sendRes})`,
-            { message, sender, sendResponse }
-        );
         const settings = await getFullSettings();
         handleMessage(settings, message, sendResponse);
     } catch (e) {
@@ -1369,7 +1343,6 @@ async function saveSettings(settings) {
         if (settingsToSave.hasOwnProperty(key)) {
             const save = {};
             save[key] = settingsToSave[key];
-            console.info(`saving ${key}`, save);
             await chrome.storage.local.set(save);
         }
     }
