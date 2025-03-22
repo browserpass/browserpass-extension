@@ -407,7 +407,7 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
     });
 
     try {
-        await injectScript(settings.tab, allFrames);
+        await injectScript(settings, allFrames);
     } catch {
         throw new Error("Unable to inject script in the top frame");
     }
@@ -415,7 +415,7 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
     let perFrameResults = await chrome.scripting.executeScript({
         target: { tabId: settings.tab.id, allFrames: allFrames },
         func: function (request) {
-            window.browserpass.fillLogin(request);
+            return window.browserpass.fillLogin(request);
         },
         args: [request],
     });
@@ -423,7 +423,7 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
     // merge filled fields into a single array
     let filledFields = perFrameResults
         .reduce((merged, frameResult) => merged.concat(frameResult.filledFields), [])
-        .filter((val, i, merged) => merged.indexOf(val) === i);
+        .filter((val, i, merged) => val && merged.indexOf(val) === i);
 
     // if user answered a foreign-origin confirmation,
     // store the answers in the settings
@@ -441,6 +441,11 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
         await saveSettings(settings);
     }
 
+    console.debug("dispatchFill finished => ", {
+        foreignFillsChanged,
+        filledFields,
+        perFrameResults,
+    });
     return filledFields;
 }
 
@@ -471,17 +476,17 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
 /**
  * Inject script
  *
- * @param object tab Tab object
+ * @param object settings Settings object
  * @param boolean allFrames Inject in all frames
  * @return object Cancellable promise
  */
-async function injectScript(tab, allFrames) {
+async function injectScript(settings, allFrames) {
     const MAX_WAIT = 1000;
 
     return new Promise(async (resolve, reject) => {
         const waitTimeout = setTimeout(reject, MAX_WAIT);
         await chrome.scripting.executeScript({
-            target: { tabId: tab.id, allFrames: allFrames },
+            target: { tabId: settings.tab.id, allFrames: allFrames },
             files: ["js/inject.dist.js"],
         });
         clearTimeout(waitTimeout);
@@ -500,14 +505,14 @@ async function injectScript(tab, allFrames) {
 async function fillFields(settings, login, fields) {
     // inject script
     try {
-        await injectScript(settings.tab, false);
+        await injectScript(settings, false);
     } catch {
         throw new Error("Unable to inject script in the top frame");
     }
 
     let injectedAllFrames = false;
     try {
-        await injectScript(settings.tab, true);
+        await injectScript(settings, true);
         injectedAllFrames = true;
     } catch {
         // we'll proceed with trying to fill only the top frame
@@ -746,19 +751,23 @@ async function getFullSettings() {
     // Fill current tab info
     try {
         settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-        let originInfo = new BrowserpassURL(settings.tab.url);
-        settings.origin = originInfo.origin;
+        if (settings.tab) {
+            let originInfo = new BrowserpassURL(settings.tab.url);
+            settings.origin = originInfo.origin;
+        }
     } catch (e) {
         console.error(`getFullsettings() failure getting tab: ${e}`, { e });
     }
 
     // check for auth url
     try {
-        const authUrl = helpers.parseAuthUrl(settings.tab.url);
-        if (authUrl && currentAuthRequest && currentAuthRequest.url) {
-            settings.authRequested = authUrl.startsWith(
-                helpers.parseAuthUrl(currentAuthRequest.url)
-            );
+        if (settings.tab) {
+            const authUrl = helpers.parseAuthUrl(settings.tab.url);
+            if (authUrl && currentAuthRequest && currentAuthRequest.url) {
+                settings.authRequested = authUrl.startsWith(
+                    helpers.parseAuthUrl(currentAuthRequest.url)
+                );
+            }
         }
     } catch (e) {
         console.error(`getFullsettings() failure parsing auth url: ${e}`, { e });
