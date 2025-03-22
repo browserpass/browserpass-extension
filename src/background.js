@@ -406,12 +406,6 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
         foreignFills: settings.foreignFills[settings.origin] || {},
     });
 
-    try {
-        await injectScript(settings, allFrames);
-    } catch {
-        throw new Error("Unable to inject script in the top frame");
-    }
-
     let perFrameResults = await chrome.scripting.executeScript({
         target: { tabId: settings.tab.id, allFrames: allFrames },
         func: function (request) {
