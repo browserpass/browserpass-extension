@@ -94,7 +94,7 @@ let currentAuthRequest = null;
 function resolveAuthRequest(message, url) {
     if (currentAuthRequest) {
         console.info("attempting to resolve auth request", { currentAuthRequest, message, url });
-        if (new URL(currentAuthRequest.url).href === new URL(url).href) {
+        if (new URL(url).href.startsWith(new URL(currentAuthRequest.url).href)) {
             console.info("resolve current auth request", url);
             currentAuthRequest.resolve(message);
             chrome.windows.onRemoved.removeListener(currentAuthRequest.handleCloseAuthModal);
@@ -105,7 +105,7 @@ function resolveAuthRequest(message, url) {
     }
 }
 
-async function createAuthRequestModal(url, callback) {
+async function createAuthRequestModal(url, callback, details) {
     // https://developer.chrome.com/docs/extensions/reference/api/windows
     const popup = await chrome.windows.create({
         url: url,
@@ -118,13 +118,16 @@ async function createAuthRequestModal(url, callback) {
     });
 
     const handleCloseAuthModal = function (windowId) {
+        console.info("pop up clean up called", { windowId });
         if (popup.id == windowId) {
             console.info("clean up after auth request", { popup, url, windowId });
             resolveAuthRequest({ cancel: false }, url);
+        } else {
+            console.warn("pop window clean up did not match", { popup, windowId });
         }
     };
 
-    currentAuthRequest = { resolve: callback, url, handleCloseAuthModal };
+    currentAuthRequest = { resolve: callback, url, details, handleCloseAuthModal };
     chrome.windows.onRemoved.addListener(handleCloseAuthModal);
 }
 
@@ -141,7 +144,7 @@ chrome.webRequest.onAuthRequired.addListener(
                 console.warn("another auth request is already in progress");
                 resolve({});
             } else {
-                createAuthRequestModal(url, resolve);
+                createAuthRequestModal(url, resolve, details);
             }
         });
     },
@@ -1050,9 +1053,29 @@ async function handleMessage(settings, message, sendResponse) {
             try {
                 let fields = message.login.fields.openid ? ["openid"] : ["login", "secret"];
 
-                // dispatch initial fill request
-                var filledFields = await fillFields(settings, message.login, fields);
-                await saveRecent(settings, message.login);
+                if (settings.authRequested) {
+                    console.info("handleMessage() attempt to resolve current auth request: ", {
+                        currentAuthRequest,
+                        login: message.login,
+                        fields,
+                    });
+                    resolveAuthRequest(
+                        {
+                            authCredentials: {
+                                username: message.login.fields.login,
+                                password: message.login.fields.secret,
+                            },
+                        },
+                        settings.tab.url
+                    );
+                    await saveRecent(settings, message.login);
+                    // don't send response window is closed
+                    break;
+                } else {
+                    // dispatch initial fill request
+                    var filledFields = await fillFields(settings, message.login, fields);
+                    await saveRecent(settings, message.login);
+                }
 
                 // no need to check filledFields, because fillFields() already throws an error if empty
                 sendResponse({ status: "ok", filledFields: filledFields });

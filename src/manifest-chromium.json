@@ -35,6 +35,7 @@
         "offscreen",
         "scripting",
         "storage",
+        "webNavigation",
         "webRequest",
         "webRequestAuthProvider"
     ],
