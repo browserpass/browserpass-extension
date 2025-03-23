@@ -416,7 +416,7 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
 
     // merge filled fields into a single array
     let filledFields = perFrameResults
-        .reduce((merged, frameResult) => merged.concat(frameResult.filledFields), [])
+        .reduce((merged, frameResult) => merged.concat(frameResult.result.filledFields), [])
         .filter((val, i, merged) => val && merged.indexOf(val) === i);
 
     // if user answered a foreign-origin confirmation,
@@ -435,11 +435,6 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
         await saveSettings(settings);
     }
 
-    console.debug("dispatchFill finished => ", {
-        foreignFillsChanged,
-        filledFields,
-        perFrameResults,
-    });
     return filledFields;
 }
 
