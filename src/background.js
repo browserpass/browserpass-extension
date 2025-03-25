@@ -115,7 +115,17 @@ async function createAuthRequestModal(url, callback, details) {
         focused: true,
     });
 
+    function onPopupClose(windowId) {
+        console.debug("onPopupClose", { windowId, currentAuthRequest });
+        const waitingRequestId =
+            (currentAuthRequest && currentAuthRequest.popup && currentAuthRequest.popup.id) ||
+            false;
+        if (waitingRequestId === windowId) {
+            chrome.alarms.create("clearAuthRequest", { when: Date.now() + 1e3 });
+        }
+    }
     currentAuthRequest = { resolve: callback, url, details, popup };
+    chrome.windows.onRemoved.addListener(onPopupClose);
 }
 
 chrome.webRequest.onAuthRequired.addListener(
@@ -151,6 +161,7 @@ async function keepAlive() {
 // handle fired alarms
 chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "clearClipboard") {
+        console.debug("clearClipboard fired", { current, lastCopiedText });
         if ((await readFromClipboard()) === lastCopiedText) {
             copyToClipboard("", false);
         }
@@ -161,6 +172,11 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         // stop if either value changes
         if (current === lastCopiedText) {
             await keepAlive();
+        }
+    } else if (alarm.name === "clearAuthRequest") {
+        console.debug("clearAuthRequest fired", { current, lastCopiedText });
+        if (currentAuthRequest !== null) {
+            currentAuthRequest = null;
         }
     }
 });
