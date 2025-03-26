@@ -19,7 +19,7 @@ const fieldsPrefix = {
 const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
 const LATEST_NATIVE_APP_VERSION = 3001000;
 const AUTH_URL_QUERY_PARAM = "authUrl";
-const LAUNCH_URL_DEPRECATION_MESSAGE = `"Ctrl+G" and "Ctrl+Shift+G" shortcuts are deprecated and will be removed in a future version. You no longer need to open websites that require basic auth using these shortcuts, open websites normally and Browserpass will open a popup for you to choose the credentials.`;
+const LAUNCH_URL_DEPRECATION_MESSAGE = `<p>"Ctrl+G" and "Ctrl+Shift+G" shortcuts are deprecated and will be removed in a future version.</p> <p>It is no longer necessary to open websites which require basic auth using these shortcuts. Navigate websites normally and Browserpass will automatically open a popup for you to choose the credentials.</p>`;
 
 module.exports = {
     containsSymbolsRegEx,
