@@ -41,15 +41,17 @@ let Modal = {
         return m("dialog", { id: modalId }, [
             m(".modal-content", {}, m.trust(modalContent)),
             m(".modal-actions", {}, [
-                m(
-                    "button.cancel",
-                    {
-                        onclick: () => {
-                            buttonClick(false);
-                        },
-                    },
-                    cancelButtonText
-                ),
+                cancelButtonText
+                    ? m(
+                          "button.cancel",
+                          {
+                              onclick: () => {
+                                  buttonClick(false);
+                              },
+                          },
+                          cancelButtonText
+                      )
+                    : null,
                 m(
                     "button.confirm",
                     {
@@ -84,6 +86,8 @@ let Modal = {
 
         if (typeof cancelText == "string" && cancelText.length) {
             cancelButtonText = cancelText;
+        } else if (cancelText === false) {
+            cancelButtonText = undefined;
         } else {
             cancelButtonText = CANCEL;
         }
