@@ -5,6 +5,7 @@ const Moment = require("moment");
 const SearchInterface = require("./searchinterface");
 const BrowserpassURL = require("@browserpass/url");
 const layout = require("./layoutInterface");
+const dialog = require("./modalDialog");
 const helpers = require("../helpers");
 let overrideDefaultSearchOnce = true;
 
@@ -318,7 +319,15 @@ function keyHandler(e) {
             break;
         case "KeyG":
             if (e.ctrlKey) {
-                this.doAction(e.shiftKey ? "launchInNewTab" : "launch");
+                const event = e;
+                const target = this;
+                dialog.open(
+                    helpers.LAUNCH_URL_DEPRECATION_MESSAGE,
+                    function () {
+                        target.doAction(event.shiftKey ? "launchInNewTab" : "launch");
+                    },
+                    false
+                );
             }
             break;
         case "KeyO":

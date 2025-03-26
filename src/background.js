@@ -782,70 +782,6 @@ async function getFullSettings() {
 }
 
 /**
- * Handle modal authentication requests (e.g. HTTP basic)
- *
- * @deprecated 3.10.0 no longer supported by Chrome, due to removal
- * of blocking webRequest
- * @since 3.0.0
- *
- * @param object requestDetails Auth request details
- * @return object Authentication credentials or {}
- */
-function handleModalAuth(requestDetails) {
-    var launchHost = requestDetails.url.match(/:\/\/([^\/]+)/)[1];
-
-    // don't attempt authentication against the same login more than once
-    if (!this.login.allowFill) {
-        return {};
-    }
-    this.login.allowFill = false;
-
-    // don't attempt authentication outside the main frame
-    if (requestDetails.type !== "main_frame") {
-        return {};
-    }
-
-    // ensure the auth domain is the same, or ask the user for permissions to continue
-    if (launchHost !== requestDetails.challenger.host) {
-        var message =
-            "You are about to send login credentials to a domain that is different than " +
-            "the one you launched from the browserpass extension. Do you wish to proceed?\n\n" +
-            "Realm: " +
-            requestDetails.realm +
-            "\n" +
-            "Launched URL: " +
-            this.url +
-            "\n" +
-            "Authentication URL: " +
-            requestDetails.url;
-        if (!confirm(message)) {
-            return {};
-        }
-    }
-
-    // ask the user before sending credentials over an insecure connection
-    if (!requestDetails.url.match(/^https:/i)) {
-        var message =
-            "You are about to send login credentials via an insecure connection!\n\n" +
-            "Are you sure you want to do this? If there is an attacker watching your " +
-            "network traffic, they may be able to see your username and password.\n\n" +
-            "URL: " +
-            requestDetails.url;
-        if (!confirm(message)) {
-            return {};
-        }
-    }
-
-    // supply credentials
-    return {
-        authCredentials: {
-            username: this.login.fields.login,
-            password: this.login.fields.secret,
-        },
-    };
-}
-
-/**
  * Handle a message from elsewhere within the extension
  *
  * @since 3.0.0
@@ -1028,19 +964,6 @@ async function handleMessage(settings, message, sendResponse) {
                         ? await chrome.tabs.update(settings.tab.id, { url: url })
                         : await chrome.tabs.create({ url: url });
 
-                if (authListeners[tab.id]) {
-                    chrome.tabs.onUpdated.removeListener(authListeners[tab.id]);
-                    delete authListeners[tab.id];
-                }
-                authListeners[tab.id] = handleModalAuth.bind({
-                    url: url,
-                    login: message.login,
-                });
-                chrome.webRequest.onAuthRequired.addListener(
-                    authListeners[tab.id],
-                    { urls: ["*://*/*"], tabId: tab.id },
-                    ["blocking"]
-                );
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
