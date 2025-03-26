@@ -161,7 +161,7 @@ async function keepAlive() {
 // handle fired alarms
 chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "clearClipboard") {
-        console.debug("clearClipboard fired", { current, lastCopiedText });
+        console.debug("clearClipboard fired", { lastCopiedText });
         if ((await readFromClipboard()) === lastCopiedText) {
             copyToClipboard("", false);
         }
@@ -174,9 +174,9 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
             await keepAlive();
         }
     } else if (alarm.name === "clearAuthRequest") {
-        console.debug("clearAuthRequest fired", { current, lastCopiedText });
+        console.debug("clearAuthRequest fired", { currentAuthRequest });
         if (currentAuthRequest !== null) {
-            currentAuthRequest = null;
+            resolveAuthRequest({ cancel: true }, currentAuthRequest.url);
         }
     }
 });
