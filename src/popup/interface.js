@@ -3,6 +3,7 @@ module.exports = Interface;
 const m = require("mithril");
 const Moment = require("moment");
 const SearchInterface = require("./searchinterface");
+const BrowserpassURL = require("@browserpass/url");
 const layout = require("./layoutInterface");
 const helpers = require("../helpers");
 let overrideDefaultSearchOnce = true;
@@ -231,8 +232,8 @@ function search(searchQuery) {
     const authUrl = overrideDefaultSearchOnce && helpers.parseAuthUrl(this.settings.tab.url);
 
     if (overrideDefaultSearchOnce && this.settings.authRequested && authUrl) {
-        const authUrlInfo = new URL(authUrl);
-        this.results = helpers.filterSortLogins(this.logins, authUrlInfo.host, true);
+        const authUrlInfo = new BrowserpassURL(authUrl);
+        this.results = helpers.filterSortLogins(this.logins, authUrlInfo.domain, true);
     } else {
         this.results = helpers.filterSortLogins(this.logins, searchQuery, this.currentDomainOnly);
     }
