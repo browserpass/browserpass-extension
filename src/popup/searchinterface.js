@@ -34,7 +34,7 @@ function view(ctl, params) {
     var self = this;
 
     let url = "";
-    const authUrl = helpers.parseAuthUrl((window && `${window.location.href}`) || null);
+    const authUrl = helpers.parseAuthUrl(window?.location?.href ?? null);
     if (this.popup.settings.authRequested && authUrl) {
         url = new BrowserpassURL(authUrl);
     } else {
