@@ -116,7 +116,6 @@ async function createAuthRequestModal(url, callback, details) {
     });
 
     function onPopupClose(windowId) {
-        console.debug("onPopupClose", { windowId, currentAuthRequest });
         const waitingRequestId =
             (currentAuthRequest && currentAuthRequest.popup && currentAuthRequest.popup.id) ||
             false;
@@ -161,20 +160,17 @@ async function keepAlive() {
 // handle fired alarms
 chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "clearClipboard") {
-        console.debug("clearClipboard fired", { lastCopiedText });
         if ((await readFromClipboard()) === lastCopiedText) {
             copyToClipboard("", false);
         }
         lastCopiedText = null;
     } else if (alarm.name === "keepAlive") {
         const current = await readFromClipboard();
-        console.debug("keepAlive fired", { current, lastCopiedText });
         // stop if either value changes
         if (current === lastCopiedText) {
             await keepAlive();
         }
     } else if (alarm.name === "clearAuthRequest") {
-        console.debug("clearAuthRequest fired", { currentAuthRequest });
         if (currentAuthRequest !== null) {
             resolveAuthRequest({ cancel: true }, currentAuthRequest.url);
         }
