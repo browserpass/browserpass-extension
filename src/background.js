@@ -642,7 +642,6 @@ async function getLocalSettings() {
         if (Object.prototype.hasOwnProperty.call(items, key)) {
             value = items[key];
         }
-        console.info(`getLocalSettings(), response for ${key}=`, value);
 
         if (value !== null && Boolean(value)) {
             try {
