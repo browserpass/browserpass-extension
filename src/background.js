@@ -368,8 +368,9 @@ async function saveRecent(settings, login, remove = false) {
     var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
 
     // save store timestamp
-    const ts = `recent:${login.store.id}`;
-    chrome.storage.local.set(ts, JSON.stringify(Date.now()));
+    const obj = {};
+    obj[`recent:${login.store.id}`] = JSON.stringify(Date.now());
+    chrome.storage.local.set(obj);
 
     // update login usage count & timestamp
     if (Date.now() > login.recent.when + ignoreInterval) {
