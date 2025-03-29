@@ -1233,11 +1233,11 @@ async function receiveMessage(message, sender, sendResponse) {
  */
 async function clearUsageData() {
     // clear local storage
-    localStorage.removeItem("foreignFills");
-    localStorage.removeItem("recent");
-    Object.keys(localStorage).forEach((key) => {
+    chrome.storage.local.remove("foreignFills");
+    chrome.storage.local.remove("recent");
+    Object.keys(chrome.storage.local.getKeys()).forEach((key) => {
         if (key.startsWith("recent:")) {
-            localStorage.removeItem(key);
+            chrome.storage.local.remove(key);
         }
     });
 

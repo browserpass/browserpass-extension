@@ -69,19 +69,42 @@ let Modal = {
      *
      * @since 3.8.0
      *
-     * @param {string} message      message or html to render in main body of dialog
+     * @param {string} request      object, with type, or string message (html) to render in main body of dialog
      * @param {function} callback   function which accepts a single boolean argument
      * @param {string} cancelText   text to display on the negative response button
      * @param {string} confirmText  text to display on the positive response button
      */
     open: (
-        message = "",
+        request = "",
         callback = (resp = false) => {},
         cancelText = CANCEL,
         confirmText = CONFIRM
     ) => {
-        if (!message.length || typeof callback !== "function") {
+        if (typeof callback !== "function") {
             return null;
+        }
+
+        let message = "";
+        let type = "info";
+        switch (typeof request) {
+            case "string":
+                if (!request.length) {
+                    return null;
+                }
+                message = request;
+                break;
+            case "object":
+                if (typeof request?.message !== "string") {
+                    return null;
+                }
+                message = request.message;
+
+                if (["info", "warning", "error"].includes(request?.type)) {
+                    type = request.type;
+                }
+                break;
+            default:
+                return null;
         }
 
         if (typeof cancelText == "string" && cancelText.length) {
@@ -99,6 +122,8 @@ let Modal = {
         }
 
         modalElement = document.getElementById(modalId);
+        modalElement.classList.remove(...modalElement.classList);
+        modalElement.classList.add([type]);
         callBackFn = callback;
         modalContent = message;
         modalElement.showModal();

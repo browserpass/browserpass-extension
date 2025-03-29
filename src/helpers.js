@@ -19,7 +19,7 @@ const fieldsPrefix = {
 const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
 const LATEST_NATIVE_APP_VERSION = 3001000;
 const AUTH_URL_QUERY_PARAM = "authUrl";
-const LAUNCH_URL_DEPRECATION_MESSAGE = `<p>"Ctrl+G" and "Ctrl+Shift+G" shortcuts are deprecated and will be removed in a future version.</p> <p>It is no longer necessary to open websites which require basic auth using these shortcuts. Navigate websites normally and Browserpass will automatically open a popup for you to choose the credentials.</p>`;
+const LAUNCH_URL_DEPRECATION_MESSAGE = `<h3>Deprecation</h3><p>"Ctrl+G" and "Ctrl+Shift+G" shortcuts are deprecated and will be removed in a future version.</p> <p>It is no longer necessary to open websites which require basic auth using these shortcuts. Navigate websites normally and Browserpass will automatically open a popup for you to choose the credentials.</p>`;
 
 module.exports = {
     containsSymbolsRegEx,
@@ -37,6 +37,7 @@ module.exports = {
     parseAuthUrl,
     prepareLogin,
     prepareLogins,
+    unsecureRequestWarning,
 };
 
 //----------------------------------- Function definitions ----------------------------------//
@@ -92,7 +93,13 @@ function getSetting(key, login, settings) {
  * @since 3.10.0
  */
 function isChrome() {
-    return chrome.runtime.getURL("/").startsWith("chrom");
+    // return chrome.runtime.getURL("/").startsWith("chrom");
+    const ua = navigator.userAgent;
+    const matches = ua.match(/(chrom)/i) || [];
+    if (Object.keys(matches).length > 2 && /chrom/i.test(matches[1])) {
+        return true;
+    }
+    return false;
 }
 
 /**
@@ -487,4 +494,17 @@ function sortUnique(array, comparator) {
     return array
         .sort(comparator)
         .filter((elem, index, arr) => index == !arr.length || arr[index - 1] != elem);
+}
+
+/**
+ * Returns warning html string with unsecure url specified
+ * @returns html string
+ */
+function unsecureRequestWarning(url) {
+    return (
+        "<h3 >Warning: Are you sure you want to do this?</h3>" +
+        "<p>You are about to send login credentials via an insecure connection!</p>" +
+        "<p>If there is an attacker watching your network traffic, they may be able to see your username and password.</p>" +
+        `<p>URL: <strong>${url}</strong></p>`
+    );
 }

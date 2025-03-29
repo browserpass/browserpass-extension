@@ -3,10 +3,10 @@ const Login = require("./models/Login");
 const Settings = require("./models/Settings");
 const Tree = require("./models/Tree");
 const notify = require("./notifications");
+const dialog = require("./modalDialog");
 const helpers = require("../helpers");
 const helpersUI = require("../helpers.ui");
 const layout = require("./layoutInterface");
-const dialog = require("./modalDialog");
 
 module.exports = AddEditInterface;
 

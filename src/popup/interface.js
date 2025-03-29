@@ -4,9 +4,9 @@ const m = require("mithril");
 const Moment = require("moment");
 const SearchInterface = require("./searchinterface");
 const BrowserpassURL = require("@browserpass/url");
-const layout = require("./layoutInterface");
 const dialog = require("./modalDialog");
 const helpers = require("../helpers");
+const layout = require("./layoutInterface");
 let overrideDefaultSearchOnce = true;
 
 /**

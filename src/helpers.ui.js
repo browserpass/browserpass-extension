@@ -2,8 +2,9 @@
 "use strict";
 
 const m = require("mithril");
-const helpers = require("./helpers");
+const dialog = require("./popup/modalDialog");
 const notify = require("./popup/notifications");
+const helpers = require("./helpers");
 
 const containsNumbersRegEx = RegExp(/[0-9]/);
 const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
@@ -79,6 +80,33 @@ function handleError(error, type = "error") {
  * @return void
  */
 async function withLogin(action, params = {}) {
+    try {
+        const url = helpers.parseAuthUrl(this.settings?.tab?.url ?? null);
+        const askToProceed =
+            action === "fill" &&
+            this.settings?.authRequested &&
+            !params?.confirmedAlready &&
+            !url?.match(/^https:/i);
+        if (askToProceed) {
+            const that = this;
+            that.doAction = withLogin.bind({
+                settings: this.settings,
+                login: this.login,
+            });
+            dialog.open(
+                { message: helpers.unsecureRequestWarning(url), type: "warning" },
+                function () {
+                    // proceed
+                    params.confirmedAlready = true;
+                    that.doAction(action, params);
+                }
+            );
+            return;
+        }
+    } catch (e) {
+        console.error(e);
+    }
+
     try {
         switch (action) {
             case "fill":
