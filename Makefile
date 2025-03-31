@@ -20,6 +20,7 @@ EXTENSION_FILES := \
 	src/popup/*.html \
 	src/popup/*.gif \
 	src/popup/*.svg \
+	src/offscreen/*.html \
 	src/options/*.html
 EXTENSION_FILES := \
     $(wildcard $(EXTENSION_FILES)) \
@@ -27,6 +28,7 @@ EXTENSION_FILES := \
 	src/css/options.dist.css \
 	src/js/background.dist.js \
 	src/js/popup.dist.js \
+	src/js/offscreen.dist.js \
 	src/js/options.dist.js \
 	src/js/inject.dist.js
 CHROMIUM_FILES := $(patsubst src/%,chromium/%, $(EXTENSION_FILES))

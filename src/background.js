@@ -39,7 +39,7 @@ var badgeCache = {
 // the last text copied to the clipboard is stored here in order to be cleared after 60 seconds
 let lastCopiedText = null;
 
-chrome.browserAction.setBadgeBackgroundColor({
+chrome.action.setBadgeBackgroundColor({
     color: "#666",
 });
 
@@ -89,13 +89,91 @@ chrome.commands.onCommand.addListener(async (command) => {
     }
 });
 
+let currentAuthRequest = null;
+
+function resolveAuthRequest(message, senderUrl) {
+    if (currentAuthRequest) {
+        if (new URL(senderUrl).href.startsWith(new URL(currentAuthRequest.url).href)) {
+            console.info("Resolve current auth request", senderUrl);
+            currentAuthRequest.resolve(message);
+            currentAuthRequest = null;
+        }
+    } else {
+        console.warn("Resolve auth request received without existing details", senderUrl);
+    }
+}
+
+async function createAuthRequestModal(url, callback, details) {
+    // https://developer.chrome.com/docs/extensions/reference/api/windows
+    const popup = await chrome.windows.create({
+        url: url,
+        width: 450,
+        left: 450,
+        height: 300,
+        top: 300,
+        type: "popup",
+        focused: true,
+    });
+
+    function onPopupClose(windowId) {
+        const waitingRequestId =
+            (currentAuthRequest && currentAuthRequest.popup && currentAuthRequest.popup.id) ||
+            false;
+        if (waitingRequestId === windowId) {
+            chrome.alarms.create("clearAuthRequest", { when: Date.now() + 1e3 });
+        }
+    }
+    currentAuthRequest = { resolve: callback, url, details, popup };
+    chrome.windows.onRemoved.addListener(onPopupClose);
+}
+
+chrome.webRequest.onAuthRequired.addListener(
+    function (details, chromeOnlyAsyncCallback) {
+        const url =
+            `${helpers.getPopupUrl()}` +
+            `?${helpers.AUTH_URL_QUERY_PARAM}=${encodeURIComponent(details.url)}`;
+
+        return new Promise((resolvePromise, _) => {
+            const resolve = chromeOnlyAsyncCallback || resolvePromise;
+            if (currentAuthRequest) {
+                console.warn("Another auth request is already in progress");
+                resolve({});
+            } else {
+                createAuthRequestModal(url, resolve, details);
+            }
+        });
+    },
+    { urls: ["<all_urls>"] },
+    helpers.isChrome() ? ["asyncBlocking"] : ["blocking"]
+);
+
+/**
+ * ensure service worker remains awake till clipboard is cleared
+ *
+ * @since 3.10.0
+ */
+async function keepAlive() {
+    chrome.alarms.create("keepAlive", { when: Date.now() + 25e3 });
+    await getFullSettings();
+}
+
 // handle fired alarms
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === "clearClipboard") {
-        if (readFromClipboard() === lastCopiedText) {
+        if ((await readFromClipboard()) === lastCopiedText) {
             copyToClipboard("", false);
         }
         lastCopiedText = null;
+    } else if (alarm.name === "keepAlive") {
+        const current = await readFromClipboard();
+        // stop if either value changes
+        if (current === lastCopiedText) {
+            await keepAlive();
+        }
+    } else if (alarm.name === "clearAuthRequest") {
+        if (currentAuthRequest !== null) {
+            resolveAuthRequest({ cancel: true }, currentAuthRequest.url);
+        }
     }
 });
 
@@ -156,7 +234,7 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
         );
 
         // Set badge for the current tab
-        chrome.browserAction.setBadgeText({
+        chrome.action.setBadgeText({
             text: "" + (matchedPasswordsCount || ""),
             tabId: tabId,
         });
@@ -175,20 +253,30 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
  * @param boolean clear Whether to clear the clipboard after one minute
  * @return void
  */
-function copyToClipboard(text, clear = true) {
-    document.addEventListener(
-        "copy",
-        function (e) {
-            e.clipboardData.setData("text/plain", text);
-            e.preventDefault();
-        },
-        { once: true }
-    );
-    document.execCommand("copy");
+async function copyToClipboard(text, clear = true) {
+    if (helpers.isChrome()) {
+        await setupOffscreenDocument("offscreen/offscreen.html");
+        chrome.runtime.sendMessage({
+            type: "copy-data-to-clipboard",
+            target: "offscreen-doc",
+            data: text,
+        });
+    } else {
+        document.addEventListener(
+            "copy",
+            function (e) {
+                e.clipboardData.setData("text/plain", text);
+                e.preventDefault();
+            },
+            { once: true }
+        );
+        document.execCommand("copy");
+    }
 
     if (clear) {
         lastCopiedText = text;
         chrome.alarms.create("clearClipboard", { delayInMinutes: 1 });
+        await keepAlive();
     }
 }
 
@@ -199,17 +287,70 @@ function copyToClipboard(text, clear = true) {
  *
  * @return string The current plaintext content of the clipboard
  */
-function readFromClipboard() {
-    const ta = document.createElement("textarea");
-    // these lines are carefully crafted to make paste work in both Chrome and Firefox
-    ta.contentEditable = true;
-    ta.textContent = "";
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand("paste");
-    const content = ta.value;
-    document.body.removeChild(ta);
-    return content;
+async function readFromClipboard() {
+    if (helpers.isChrome()) {
+        await setupOffscreenDocument("offscreen/offscreen.html");
+
+        const response = await chrome.runtime.sendMessage({
+            type: "read-from-clipboard",
+            target: "offscreen-doc",
+        });
+
+        if (response.status != "ok") {
+            console.error(
+                "failure reading from clipboard in offscreen document",
+                response.message || undefined
+            );
+            return;
+        }
+
+        return response.message;
+    } else {
+        const ta = document.createElement("textarea");
+        // these lines are carefully crafted to make paste work in both Chrome and Firefox
+        ta.contentEditable = true;
+        ta.textContent = "";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("paste");
+        const content = ta.value;
+        document.body.removeChild(ta);
+        return content;
+    }
+}
+
+/**
+ * Setup offscreen document
+ * @since 3.10.0
+ * @param string path - location of html document to be created
+ */
+let creatingOffscreen; // A global promise to avoid concurrency issues
+async function setupOffscreenDocument(path) {
+    // Check all windows controlled by the service worker to see if one
+    // of them is the offscreen document with the given path
+    const offscreenUrl = chrome.runtime.getURL(path);
+    const existingContexts = await chrome.runtime.getContexts({
+        contextTypes: ["OFFSCREEN_DOCUMENT"],
+        documentUrls: [offscreenUrl],
+    });
+
+    if (existingContexts.length > 0) {
+        return;
+    }
+
+    // create offscreen document
+    if (!creatingOffscreen) {
+        creatingOffscreen = chrome.offscreen.createDocument({
+            url: path,
+            reasons: [chrome.offscreen.Reason.CLIPBOARD],
+            justification: "Read / write text to the clipboard",
+        });
+    }
+
+    if (creatingOffscreen) {
+        await creatingOffscreen;
+        creatingOffscreen = null;
+    }
 }
 
 /**
@@ -227,7 +368,9 @@ async function saveRecent(settings, login, remove = false) {
     var ignoreInterval = 60000; // 60 seconds - don't increment counter twice within this window
 
     // save store timestamp
-    localStorage.setItem("recent:" + login.store.id, JSON.stringify(Date.now()));
+    const obj = {};
+    obj[`recent:${login.store.id}`] = JSON.stringify(Date.now());
+    chrome.storage.local.set(obj);
 
     // update login usage count & timestamp
     if (Date.now() > login.recent.when + ignoreInterval) {
@@ -238,7 +381,7 @@ async function saveRecent(settings, login, remove = false) {
         login.recent;
 
     // save to local storage
-    localStorage.setItem("recent", JSON.stringify(settings.recent));
+    chrome.storage.local.set({ recent: JSON.stringify(settings.recent) });
 
     // a new entry was added to the popup matching list, need to refresh the count
     if (!login.inCurrentHost && login.recent.count === 1) {
@@ -276,15 +419,18 @@ async function dispatchFill(settings, request, allFrames, allowForeign, allowNoS
         foreignFills: settings.foreignFills[settings.origin] || {},
     });
 
-    let perFrameResults = await chrome.tabs.executeScript(settings.tab.id, {
-        allFrames: allFrames,
-        code: `window.browserpass.fillLogin(${JSON.stringify(request)});`,
+    let perFrameResults = await chrome.scripting.executeScript({
+        target: { tabId: settings.tab.id, allFrames: allFrames },
+        func: function (request) {
+            return window.browserpass.fillLogin(request);
+        },
+        args: [request],
     });
 
     // merge filled fields into a single array
     let filledFields = perFrameResults
-        .reduce((merged, frameResult) => merged.concat(frameResult.filledFields), [])
-        .filter((val, i, merged) => merged.indexOf(val) === i);
+        .reduce((merged, frameResult) => merged.concat(frameResult.result.filledFields), [])
+        .filter((val, i, merged) => val && merged.indexOf(val) === i);
 
     // if user answered a foreign-origin confirmation,
     // store the answers in the settings
@@ -320,9 +466,12 @@ async function dispatchFocusOrSubmit(settings, request, allFrames, allowForeign)
         foreignFills: settings.foreignFills[settings.origin] || {},
     });
 
-    await chrome.tabs.executeScript(settings.tab.id, {
-        allFrames: allFrames,
-        code: `window.browserpass.focusOrSubmit(${JSON.stringify(request)});`,
+    await chrome.scripting.executeScript({
+        target: { tabId: settings.tab.id, allFrames: allFrames },
+        func: function (request) {
+            window.browserpass.focusOrSubmit(request);
+        },
+        args: [request],
     });
 }
 
@@ -338,9 +487,9 @@ async function injectScript(settings, allFrames) {
 
     return new Promise(async (resolve, reject) => {
         const waitTimeout = setTimeout(reject, MAX_WAIT);
-        await chrome.tabs.executeScript(settings.tab.id, {
-            allFrames: allFrames,
-            file: "js/inject.dist.js",
+        await chrome.scripting.executeScript({
+            target: { tabId: settings.tab.id, allFrames: allFrames },
+            files: ["js/inject.dist.js"],
         });
         clearTimeout(waitTimeout);
         resolve(true);
@@ -478,12 +627,29 @@ async function fillFields(settings, login, fields) {
  *
  * @return object Local settings from the extension
  */
-function getLocalSettings() {
+async function getLocalSettings() {
     var settings = helpers.deepCopy(defaultSettings);
-    for (var key in settings) {
-        var value = localStorage.getItem(key);
-        if (value !== null) {
-            settings[key] = JSON.parse(value);
+
+    try {
+        // use for debugging only, since dev tools does not show extension storage
+        await chrome.storage.local.get(console.dir);
+    } catch (err) {
+        console.warn("could not display extension local storage");
+    }
+
+    var items = await chrome.storage.local.get(Object.keys(defaultSettings));
+    for (var key in defaultSettings) {
+        var value = null;
+        if (Object.prototype.hasOwnProperty.call(items, key)) {
+            value = items[key];
+        }
+
+        if (value !== null && Boolean(value)) {
+            try {
+                settings[key] = value;
+            } catch (err) {
+                console.error(`getLocalSettings(), error JSON.parse(value):`, err, { key, value });
+            }
         }
     }
 
@@ -498,11 +664,12 @@ function getLocalSettings() {
  * @return object Full settings object
  */
 async function getFullSettings() {
-    var settings = getLocalSettings();
+    var settings = await getLocalSettings();
     var configureSettings = Object.assign(helpers.deepCopy(settings), {
         defaultStore: {},
     });
     var response = await hostAction(configureSettings, "configure");
+
     if (response.status != "ok") {
         settings.hostError = response;
     }
@@ -554,16 +721,30 @@ async function getFullSettings() {
 
     // Fill recent data
     for (var storeId in settings.stores) {
-        var when = localStorage.getItem("recent:" + storeId);
-        if (when) {
-            settings.stores[storeId].when = JSON.parse(when);
+        const whenKey = `recent:${storeId}`;
+        var when = await chrome.storage.local.get([whenKey]);
+        if (when && Object.prototype.hasOwnProperty.call(when, whenKey)) {
+            try {
+                settings.stores[storeId].when = JSON.parse(when[whenKey]);
+            } catch (err) {
+                console.error(
+                    `getFullSettings() error fill stores recent data (${whenKey})`,
+                    err,
+                    when
+                );
+            }
         } else {
             settings.stores[storeId].when = 0;
         }
     }
-    settings.recent = localStorage.getItem("recent");
-    if (settings.recent) {
-        settings.recent = JSON.parse(settings.recent);
+    const recentKey = "recent";
+    const recent = await chrome.storage.local.get(recentKey);
+    if (recent && Object.prototype.hasOwnProperty.call(recent, recentKey)) {
+        try {
+            settings.recent = JSON.parse(recent[recentKey]);
+        } catch (err) {
+            console.error(`getFullSettings() error recent`, err, recent);
+        }
     } else {
         settings.recent = {};
     }
@@ -571,92 +752,29 @@ async function getFullSettings() {
     // Fill current tab info
     try {
         settings.tab = (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
-        let originInfo = new BrowserpassURL(settings.tab.url);
-        settings.origin = originInfo.origin;
-    } catch (e) {}
+        if (settings.tab) {
+            let originInfo = new BrowserpassURL(settings.tab.url);
+            settings.origin = originInfo.origin;
+        }
+    } catch (e) {
+        console.error(`getFullsettings() failure getting tab: ${e}`, { e });
+    }
+
+    // check for auth url
+    try {
+        if (settings.tab) {
+            const authUrl = helpers.parseAuthUrl(settings.tab.url);
+            if (authUrl && currentAuthRequest && currentAuthRequest.url) {
+                settings.authRequested = authUrl.startsWith(
+                    helpers.parseAuthUrl(currentAuthRequest.url)
+                );
+            }
+        }
+    } catch (e) {
+        console.error(`getFullsettings() failure parsing auth url: ${e}`, { e });
+    }
 
     return settings;
-}
-
-/**
- * Get most relevant setting value
- *
- * @param string key      Setting key
- * @param object login    Login object
- * @param object settings Settings object
- * @return object Setting value
- */
-function getSetting(key, login, settings) {
-    if (typeof login.settings[key] !== "undefined") {
-        return login.settings[key];
-    }
-    if (typeof settings.stores[login.store.id].settings[key] !== "undefined") {
-        return settings.stores[login.store.id].settings[key];
-    }
-
-    return settings[key];
-}
-
-/**
- * Handle modal authentication requests (e.g. HTTP basic)
- *
- * @since 3.0.0
- *
- * @param object requestDetails Auth request details
- * @return object Authentication credentials or {}
- */
-function handleModalAuth(requestDetails) {
-    var launchHost = requestDetails.url.match(/:\/\/([^\/]+)/)[1];
-
-    // don't attempt authentication against the same login more than once
-    if (!this.login.allowFill) {
-        return {};
-    }
-    this.login.allowFill = false;
-
-    // don't attempt authentication outside the main frame
-    if (requestDetails.type !== "main_frame") {
-        return {};
-    }
-
-    // ensure the auth domain is the same, or ask the user for permissions to continue
-    if (launchHost !== requestDetails.challenger.host) {
-        var message =
-            "You are about to send login credentials to a domain that is different than " +
-            "the one you launched from the browserpass extension. Do you wish to proceed?\n\n" +
-            "Realm: " +
-            requestDetails.realm +
-            "\n" +
-            "Launched URL: " +
-            this.url +
-            "\n" +
-            "Authentication URL: " +
-            requestDetails.url;
-        if (!confirm(message)) {
-            return {};
-        }
-    }
-
-    // ask the user before sending credentials over an insecure connection
-    if (!requestDetails.url.match(/^https:/i)) {
-        var message =
-            "You are about to send login credentials via an insecure connection!\n\n" +
-            "Are you sure you want to do this? If there is an attacker watching your " +
-            "network traffic, they may be able to see your username and password.\n\n" +
-            "URL: " +
-            requestDetails.url;
-        if (!confirm(message)) {
-            return {};
-        }
-    }
-
-    // supply credentials
-    return {
-        authCredentials: {
-            username: this.login.fields.login,
-            password: this.login.fields.secret,
-        },
-    };
 }
 
 /**
@@ -781,7 +899,7 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "copyPassword":
             try {
-                copyToClipboard(message.login.fields.secret);
+                await copyToClipboard(message.login.fields.secret);
                 await saveRecent(settings, message.login);
                 sendResponse({ status: "ok" });
             } catch (e) {
@@ -793,7 +911,7 @@ async function handleMessage(settings, message, sendResponse) {
             break;
         case "copyUsername":
             try {
-                copyToClipboard(message.login.fields.login);
+                await copyToClipboard(message.login.fields.login);
                 await saveRecent(settings, message.login);
                 sendResponse({ status: "ok" });
             } catch (e) {
@@ -809,7 +927,7 @@ async function handleMessage(settings, message, sendResponse) {
                     if (!message.login.fields.otp) {
                         throw new Exception("No OTP seed available");
                     }
-                    copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
+                    await copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
                     sendResponse({ status: "ok" });
                 } catch (e) {
                     sendResponse({
@@ -842,19 +960,6 @@ async function handleMessage(settings, message, sendResponse) {
                         ? await chrome.tabs.update(settings.tab.id, { url: url })
                         : await chrome.tabs.create({ url: url });
 
-                if (authListeners[tab.id]) {
-                    chrome.tabs.onUpdated.removeListener(authListeners[tab.id]);
-                    delete authListeners[tab.id];
-                }
-                authListeners[tab.id] = handleModalAuth.bind({
-                    url: url,
-                    login: message.login,
-                });
-                chrome.webRequest.onAuthRequired.addListener(
-                    authListeners[tab.id],
-                    { urls: ["*://*/*"], tabId: tab.id },
-                    ["blocking"]
-                );
                 sendResponse({ status: "ok" });
             } catch (e) {
                 sendResponse({
@@ -867,9 +972,24 @@ async function handleMessage(settings, message, sendResponse) {
             try {
                 let fields = message.login.fields.openid ? ["openid"] : ["login", "secret"];
 
-                // dispatch initial fill request
-                var filledFields = await fillFields(settings, message.login, fields);
-                await saveRecent(settings, message.login);
+                if (settings.authRequested) {
+                    resolveAuthRequest(
+                        {
+                            authCredentials: {
+                                username: message.login.fields.login,
+                                password: message.login.fields.secret,
+                            },
+                        },
+                        settings.tab.url
+                    );
+                    await saveRecent(settings, message.login);
+                    sendResponse({ status: "ok" });
+                    break;
+                } else {
+                    // dispatch initial fill request
+                    var filledFields = await fillFields(settings, message.login, fields);
+                    await saveRecent(settings, message.login);
+                }
 
                 // no need to check filledFields, because fillFields() already throws an error if empty
                 sendResponse({ status: "ok", filledFields: filledFields });
@@ -880,7 +1000,7 @@ async function handleMessage(settings, message, sendResponse) {
                     helpers.getSetting("enableOTP", message.login, settings) &&
                     message.login.fields.hasOwnProperty("otp")
                 ) {
-                    copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
+                    await copyToClipboard(helpers.makeTOTP(message.login.fields.otp.params));
                 }
             } catch (e) {
                 try {
@@ -1113,11 +1233,11 @@ async function receiveMessage(message, sender, sendResponse) {
  */
 async function clearUsageData() {
     // clear local storage
-    localStorage.removeItem("foreignFills");
-    localStorage.removeItem("recent");
-    Object.keys(localStorage).forEach((key) => {
+    chrome.storage.local.remove("foreignFills");
+    chrome.storage.local.remove("recent");
+    Object.keys(chrome.storage.local.getKeys()).forEach((key) => {
         if (key.startsWith("recent:")) {
-            localStorage.removeItem(key);
+            chrome.storage.local.remove(key);
         }
     });
 
@@ -1154,7 +1274,9 @@ async function saveSettings(settings) {
 
     for (var key in defaultSettings) {
         if (settingsToSave.hasOwnProperty(key)) {
-            localStorage.setItem(key, JSON.stringify(settingsToSave[key]));
+            const save = {};
+            save[key] = settingsToSave[key];
+            await chrome.storage.local.set(save);
         }
     }
 
@@ -1186,8 +1308,8 @@ function onExtensionInstalled(details) {
     };
 
     if (details.reason === "install") {
-        if (localStorage.getItem("installed") === null) {
-            localStorage.setItem("installed", Date.now());
+        if (chrome.storage.local.get("installed") === null) {
+            chrome.storage.local.set({ installed: Date.now() });
             show(
                 "installed",
                 "browserpass: Install native host app",

@@ -3,9 +3,10 @@ const Login = require("./models/Login");
 const Settings = require("./models/Settings");
 const Tree = require("./models/Tree");
 const notify = require("./notifications");
-const helpers = require("../helpers");
-const layout = require("./layoutInterface");
 const dialog = require("./modalDialog");
+const helpers = require("../helpers");
+const helpersUI = require("../helpers.ui");
+const layout = require("./layoutInterface");
 
 module.exports = AddEditInterface;
 
@@ -486,7 +487,7 @@ function AddEditInterface(settingsModel) {
                             m(
                                 "div.chars",
                                 loginObj.hasOwnProperty("fields")
-                                    ? helpers.highlight(loginObj.fields.secret)
+                                    ? helpersUI.highlight(loginObj.fields.secret)
                                     : ""
                             ),
                             m("div.btn.generate", {

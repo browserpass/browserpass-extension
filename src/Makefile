@@ -3,10 +3,10 @@ PRETTIER := node_modules/.bin/prettier
 LESSC := node_modules/.bin/lessc
 
 CLEAN_FILES := css js
-PRETTIER_FILES := $(wildcard *.json *.js popup/*.js options/*.js *.less popup/*.less options/*.less *.html popup/*.html options/*.html)
+PRETTIER_FILES := $(wildcard *.json *.js popup/*.js offscreen/*.js options/*.js *.less popup/*.less options/*.less *.html popup/*.html offscreen/*.html options/*.html)
 
 .PHONY: all
-all: deps prettier css/popup.dist.css css/options.dist.css js/background.dist.js js/popup.dist.js js/options.dist.js js/inject.dist.js
+all: deps prettier css/popup.dist.css css/options.dist.css js/background.dist.js js/popup.dist.js js/offscreen.dist.js js/options.dist.js js/inject.dist.js
 
 .PHONY: deps
 deps:
@@ -31,6 +31,10 @@ js/background.dist.js: $(BROWSERIFY) background.js helpers.js
 js/popup.dist.js: $(BROWSERIFY) popup/*.js helpers.js
 	[ -d js ] || mkdir -p js
 	$(BROWSERIFY) -o js/popup.dist.js popup/popup.js
+
+js/offscreen.dist.js: $(BROWSERIFY) offscreen/*.js
+	[ -d js ] || mkdir -p js
+	$(BROWSERIFY) -o js/offscreen.dist.js offscreen/offscreen.js
 
 js/options.dist.js: $(BROWSERIFY) options/*.js
 	[ -d js ] || mkdir -p js

@@ -1,6 +1,8 @@
 module.exports = SearchInterface;
 
 const BrowserpassURL = require("@browserpass/url");
+const dialog = require("./modalDialog");
+const helpers = require("../helpers");
 const m = require("mithril");
 
 /**
@@ -30,7 +32,17 @@ function SearchInterface(popup) {
  */
 function view(ctl, params) {
     var self = this;
-    var host = new BrowserpassURL(this.popup.settings.origin).host;
+
+    let url = "";
+    const authUrl = helpers.parseAuthUrl(window?.location?.href ?? null);
+    if (this.popup.settings.authRequested && authUrl) {
+        url = new BrowserpassURL(authUrl);
+    } else {
+        url = new BrowserpassURL(this.popup.settings.origin);
+    }
+
+    var host = url.host;
+
     return m(
         "form.part.search",
         {
@@ -121,8 +133,16 @@ function view(ctl, params) {
                         case "KeyG":
                             if (e.ctrlKey && e.target.selectionStart == e.target.selectionEnd) {
                                 e.preventDefault();
-                                self.popup.results[0].doAction(
-                                    e.shiftKey ? "launchInNewTab" : "launch"
+                                const event = e;
+                                const target = self.popup.results[0];
+                                dialog.open(
+                                    helpers.LAUNCH_URL_DEPRECATION_MESSAGE,
+                                    function () {
+                                        target.doAction(
+                                            event.shiftKey ? "launchInNewTab" : "launch"
+                                        );
+                                    },
+                                    false
                                 );
                             }
                             break;

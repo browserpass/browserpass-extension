@@ -7,7 +7,7 @@ require("chrome-extension-async");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");
 // utils, libs
-const helpers = require("../helpers");
+const helpers = require("../helpers.ui");
 const m = require("mithril");
 // components
 const AddEditInterface = require("./addEditInterface");
@@ -42,6 +42,15 @@ async function run() {
             root = document.getElementsByTagName("html")[0];
         root.classList.remove("colors-dark");
         root.classList.add(`colors-${settings.theme}`);
+
+        /**
+         * Only set width: min-content for the attached popup,
+         * and allow content to fill detached window
+         */
+        if (!Object.prototype.hasOwnProperty.call(settings, "authRequested")) {
+            root.classList.add("attached");
+            document.getElementsByTagName("body")[0].classList.add("attached");
+        }
 
         // set theme
         const theme =

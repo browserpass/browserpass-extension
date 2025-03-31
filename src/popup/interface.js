@@ -3,9 +3,11 @@ module.exports = Interface;
 const m = require("mithril");
 const Moment = require("moment");
 const SearchInterface = require("./searchinterface");
-const layout = require("./layoutInterface");
+const BrowserpassURL = require("@browserpass/url");
+const dialog = require("./modalDialog");
 const helpers = require("../helpers");
-const Settings = require("./models/Settings");
+const layout = require("./layoutInterface");
+let overrideDefaultSearchOnce = true;
 
 /**
  * Popup main interface
@@ -228,7 +230,15 @@ function renderMainView(ctl, params) {
  * @return void
  */
 function search(searchQuery) {
-    this.results = helpers.filterSortLogins(this.logins, searchQuery, this.currentDomainOnly);
+    const authUrl = overrideDefaultSearchOnce && helpers.parseAuthUrl(this.settings.tab.url);
+
+    if (overrideDefaultSearchOnce && this.settings.authRequested && authUrl) {
+        const authUrlInfo = new BrowserpassURL(authUrl);
+        this.results = helpers.filterSortLogins(this.logins, authUrlInfo.domain, true);
+    } else {
+        this.results = helpers.filterSortLogins(this.logins, searchQuery, this.currentDomainOnly);
+    }
+    overrideDefaultSearchOnce = false;
 }
 
 /**
@@ -309,7 +319,15 @@ function keyHandler(e) {
             break;
         case "KeyG":
             if (e.ctrlKey) {
-                this.doAction(e.shiftKey ? "launchInNewTab" : "launch");
+                const event = e;
+                const target = this;
+                dialog.open(
+                    helpers.LAUNCH_URL_DEPRECATION_MESSAGE,
+                    function () {
+                        target.doAction(event.shiftKey ? "launchInNewTab" : "launch");
+                    },
+                    false
+                );
             }
             break;
         case "KeyO":

@@ -5,8 +5,6 @@ const FuzzySort = require("fuzzysort");
 const sha1 = require("sha1");
 const ignore = require("ignore");
 const hash = require("hash.js");
-const m = require("mithril");
-const notify = require("./popup/notifications");
 const Authenticator = require("otplib").authenticator.Authenticator;
 const BrowserpassURL = require("@browserpass/url");
 
@@ -18,24 +16,28 @@ const fieldsPrefix = {
     url: ["url", "uri", "website", "site", "link", "launch"],
 };
 
-const containsNumbersRegEx = RegExp(/[0-9]/);
 const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
 const LATEST_NATIVE_APP_VERSION = 3001000;
+const AUTH_URL_QUERY_PARAM = "authUrl";
+const LAUNCH_URL_DEPRECATION_MESSAGE = `<h3>Deprecation</h3><p>"Ctrl+G" and "Ctrl+Shift+G" shortcuts are deprecated and will be removed in a future version.</p> <p>It is no longer necessary to open websites which require basic auth using these shortcuts. Navigate websites normally and Browserpass will automatically open a popup for you to choose the credentials.</p>`;
 
 module.exports = {
     containsSymbolsRegEx,
     fieldsPrefix,
+    AUTH_URL_QUERY_PARAM,
     LATEST_NATIVE_APP_VERSION,
+    LAUNCH_URL_DEPRECATION_MESSAGE,
     deepCopy,
     filterSortLogins,
-    handleError,
-    highlight,
+    getPopupUrl,
     getSetting,
     ignoreFiles,
+    isChrome,
     makeTOTP,
+    parseAuthUrl,
     prepareLogin,
     prepareLogins,
-    withLogin,
+    unsecureRequestWarning,
 };
 
 //----------------------------------- Function definitions ----------------------------------//
@@ -56,90 +58,14 @@ function deepCopy(obj) {
 }
 
 /**
- * Handle an error
+ * Returns url string of the html popup page
+ * @since 3.10.0
  *
- * @since 3.0.0
- *
- * @param Error error Error object
- * @param string type Error type
+ * @returns string
  */
-function handleError(error, type = "error") {
-    switch (type) {
-        case "error":
-            console.log(error);
-            // disable error timeout, to allow necessary user action
-            notify.errorMsg(error.toString(), 0);
-            break;
-
-        case "warning":
-            notify.warningMsg(error.toString());
-            break;
-
-        case "success":
-            notify.successMsg(error.toString());
-            break;
-
-        case "info":
-        default:
-            notify.infoMsg(error.toString());
-            break;
-    }
-}
-
-/**
- * Do a login action
- *
- * @since 3.0.0
- *
- * @param string action Action to take
- * @param object params Action parameters
- * @return void
- */
-async function withLogin(action, params = {}) {
-    try {
-        switch (action) {
-            case "fill":
-                handleError("Filling login details...", "info");
-                break;
-            case "launch":
-                handleError("Launching URL...", "info");
-                break;
-            case "launchInNewTab":
-                handleError("Launching URL in a new tab...", "info");
-                break;
-            case "copyPassword":
-                handleError("Copying password to clipboard...", "info");
-                break;
-            case "copyUsername":
-                handleError("Copying username to clipboard...", "info");
-                break;
-            case "copyOTP":
-                handleError("Copying OTP token to clipboard...", "info");
-                break;
-            default:
-                handleError("Please wait...", "info");
-                break;
-        }
-
-        const login = deepCopy(this.login);
-
-        // hand off action to background script
-        var response = await chrome.runtime.sendMessage({ action, login, params });
-        if (response.status != "ok") {
-            throw new Error(response.message);
-        } else {
-            if (response.login && typeof response.login === "object") {
-                response.login.doAction = withLogin.bind({
-                    settings: this.settings,
-                    login: response.login,
-                });
-            } else {
-                window.close();
-            }
-        }
-    } catch (e) {
-        handleError(e);
-    }
+function getPopupUrl() {
+    const base = chrome || browser;
+    return base.runtime.getURL("popup/popup.html");
 }
 
 /*
@@ -159,6 +85,32 @@ function getSetting(key, login, settings) {
     }
 
     return settings[key];
+}
+
+/**
+ * returns true if agent string is Chrome / Chromium
+ *
+ * @since 3.10.0
+ */
+function isChrome() {
+    return chrome.runtime.getURL("/").startsWith("chrom");
+    /**
+     * Alternate approach to checking if current browser is chrome or
+     * chromium based.
+     *
+     * @TODO: remove one of these two after probationary period
+     * to determine which will approach will best suite browserpass
+     * purposes in the wild.
+     *
+     * Above: .getURL("/") will error on "chrome://" protocols
+     * Below: check user agent, can be altered depending vendor
+     */
+    // const ua = navigator.userAgent;
+    // const matches = ua.match(/(chrom)/i) || [];
+    // if (Object.keys(matches).length > 2 && /chrom/i.test(matches[1])) {
+    //     return true;
+    // }
+    // return false;
 }
 
 /**
@@ -195,6 +147,25 @@ function pathToInfo(path, currentHost) {
 }
 
 /**
+ * Returns decoded url param for "authUrl" if present
+ * @since 3.10.0
+ * @param string url    string to parse and compare against extension popup url
+ * @returns string | null
+ */
+function parseAuthUrl(url) {
+    const currentUrl = url || null;
+
+    // query url not exact match when includes fragments, so must start with extension url
+    if (currentUrl && `${currentUrl}`.startsWith(getPopupUrl())) {
+        const encodedUrl = new URL(currentUrl).searchParams.get(AUTH_URL_QUERY_PARAM);
+        if (encodedUrl) {
+            return decodeURIComponent(encodedUrl);
+        }
+    }
+    return null;
+}
+
+/**
  * Prepare list of logins based on provided files
  *
  * @since 3.1.0
@@ -206,7 +177,9 @@ function pathToInfo(path, currentHost) {
 function prepareLogins(files, settings) {
     const logins = [];
     let index = 0;
-    let origin = new BrowserpassURL(settings.origin);
+    let origin = new BrowserpassURL(
+        settings.authRequested ? parseAuthUrl(settings.tab.url) : settings.origin
+    );
 
     for (let storeId in files) {
         for (let key in files[storeId]) {
@@ -282,25 +255,6 @@ function prepareLogin(settings, storeId, file, index = 0, origin = undefined) {
     }
 
     return login;
-}
-
-/**
- * Highlight password characters
- *
- * @since 3.8.0
- *
- * @param {string} secret a string to be split by character
- * @return {array} mithril vnodes to be rendered
- */
-function highlight(secret = "") {
-    return secret.split("").map((c) => {
-        if (c.match(containsNumbersRegEx)) {
-            return m("span.char.num", c);
-        } else if (c.match(containsSymbolsRegEx)) {
-            return m("span.char.punct", c);
-        }
-        return m("span.char", c);
-    });
 }
 
 /**
@@ -551,4 +505,17 @@ function sortUnique(array, comparator) {
     return array
         .sort(comparator)
         .filter((elem, index, arr) => index == !arr.length || arr[index - 1] != elem);
+}
+
+/**
+ * Returns warning html string with unsecure url specified
+ * @returns html string
+ */
+function unsecureRequestWarning(url) {
+    return (
+        "<h3 >Warning: Are you sure you want to do this?</h3>" +
+        "<p>You are about to send login credentials via an insecure connection!</p>" +
+        "<p>If there is an attacker watching your network traffic, they may be able to see your username and password.</p>" +
+        `<p>URL: <strong>${url}</strong></p>`
+    );
 }

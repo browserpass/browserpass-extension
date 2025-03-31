@@ -265,5 +265,25 @@
             background-color: @ntfy-warning-bgcolor;
             border: 1px solid @ntfy-warning-border;
         }
+
+        &.warning {
+            color: @ntfy-warning-color;
+            background-color: @ntfy-warning-bgcolor;
+            border: 1px solid @ntfy-warning-border;
+        }
+        &.error {
+            color: @ntfy-error-color;
+            background-color: @ntfy-error-bgcolor;
+            border: 1px solid @ntfy-error-border;
+        }
+
+        &.warning,
+        &.error {
+            button {
+                color: @ntfy-info-color;
+                background-color: @ntfy-info-bgcolor;
+                border: 1px solid @ntfy-info-border;
+            }
+        }
     }
 }
