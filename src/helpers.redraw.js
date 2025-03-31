@@ -16,27 +16,16 @@ function increaseModalHeight(referenceElement, heightDiff = 50) {
     if (typeof heightDiff != "number") {
         heightDiff = 50;
     }
-    console.debug(`increaseModalHeight(referenceElement...${referenceElement && "present"})`, {
-        referenceElement,
-        exists: Boolean(referenceElement),
-        height: referenceElement.clientHeight,
-    });
     if (!referenceElement) {
         return;
     }
     const rootContentEl = document.getRootNode().getElementsByClassName("layout")[0] ?? null;
-    console.debug(`increaseModalHeight()`, {
-        rootContentEl,
-        exists: Boolean(rootContentEl),
-        height: rootContentEl.clientHeight,
-    });
     if (rootContentEl) {
         let count = 0;
         while (
             rootContentEl.clientHeight < 1000 &&
             rootContentEl.clientHeight < referenceElement?.clientHeight + heightDiff
         ) {
-            console.log(count, rootContentEl, referenceElement);
             rootContentEl.classList.remove(...rootContentEl.classList);
             rootContentEl.classList.add(...["layout", `mh-${count}`]);
             m.redraw();
