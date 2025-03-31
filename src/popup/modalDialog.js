@@ -1,4 +1,5 @@
 const m = require("mithril");
+const redraw = require("../helpers.redraw");
 
 const modalId = "browserpass-modal";
 const CANCEL = "Cancel";
@@ -128,6 +129,8 @@ let Modal = {
         modalContent = message;
         modalElement.showModal();
         m.redraw();
+
+        redraw.increaseModalHeight(modalElement);
     },
 };
 

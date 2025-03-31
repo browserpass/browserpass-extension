@@ -5,7 +5,9 @@
  */
 
 const m = require("mithril");
+const redraw = require("../helpers.redraw");
 const uuidPrefix = RegExp(/^([a-z0-9]){8}-/);
+const NOTIFY_CLASS = "m-notifications";
 
 /**
  * Generate a globally unique id
@@ -85,11 +87,16 @@ function addError(text, timeout = 5000) {
 }
 
 let Notifications = {
+    onupdate: function () {
+        setTimeout(() => {
+            redraw.increaseModalHeight(document.getElementsByClassName(NOTIFY_CLASS)[0]);
+        }, 25);
+    },
     view(vnode) {
         let ui = vnode.state;
         return state.list
             ? m(
-                  ".m-notifications",
+                  `.${NOTIFY_CLASS}`,
                   state.list.map((msg) => {
                       return m("div", { key: msg.id }, m(Notification, msg)); //wrap in div with key for proper dom updates
                   })

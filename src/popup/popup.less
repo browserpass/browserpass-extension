@@ -659,3 +659,11 @@ dialog#browserpass-modal {
         opacity: 0;
     }
 }
+
+.generate-heights(@start, @end, @i: 0, @step: 25) when ((@start + @i * @step) =< @end) {
+    .mh-@{i} {
+        min-height: (1px * @start) + (1px * @i * @step);
+    }
+    .generate-heights(@start, @end, (@i + 1));
+}
+.generate-heights(300, 1000);
