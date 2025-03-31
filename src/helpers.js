@@ -93,7 +93,6 @@ function getSetting(key, login, settings) {
  * @since 3.10.0
  */
 function isChrome() {
-    // return chrome.runtime.getURL("/").startsWith("chrom");
     const ua = navigator.userAgent;
     const matches = ua.match(/(chrom)/i) || [];
     if (Object.keys(matches).length > 2 && /chrom/i.test(matches[1])) {
