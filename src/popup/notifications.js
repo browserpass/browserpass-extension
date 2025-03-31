@@ -89,7 +89,7 @@ function addError(text, timeout = 5000) {
 let Notifications = {
     onupdate: function () {
         setTimeout(() => {
-            redraw.increaseModalHeight(document.getElementsByClassName(NOTIFY_CLASS)[0]);
+            redraw.increaseModalHeight(document.getElementsByClassName(NOTIFY_CLASS)[0], 25);
         }, 25);
     },
     view(vnode) {

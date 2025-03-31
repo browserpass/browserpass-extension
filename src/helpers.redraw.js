@@ -12,7 +12,10 @@ module.exports = {
  * @param referenceElement an htmlElement returned from one of document.getElementBy... methods
  * @since 3.10.0
  */
-function increaseModalHeight(referenceElement) {
+function increaseModalHeight(referenceElement, heightDiff = 50) {
+    if (typeof heightDiff != "number") {
+        heightDiff = 50;
+    }
     console.debug(`increaseModalHeight(referenceElement...${referenceElement && "present"})`, {
         referenceElement,
         exists: Boolean(referenceElement),
@@ -31,7 +34,7 @@ function increaseModalHeight(referenceElement) {
         let count = 0;
         while (
             rootContentEl.clientHeight < 1000 &&
-            rootContentEl.clientHeight < referenceElement?.clientHeight + 50
+            rootContentEl.clientHeight < referenceElement?.clientHeight + heightDiff
         ) {
             console.log(count, rootContentEl, referenceElement);
             rootContentEl.classList.remove(...rootContentEl.classList);
