@@ -1319,6 +1319,9 @@ function onExtensionInstalled(details) {
         }
     } else if (details.reason === "update") {
         var changelog = {
+            3010001:
+                "If you use custom stores or other settings, please configure them again.\n" +
+                "Unfortunately, the extension lost all settings during the migration to Manifest V3.",
             3002000: "New permissions added to clear copied credentials after 60 seconds.",
             3000000:
                 "New major update is out, please update the native host app to v3.\n" +
