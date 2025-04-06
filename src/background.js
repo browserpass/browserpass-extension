@@ -172,7 +172,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         }
     } else if (alarm.name === "clearAuthRequest") {
         if (currentAuthRequest !== null) {
-            resolveAuthRequest({ cancel: true }, currentAuthRequest.url);
+            resolveAuthRequest({ cancel: false }, currentAuthRequest.url);
         }
     }
 });
