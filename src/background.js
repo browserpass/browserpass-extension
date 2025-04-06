@@ -631,10 +631,9 @@ async function getLocalSettings() {
     var settings = helpers.deepCopy(defaultSettings);
 
     try {
-        // use for debugging only, since dev tools does not show extension storage
         await chrome.storage.local.get(console.dir);
     } catch (err) {
-        console.warn("could not display extension local storage");
+        console.warn("could not retrieve extension local storage", err);
     }
 
     var items = await chrome.storage.local.get(Object.keys(defaultSettings));
