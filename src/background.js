@@ -307,7 +307,7 @@ async function readFromClipboard() {
         return response.message;
     } else {
         const ta = document.createElement("textarea");
-        // these lines are carefully crafted to make paste work in both Chrome and Firefox
+        // these lines are carefully crafted to make paste work in Firefox
         ta.contentEditable = true;
         ta.textContent = "";
         document.body.appendChild(ta);
