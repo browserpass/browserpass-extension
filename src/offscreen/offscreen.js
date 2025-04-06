@@ -58,7 +58,6 @@ function readFromClipboard() {
  * @since 3.2.0
  *
  * @param string text Text to copy
- * @param boolean clear Whether to clear the clipboard after one minute
  * @return void
  */
 async function writeToClipboard(text) {
