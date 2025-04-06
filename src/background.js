@@ -644,11 +644,7 @@ async function getLocalSettings() {
         }
 
         if (value !== null && Boolean(value)) {
-            try {
-                settings[key] = value;
-            } catch (err) {
-                console.error(`getLocalSettings(), error JSON.parse(value):`, err, { key, value });
-            }
+            settings[key] = value;
         }
     }
 
