@@ -1,5 +1,6 @@
 //------------------------------------- Initialization --------------------------------------//
 "use strict";
+const clipboard = require("../helpers/clipboard");
 
 //----------------------------------- Function definitions ----------------------------------//
 chrome.runtime.onMessage.addListener(handleMessage);
@@ -20,10 +21,10 @@ async function handleMessage(message, sender, sendResponse) {
     try {
         switch (message.type) {
             case "copy-data-to-clipboard":
-                writeToClipboard(message.data);
+                clipboard.writeToClipboard(message.data);
                 break;
             case "read-from-clipboard":
-                reply = readFromClipboard();
+                reply = clipboard.readFromClipboard();
                 break;
             default:
                 console.warn(`Unexpected message type received: '${message.type}'.`);
@@ -32,47 +33,4 @@ async function handleMessage(message, sender, sendResponse) {
     } catch (e) {
         sendResponse({ status: "error", message: e.toString() });
     }
-}
-
-/**
- * Read plain text from clipboard
- *
- * @since 3.2.0
- *
- * @return string The current plaintext content of the clipboard
- */
-function readFromClipboard() {
-    const ta = document.querySelector("#text");
-    // these lines are carefully crafted to make paste work in both Chrome and Firefox
-    ta.contentEditable = true;
-    ta.textContent = "";
-    ta.select();
-    document.execCommand("paste");
-    const content = ta.value;
-    return content;
-}
-
-/**
- * Copy text to clipboard and optionally clear it from the clipboard after one minute
- *
- * @since 3.2.0
- *
- * @param string text Text to copy
- * @return void
- */
-async function writeToClipboard(text) {
-    // Error if we received the wrong kind of data.
-    if (typeof text !== "string") {
-        throw new TypeError(`Value provided must be a 'string', got '${typeof text}'.`);
-    }
-
-    document.addEventListener(
-        "copy",
-        function (e) {
-            e.clipboardData.setData("text/plain", text);
-            e.preventDefault();
-        },
-        { once: true }
-    );
-    document.execCommand("copy");
 }

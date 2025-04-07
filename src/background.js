@@ -6,6 +6,7 @@ const sha1 = require("sha1");
 const idb = require("idb");
 const BrowserpassURL = require("@browserpass/url");
 const helpers = require("./helpers");
+const clipboard = require("./helpers/clipboard");
 
 // native application id
 var appID = "com.github.browserpass.native";
@@ -262,15 +263,7 @@ async function copyToClipboard(text, clear = true) {
             data: text,
         });
     } else {
-        document.addEventListener(
-            "copy",
-            function (e) {
-                e.clipboardData.setData("text/plain", text);
-                e.preventDefault();
-            },
-            { once: true }
-        );
-        document.execCommand("copy");
+        clipboard.writeToClipboard(text);
     }
 
     if (clear) {
@@ -306,16 +299,7 @@ async function readFromClipboard() {
 
         return response.message;
     } else {
-        const ta = document.createElement("textarea");
-        // these lines are carefully crafted to make paste work in Firefox
-        ta.contentEditable = true;
-        ta.textContent = "";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("paste");
-        const content = ta.value;
-        document.body.removeChild(ta);
-        return content;
+        return clipboard.readFromClipboard();
     }
 }
 
