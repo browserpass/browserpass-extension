@@ -5,7 +5,7 @@
  */
 
 const m = require("mithril");
-const redraw = require("../helpers.redraw");
+const redraw = require("../helpers/redraw");
 const uuidPrefix = RegExp(/^([a-z0-9]){8}-/);
 const NOTIFY_CLASS = "m-notifications";
 

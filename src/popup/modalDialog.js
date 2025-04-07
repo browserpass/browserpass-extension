@@ -1,5 +1,5 @@
 const m = require("mithril");
-const redraw = require("../helpers.redraw");
+const redraw = require("../helpers/redraw");
 
 const modalId = "browserpass-modal";
 const CANCEL = "Cancel";
