@@ -4,7 +4,7 @@ const Settings = require("./models/Settings");
 const Tree = require("./models/Tree");
 const notify = require("./notifications");
 const dialog = require("./modalDialog");
-const helpers = require("../helpers");
+const helpers = require("../helpers/base");
 const helpersUI = require("../helpers/ui");
 const layout = require("./layoutInterface");
 

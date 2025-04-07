@@ -2,7 +2,7 @@ module.exports = SearchInterface;
 
 const BrowserpassURL = require("@browserpass/url");
 const dialog = require("./modalDialog");
-const helpers = require("../helpers");
+const helpers = require("../helpers/base");
 const m = require("mithril");
 
 /**

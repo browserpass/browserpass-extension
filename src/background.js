@@ -5,7 +5,7 @@ require("chrome-extension-async");
 const sha1 = require("sha1");
 const idb = require("idb");
 const BrowserpassURL = require("@browserpass/url");
-const helpers = require("./helpers");
+const helpers = require("./helpers/base");
 const clipboard = require("./helpers/clipboard");
 
 // native application id
