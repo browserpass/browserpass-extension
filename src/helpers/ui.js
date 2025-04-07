@@ -2,9 +2,9 @@
 "use strict";
 
 const m = require("mithril");
-const dialog = require("./popup/modalDialog");
-const notify = require("./popup/notifications");
-const helpers = require("./helpers");
+const dialog = require("../popup/modalDialog");
+const notify = require("../popup/notifications");
+const helpers = require("../helpers");
 
 const containsNumbersRegEx = RegExp(/[0-9]/);
 const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");

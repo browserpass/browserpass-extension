@@ -5,7 +5,7 @@ const Tree = require("./models/Tree");
 const notify = require("./notifications");
 const dialog = require("./modalDialog");
 const helpers = require("../helpers");
-const helpersUI = require("../helpers.ui");
+const helpersUI = require("../helpers/ui");
 const layout = require("./layoutInterface");
 
 module.exports = AddEditInterface;
