@@ -284,6 +284,33 @@ function AddEditInterface(settingsModel) {
                 } else {
                     // view instance should be a Login
                     loginObj = new Login(settings);
+                    const template =
+                        helpers.getSetting("nameTemplate", loginObj, settings) || "%host%";
+                    const tab = await chrome.tabs
+                        .query({
+                            lastFocusedWindow: true,
+                            active: true,
+                        })
+                        .then((it) => it[0]);
+
+                    const host = new URL(tab.url).host;
+                    const defaultUser = helpers.getSetting("username", loginObj, settings);
+
+                    const containerName =
+                        (await browser?.contextualIdentities
+                            ?.query({})
+                            ?.then(
+                                (a) =>
+                                    a.find((a) => a.cookieStoreId === tab.cookieStoreId)?.name ||
+                                    defaultUser
+                            )) || defaultUser;
+
+                    // Apply to a template
+                    rendered = template
+                        .replaceAll("%container%", containerName)
+                        .replaceAll("%host%", host);
+
+                    loginObj.login = rendered;
                 }
 
                 // set the storePath and get tree dirs
