@@ -308,7 +308,6 @@ async function readFromClipboard() {
  * @since 3.10.0
  * @param string path - location of html document to be created
  */
-let creatingOffscreen; // A global promise to avoid concurrency issues
 async function setupOffscreenDocument(path) {
     // Check all windows controlled by the service worker to see if one
     // of them is the offscreen document with the given path
@@ -323,18 +322,11 @@ async function setupOffscreenDocument(path) {
     }
 
     // create offscreen document
-    if (!creatingOffscreen) {
-        creatingOffscreen = chrome.offscreen.createDocument({
-            url: path,
-            reasons: [chrome.offscreen.Reason.CLIPBOARD],
-            justification: "Read / write text to the clipboard",
-        });
-    }
-
-    if (creatingOffscreen) {
-        await creatingOffscreen;
-        creatingOffscreen = null;
-    }
+    await chrome.offscreen.createDocument({
+        url: path,
+        reasons: [chrome.offscreen.Reason.CLIPBOARD],
+        justification: "Read / write text to the clipboard",
+    });
 }
 
 /**
@@ -613,12 +605,6 @@ async function fillFields(settings, login, fields) {
  */
 async function getLocalSettings() {
     var settings = helpers.deepCopy(defaultSettings);
-
-    try {
-        await chrome.storage.local.get(console.dir);
-    } catch (err) {
-        console.warn("could not retrieve extension local storage", err);
-    }
 
     var items = await chrome.storage.local.get(Object.keys(defaultSettings));
     for (var key in defaultSettings) {
