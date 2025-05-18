@@ -234,7 +234,7 @@ function search(searchQuery) {
 
     if (overrideDefaultSearchOnce && this.settings.authRequested && authUrl) {
         const authUrlInfo = new BrowserpassURL(authUrl);
-        searchQuery = authUrlInfo?.validDomain ? authUrlInfo.domain : authUrlInfo?.host || "";
+        searchQuery = authUrlInfo.validDomain ? authUrlInfo.domain : authUrlInfo.hostname ?? "";
         this.results = helpers.filterSortLogins(this.logins, searchQuery, true);
     } else {
         this.results = helpers.filterSortLogins(this.logins, searchQuery, this.currentDomainOnly);
