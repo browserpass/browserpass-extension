@@ -29,6 +29,7 @@
         "tabs",
         "clipboardRead",
         "clipboardWrite",
+        "contextualIdentities",
         "nativeMessaging",
         "notifications",
         "scripting",
