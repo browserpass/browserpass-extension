@@ -41,7 +41,7 @@ function view(ctl, params) {
         url = new BrowserpassURL(this.popup.settings.origin);
     }
 
-    var host = url.host;
+    const host = url.hostname;
 
     return m(
         "form.part.search",
