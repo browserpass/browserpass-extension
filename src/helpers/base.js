@@ -94,23 +94,6 @@ function getSetting(key, login, settings) {
  */
 function isChrome() {
     return chrome.runtime.getURL("/").startsWith("chrom");
-    /**
-     * Alternate approach to checking if current browser is chrome or
-     * chromium based.
-     *
-     * @TODO: remove one of these two after probationary period
-     * to determine which will approach will best suite browserpass
-     * purposes in the wild.
-     *
-     * Above: .getURL("/") will error on "chrome://" protocols
-     * Below: check user agent, can be altered depending vendor
-     */
-    // const ua = navigator.userAgent;
-    // const matches = ua.match(/(chrom)/i) || [];
-    // if (Object.keys(matches).length > 2 && /chrom/i.test(matches[1])) {
-    //     return true;
-    // }
-    // return false;
 }
 
 /**

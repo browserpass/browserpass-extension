@@ -5,7 +5,8 @@ require("chrome-extension-async");
 const sha1 = require("sha1");
 const idb = require("idb");
 const BrowserpassURL = require("@browserpass/url");
-const helpers = require("./helpers");
+const helpers = require("./helpers/base");
+const clipboard = require("./helpers/clipboard");
 
 // native application id
 var appID = "com.github.browserpass.native";
@@ -262,15 +263,7 @@ async function copyToClipboard(text, clear = true) {
             data: text,
         });
     } else {
-        document.addEventListener(
-            "copy",
-            function (e) {
-                e.clipboardData.setData("text/plain", text);
-                e.preventDefault();
-            },
-            { once: true }
-        );
-        document.execCommand("copy");
+        clipboard.writeToClipboard(text);
     }
 
     if (clear) {
@@ -306,16 +299,7 @@ async function readFromClipboard() {
 
         return response.message;
     } else {
-        const ta = document.createElement("textarea");
-        // these lines are carefully crafted to make paste work in both Chrome and Firefox
-        ta.contentEditable = true;
-        ta.textContent = "";
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand("paste");
-        const content = ta.value;
-        document.body.removeChild(ta);
-        return content;
+        return clipboard.readFromClipboard();
     }
 }
 
@@ -324,7 +308,6 @@ async function readFromClipboard() {
  * @since 3.10.0
  * @param string path - location of html document to be created
  */
-let creatingOffscreen; // A global promise to avoid concurrency issues
 async function setupOffscreenDocument(path) {
     // Check all windows controlled by the service worker to see if one
     // of them is the offscreen document with the given path
@@ -339,18 +322,11 @@ async function setupOffscreenDocument(path) {
     }
 
     // create offscreen document
-    if (!creatingOffscreen) {
-        creatingOffscreen = chrome.offscreen.createDocument({
-            url: path,
-            reasons: [chrome.offscreen.Reason.CLIPBOARD],
-            justification: "Read / write text to the clipboard",
-        });
-    }
-
-    if (creatingOffscreen) {
-        await creatingOffscreen;
-        creatingOffscreen = null;
-    }
+    await chrome.offscreen.createDocument({
+        url: path,
+        reasons: [chrome.offscreen.Reason.CLIPBOARD],
+        justification: "Read / write text to the clipboard",
+    });
 }
 
 /**
@@ -630,13 +606,6 @@ async function fillFields(settings, login, fields) {
 async function getLocalSettings() {
     var settings = helpers.deepCopy(defaultSettings);
 
-    try {
-        // use for debugging only, since dev tools does not show extension storage
-        await chrome.storage.local.get(console.dir);
-    } catch (err) {
-        console.warn("could not display extension local storage");
-    }
-
     var items = await chrome.storage.local.get(Object.keys(defaultSettings));
     for (var key in defaultSettings) {
         var value = null;
@@ -645,11 +614,7 @@ async function getLocalSettings() {
         }
 
         if (value !== null && Boolean(value)) {
-            try {
-                settings[key] = value;
-            } catch (err) {
-                console.error(`getLocalSettings(), error JSON.parse(value):`, err, { key, value });
-            }
+            settings[key] = value;
         }
     }
 

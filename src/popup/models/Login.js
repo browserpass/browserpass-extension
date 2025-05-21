@@ -2,8 +2,8 @@
 
 require("chrome-extension-async");
 const sha1 = require("sha1");
-const helpers = require("../../helpers");
-const helpersUI = require("../../helpers.ui");
+const helpers = require("../../helpers/base");
+const helpersUI = require("../../helpers/ui");
 const Settings = require("./Settings");
 
 // Search for one of the secret prefixes

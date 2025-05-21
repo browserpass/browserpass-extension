@@ -24,15 +24,15 @@ css/options.dist.css: $(LESSC) options/*.less
 	[ -d css ] || mkdir -p css
 	$(LESSC) options/options.less css/options.dist.css
 
-js/background.dist.js: $(BROWSERIFY) background.js helpers.js
+js/background.dist.js: $(BROWSERIFY) background.js helpers/*.js
 	[ -d js ] || mkdir -p js
 	$(BROWSERIFY) -o js/background.dist.js background.js
 
-js/popup.dist.js: $(BROWSERIFY) popup/*.js helpers.js
+js/popup.dist.js: $(BROWSERIFY) popup/*.js helpers/*.js
 	[ -d js ] || mkdir -p js
 	$(BROWSERIFY) -o js/popup.dist.js popup/popup.js
 
-js/offscreen.dist.js: $(BROWSERIFY) offscreen/*.js
+js/offscreen.dist.js: $(BROWSERIFY) offscreen/*.js helpers/*.js
 	[ -d js ] || mkdir -p js
 	$(BROWSERIFY) -o js/offscreen.dist.js offscreen/offscreen.js
 

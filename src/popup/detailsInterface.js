@@ -2,8 +2,8 @@ module.exports = DetailsInterface;
 
 const m = require("mithril");
 const Moment = require("moment");
-const helpers = require("../helpers");
-const helpersUI = require("../helpers.ui");
+const helpers = require("../helpers/base");
+const helpersUI = require("../helpers/ui");
 const layout = require("./layoutInterface");
 const Login = require("./models/Login");
 const Settings = require("./models/Settings");

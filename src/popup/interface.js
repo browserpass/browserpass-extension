@@ -5,7 +5,7 @@ const Moment = require("moment");
 const SearchInterface = require("./searchinterface");
 const BrowserpassURL = require("@browserpass/url");
 const dialog = require("./modalDialog");
-const helpers = require("../helpers");
+const helpers = require("../helpers/base");
 const layout = require("./layoutInterface");
 let overrideDefaultSearchOnce = true;
 
