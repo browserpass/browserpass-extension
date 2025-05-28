@@ -490,13 +490,13 @@ function AddEditInterface(settingsModel) {
                                     ? helpersUI.highlight(loginObj.fields.secret)
                                     : ""
                             ),
-                            m("div.btn.generate", {
+                            m("div.btn.generate[tabindex=0]", {
                                 title: "Generate password",
-                                onclick: () => {
-                                    loginObj.setPassword(
-                                        loginObj.generateSecret(passwordLength, symbols)
-                                    );
-                                    passwordGenerated = true;
+                                onclick: () => generateSecret(loginObj),
+                                onkeydown: (e) => {
+                                    if (e.code == "Space") {
+                                        generateSecret(loginObj)
+                                    }
                                 },
                             }),
                         ]),
