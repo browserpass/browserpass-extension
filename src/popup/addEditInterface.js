@@ -222,6 +222,17 @@ function AddEditInterface(settingsModel) {
             return `min-width: 65px; max-width: 442px; width: ${length * 8}px;`;
         }
 
+        /**
+         * Generate and set a new secret on the provided login object
+         *
+         * @param {object} login current secret details
+         * @returns {void}
+         */
+        function generateSecret(login) {
+            loginObj.setPassword(loginObj.generateSecret(passwordLength, symbols));
+            passwordGenerated = true;
+        }
+
         return {
             oncreate: function (vnode) {
                 let elems = ["div.title", "div.location div.store", "div.contents"];
