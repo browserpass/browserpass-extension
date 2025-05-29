@@ -152,10 +152,10 @@ function parseAuthUrl(url) {
 /**
  * Returns current url
  * @param object settings Settings object to use
- * @returns string
+ * @returns object Instance of BrowserpassURL
  */
 function getCurrentUrl(settings) {
-    let url = "";
+    let url;
     const authUrl = parseAuthUrl(window?.location?.href ?? null);
     if (settings.authRequested && authUrl) {
         url = new BrowserpassURL(authUrl);

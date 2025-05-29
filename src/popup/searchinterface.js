@@ -33,7 +33,8 @@ function SearchInterface(popup) {
 function view(ctl, params) {
     var self = this;
 
-    const host = helpers.getCurrentUrl(this.popup.settings).hostname;
+    const url = helpers.getCurrentUrl(this.popup.settings);
+    const host = url.isValid ? url.hostname : "";
 
     return m(
         "form.part.search",
