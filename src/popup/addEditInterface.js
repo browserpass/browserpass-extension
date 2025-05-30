@@ -91,13 +91,7 @@ function AddEditInterface(settingsModel) {
                 case "Enter":
                     e.preventDefault();
                     if (e.target.classList.contains("directory")) {
-                        // replace search term with selected directory
-                        inputEl.value = `${addDirToLoginPath(
-                            loginObj.login,
-                            e.target.getAttribute("value")
-                        )}/`;
-                        this.state.setLogin(inputEl.value);
-                        inputEl.focus();
+                        clickDirectoryHandler.apply(this, [e]);
                     }
                     break;
                 case "Home":
@@ -142,10 +136,13 @@ function AddEditInterface(settingsModel) {
          */
         function clickDirectoryHandler(e) {
             e.preventDefault();
-            var inputEl = document.querySelector("input.filePath");
-
-            // replace search term with selected directory
-            inputEl.value = `${addDirToLoginPath(loginObj.login, e.target.getAttribute("value"))}/`;
+            const inputEl = document.querySelector("input.filePath");
+            const dir = e.target.getAttribute("value");
+            const val = inputEl.value;
+            const pos = inputEl.selectionStart;
+            const newLeft = `${addDirToLoginPath(val.slice(0, pos), dir)}/`;
+            inputEl.value = newLeft + val.slice(pos);
+            inputEl.selectionStart = inputEl.selectionEnd = newLeft.length;
             this.state.setLogin(inputEl.value);
             inputEl.focus();
         }
@@ -220,6 +217,19 @@ function AddEditInterface(settingsModel) {
                 length = login.login.length;
             }
             return `min-width: 65px; max-width: 442px; width: ${length * 8}px;`;
+        }
+
+        /**
+         * Update login
+         *
+         * @since 3.11.0
+         *
+         * @param {object} vnode
+         */
+        function updateLogin(vnode) {
+            const path = vnode.target.value;
+            const cursorPos = vnode.target.selectionStart;
+            this.setLogin(path, path.slice(0, cursorPos));
         }
 
         /**
@@ -325,11 +335,12 @@ function AddEditInterface(settingsModel) {
              * @since 3.8.0
              *
              * @param {string} path
+             * @param {string} pathPreceedingCursor
              */
-            setLogin: function (path) {
+            setLogin: function (path, pathPreceedingCursor) {
                 loginObj.login = path;
                 if (canTree) {
-                    storeDirs = storeTree.search(path);
+                    storeDirs = storeTree.search(pathPreceedingCursor ?? path);
                 } else {
                     storeDirs = [];
                 }
@@ -465,8 +476,10 @@ function AddEditInterface(settingsModel) {
                                 placeholder: "filename",
                                 value: loginObj.login,
                                 style: `${getPathWidth(loginObj)}`,
-                                oninput: m.withAttr("value", this.setLogin),
-                                onfocus: m.withAttr("value", this.setLogin),
+                                oninput: updateLogin.bind(this),
+                                onfocus: updateLogin.bind(this),
+                                onmouseup: updateLogin.bind(this),
+                                onkeyup: updateLogin.bind(this),
                                 onkeydown: pathKeyHandler.bind(vnode),
                             }),
                             m(`div.suffix${editing ? ".disabled" : ""}`, ".gpg"),
