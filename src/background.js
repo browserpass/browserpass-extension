@@ -21,6 +21,7 @@ var defaultSettings = {
     theme: "auto",
     enableOTP: false,
     hideBadge: false,
+    nameTemplate: "%host%",
     caps: {
         save: false,
         delete: false,
