@@ -136,11 +136,11 @@ function AddEditInterface(settingsModel) {
          */
         function clickDirectoryHandler(e) {
             e.preventDefault();
-            var inputEl = document.querySelector("input.filePath");
-            var dir = e.target.getAttribute("value");
-            var val = inputEl.value;
-            var pos = inputEl.selectionStart;
-            var newLeft = addDirToLoginPath(val.slice(0, pos), dir) + "/";
+            const inputEl = document.querySelector("input.filePath");
+            const dir = e.target.getAttribute("value");
+            const val = inputEl.value;
+            const pos = inputEl.selectionStart;
+            const newLeft = `${addDirToLoginPath(val.slice(0, pos), dir)}/`;
             inputEl.value = newLeft + val.slice(pos);
             inputEl.selectionStart = inputEl.selectionEnd = newLeft.length;
             this.state.setLogin(inputEl.value);
