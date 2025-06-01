@@ -35,7 +35,6 @@ module.exports = {
     isChrome,
     makeTOTP,
     parseAuthUrl,
-    getCurrentUrl,
     prepareLogin,
     prepareLogins,
     unsecureRequestWarning,
@@ -149,21 +148,6 @@ function parseAuthUrl(url) {
     return null;
 }
 
-/**
- * Returns current url
- * @param object settings Settings object to use
- * @returns object Instance of BrowserpassURL
- */
-function getCurrentUrl(settings) {
-    let url;
-    const authUrl = parseAuthUrl(window?.location?.href ?? null);
-    if (settings.authRequested && authUrl) {
-        url = new BrowserpassURL(authUrl);
-    } else {
-        url = new BrowserpassURL(settings.origin);
-    }
-    return url
-}
 
 /**
  * Prepare list of logins based on provided files

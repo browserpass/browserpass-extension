@@ -5,6 +5,7 @@ const m = require("mithril");
 const dialog = require("../popup/modalDialog");
 const notify = require("../popup/notifications");
 const helpers = require("../helpers/base");
+const BrowserpassURL = require("@browserpass/url");
 
 const containsNumbersRegEx = RegExp(/[0-9]/);
 const containsSymbolsRegEx = RegExp(/[\p{P}\p{S}]/, "u");
@@ -13,6 +14,7 @@ module.exports = {
     handleError,
     highlight,
     withLogin,
+    getCurrentUrl
 };
 
 //----------------------------------- Function definitions ----------------------------------//
@@ -151,4 +153,20 @@ async function withLogin(action, params = {}) {
     } catch (e) {
         handleError(e);
     }
+}
+
+/**
+ * Returns current url
+ * @param object settings Settings object to use
+ * @returns object Instance of BrowserpassURL
+ */
+function getCurrentUrl(settings) {
+    let url;
+    const authUrl = helpers.parseAuthUrl(window?.location?.href ?? null);
+    if (settings.authRequested && authUrl) {
+        url = new BrowserpassURL(authUrl);
+    } else {
+        url = new BrowserpassURL(settings.origin);
+    }
+    return url
 }

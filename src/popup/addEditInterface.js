@@ -285,7 +285,7 @@ function AddEditInterface(settingsModel) {
                     // view instance should be a Login
                     loginObj = new Login(settings);
 
-                    const url = helpers.getCurrentUrl(settings);
+                    const url = helpersUI.getCurrentUrl(settings);
 
                     // prefill the host of the current tab
                     loginObj.login = url.isValid ? url.hostname : "";
