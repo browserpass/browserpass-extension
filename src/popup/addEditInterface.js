@@ -305,6 +305,11 @@ function AddEditInterface(settingsModel) {
                 } else {
                     // view instance should be a Login
                     loginObj = new Login(settings);
+
+                    const url = helpersUI.getCurrentUrl(settings);
+
+                    // prefill the host of the current tab
+                    loginObj.login = url.isValid ? url.hostname : "";
                 }
 
                 // set the storePath and get tree dirs

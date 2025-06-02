@@ -148,6 +148,7 @@ function parseAuthUrl(url) {
     return null;
 }
 
+
 /**
  * Prepare list of logins based on provided files
  *

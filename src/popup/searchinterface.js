@@ -3,6 +3,7 @@ module.exports = SearchInterface;
 const BrowserpassURL = require("@browserpass/url");
 const dialog = require("./modalDialog");
 const helpers = require("../helpers/base");
+const helpersUI = require("../helpers/ui");
 const m = require("mithril");
 
 /**
@@ -33,15 +34,8 @@ function SearchInterface(popup) {
 function view(ctl, params) {
     var self = this;
 
-    let url = "";
-    const authUrl = helpers.parseAuthUrl(window?.location?.href ?? null);
-    if (this.popup.settings.authRequested && authUrl) {
-        url = new BrowserpassURL(authUrl);
-    } else {
-        url = new BrowserpassURL(this.popup.settings.origin);
-    }
-
-    const host = url.hostname;
+    const url = helpersUI.getCurrentUrl(this.popup.settings);
+    const host = url.isValid ? url.hostname : "";
 
     return m(
         "form.part.search",
