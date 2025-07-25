@@ -2,12 +2,12 @@
 # yarn lockfile v1
 
 
-"@browserpass/url@^1.1.6":
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/@browserpass/url/-/url-1.1.6.tgz#53831fe9228ecfba2fec5d0166f3fcbd266e2615"
-  integrity sha512-mWgr6kco+PFn0+e1cYEmNj0r352eFau5aJRhTR8uHT2D5PYa2KH7dGqkg+uhwkR042etOrPczvaO+5Mp80b0GQ==
+"@browserpass/url@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@browserpass/url/-/url-1.2.0.tgz#cec5dd18e041587054b6e9698297d08d0759ef6d"
+  integrity sha512-cwwa0sVB9rJmjntXsqwWJM3ve2d5TfSVEG1z/kgwhm4rNWKm2x384liiszFT7Y9PNY1Yv7/jQVI0UookhnsaaQ==
   dependencies:
-    punycode "^2.1.1"
+    punycode.js "^2.3.1"
 
 JSONStream@^1.0.3:
   version "1.3.5"
@@ -958,15 +958,15 @@ public-encrypt@^4.0.0:
     randombytes "^2.0.1"
     safe-buffer "^5.1.2"
 
+punycode.js@^2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/punycode.js/-/punycode.js-2.3.1.tgz#6b53e56ad75588234e79f4affa90972c7dd8cdb7"
+  integrity sha512-uxFIHU0YlHYhDQtV4R9J6a52SLx28BCjT+4ieh7IGbgwVJWO+km431c4yRlREUAsAmt/uMjQUyQHNEPf0M39CA==
+
 punycode@^1.3.2, punycode@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
   integrity sha512-jmYNElW7yvO7TV33CjSmvSiE2yco3bV2czu/OzDKdMNVZQWfxCblURLhf+47syQRBntjfLdd/H0egrzIG+oaFQ==
-
-punycode@^2.1.1:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.0.tgz#f67fa67c94da8f4d0cfff981aee4118064199b8f"
-  integrity sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==
 
 qs@^6.11.2:
   version "6.11.2"

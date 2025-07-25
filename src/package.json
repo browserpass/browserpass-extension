@@ -15,7 +15,7 @@
         }
     ],
     "dependencies": {
-        "@browserpass/url": "^1.1.6",
+        "@browserpass/url": "^1.2.0",
         "chrome-extension-async": "^3.4.1",
         "fuzzysort": "^1.1.4",
         "hash.js": "^1.1.7",
