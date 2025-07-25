@@ -524,7 +524,7 @@ function AddEditInterface(settingsModel) {
                                 onclick: () => generateSecret(loginObj),
                                 onkeydown: (e) => {
                                     if (e.code == "Space") {
-                                        generateSecret(loginObj)
+                                        generateSecret(loginObj);
                                     }
                                 },
                             }),
