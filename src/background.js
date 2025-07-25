@@ -45,7 +45,7 @@ chrome.action.setBadgeBackgroundColor({
 });
 
 // watch for tab updates
-chrome.tabs.onUpdated.addListener((tabId, info) => {
+chrome.tabs.onUpdated.addListener(async (tabId, info) => {
     // unregister any auth listeners for this tab
     if (info.status === "complete") {
         if (authListeners[tabId]) {
@@ -55,7 +55,25 @@ chrome.tabs.onUpdated.addListener((tabId, info) => {
     }
 
     // redraw badge counter
-    updateMatchingPasswordsCount(tabId);
+    let matchCount = await updateMatchingPasswordsCount(tabId);
+
+    // highlight the default login & secret fields
+    if (matchCount) {
+        try {
+            await chrome.tabs.executeScript(tabId, {
+                allFrames: true,
+                file: "js/inject.dist.js",
+            });
+            await chrome.tabs.executeScript(tabId, {
+                allFrames: true,
+                code: `window.browserpass.highlightLoginFields();`,
+            });
+        } catch (e) {
+            // errors here mean that the browser denied the script injection, typically
+            // because the tab is not allowed to run content scripts (e.g. chrome://
+            // pages etc). We can safely ignore these errors.
+        }
+    }
 });
 
 // handle incoming messages
@@ -239,6 +257,8 @@ async function updateMatchingPasswordsCount(tabId, forceRefresh = false) {
             text: "" + (matchedPasswordsCount || ""),
             tabId: tabId,
         });
+
+        return matchedPasswordsCount;
     } catch (e) {
         badgeCache.isRefreshing = false;
         console.log(e);
