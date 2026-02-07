@@ -23,6 +23,11 @@
             "input[class=username i]",
             "input[class=email i]",
             "input[class=alias i]",
+            "input[aria-label=login i]",
+            "input[aria-label=user i]",
+            "input[aria-label=username i]",
+            "input[aria-label=email i]",
+            "input[aria-label=alias i]",
 
             "input[name*=login i]",
             "input[name*=user i]",
