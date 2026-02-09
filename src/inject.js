@@ -276,10 +276,10 @@
      * @since 3.12.0
      *
      * @param DOMElement parent Parent element to query
-     * @return array List of shadow root elements plus parent
+     * @return array List of shadow root elements
      */
     function queryShadowRoots(parent) {
-        return [parent, ...parent.querySelectorAll("*")]
+        return [...parent.querySelectorAll("*")]
             .filter((e) => e.shadowRoot)
             .flatMap((e) => [e.shadowRoot, ...queryShadowRoots(e.shadowRoot)]);
     }
@@ -296,7 +296,7 @@
      */
     function queryAllVisible(parent, field, form) {
         const result = [];
-        for (let root of queryShadowRoots(parent)) {
+        for (let root of [parent, ...queryShadowRoots(parent)]) {
             for (let i = 0; i < field.selectors.length; i++) {
                 let elems = root.querySelectorAll(field.selectors[i]);
                 for (let j = 0; j < elems.length; j++) {
