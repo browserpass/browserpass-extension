@@ -992,6 +992,78 @@ async function handleMessage(settings, message, sendResponse) {
                 });
             }
             break;
+        case "migrateCredentials":
+            if (!helpers.isThunderbird() || !thunderbirdModule) {
+                sendResponse({ status: "error", message: "Not running in Thunderbird" });
+                break;
+            }
+            try {
+                settings.appID = appID;
+                const logins = await browser.credentials.getThunderbirdSavedLogins();
+                let migrated = 0;
+                let skipped = 0;
+                let failed = 0;
+
+                // List existing pass files to detect duplicates
+                const listResponse = await hostAction(settings, "list");
+                const existingFiles = new Set();
+                if (listResponse.status === "ok") {
+                    for (const storeId in listResponse.data.files) {
+                        listResponse.data.files[storeId].forEach((f) =>
+                            existingFiles.add(f.toLowerCase())
+                        );
+                    }
+                }
+
+                for (const login of logins) {
+                    if (!login.password) {
+                        skipped++;
+                        continue;
+                    }
+
+                    // Derive the target filepath (without .gpg, for prefix matching)
+                    const pathInfo = thunderbirdModule.getThunderbirdStorePath(login.host);
+                    if (!pathInfo) {
+                        skipped++;
+                        continue;
+                    }
+                    const filepath = pathInfo.path;
+
+                    // Skip if a matching file already exists (startsWith like findThunderbirdCredentials)
+                    const isDuplicate = [...existingFiles].some((f) =>
+                        f.startsWith(filepath.toLowerCase())
+                    );
+                    if (isDuplicate) {
+                        skipped++;
+                        continue;
+                    }
+
+                    const result = await thunderbirdModule.handleNewCredential(settings, {
+                        host: login.host,
+                        login: login.login,
+                        password: login.password,
+                        scope: login.httpRealm || undefined,
+                    });
+
+                    if (result) {
+                        migrated++;
+                    } else {
+                        failed++;
+                    }
+                }
+
+                sendResponse({
+                    status: "ok",
+                    migrated,
+                    skipped,
+                    failed,
+                    total: logins.length,
+                });
+            } catch (error) {
+                console.error("Error migrating credentials:", error);
+                sendResponse({ status: "error", message: error.message });
+            }
+            break;
         default:
             sendResponse({
                 status: "error",
@@ -1317,3 +1389,73 @@ function onExtensionInstalled(details) {
             });
     }
 }
+
+// =============================================================================
+// Thunderbird Support
+// =============================================================================
+// When running in Thunderbird, this extension intercepts credential requests
+// from different protocols (IMAP, SMTP, POP3, NNTP) and OAuth authentication flows.
+// The experimental API in implementation.js hooks into Thunderbird's auth
+// system and emits events that we handle here.
+
+let thunderbirdModule = null;
+
+/**
+ * Initializes Thunderbird support if running in Thunderbird.
+ * Sets up listeners for credential requests and storage events.
+ */
+(function initThunderbird() {
+    if (!helpers.isThunderbird()) {
+        return;
+    }
+
+    try {
+        thunderbirdModule = require("./thunderbird");
+        console.log("Browserpass: Thunderbird mode enabled");
+
+        /**
+         * Listener for credential requests from Thunderbird.
+         * Called when Thunderbird needs credentials for IMAP, SMTP, POP3, or other protocols.
+         * Returns matching credentials from the pass store or empty list if none found.
+         *
+         * @param {object} credentialInfo - Information about the credential request
+         * @param {string} credentialInfo.host - The host requesting credentials
+         * @param {string} credentialInfo.username - Optional username hint
+         * @returns {object} Result with autoSubmit flag and array of matching credentials
+         */
+        browser.credentials.onCredentialRequested.addListener(async function (credentialInfo) {
+            try {
+                const settings = await getFullSettings();
+                settings.appID = appID;
+                return await thunderbirdModule.handleCredentialRequest(settings, credentialInfo);
+            } catch (error) {
+                console.error("Error handling credential request:", error);
+                return { autoSubmit: false, credentials: [] };
+            }
+        });
+
+        /**
+         * Listener for new credential storage requests.
+         * Called when Thunderbird has new credentials to store (e.g., after successful login).
+         * Stores the credentials to the pass store for future use.
+         *
+         * @param {object} credentialInfo - Information about the credentials to store
+         * @param {string} credentialInfo.host - The host these credentials are for
+         * @param {string} credentialInfo.login - The username
+         * @param {string} credentialInfo.password - The password or OAuth token
+         * @returns {boolean} True if credentials were successfully stored
+         */
+        browser.credentials.onNewCredential.addListener(async function (credentialInfo) {
+            try {
+                const settings = await getFullSettings();
+                settings.appID = appID;
+                return await thunderbirdModule.handleNewCredential(settings, credentialInfo);
+            } catch (error) {
+                console.error("Error handling new credential:", error);
+                return false;
+            }
+        });
+    } catch (error) {
+        console.error("Browserpass: Failed to initialize Thunderbird support:", error);
+    }
+})();

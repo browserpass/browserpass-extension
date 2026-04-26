@@ -1,6 +1,7 @@
 module.exports = Interface;
 
 const m = require("mithril");
+const { isThunderbird } = require("../helpers/base");
 
 /**
  * Options main interface
@@ -136,6 +137,53 @@ function view(ctl, params) {
             "Clear usage data"
         )
     );
+
+    if (isThunderbird()) {
+        nodes.push(m("h3", "Thunderbird credential migration"));
+        nodes.push(
+            m(
+                "div",
+                { class: "notice" },
+                "Migrate credentials from Thunderbird's password manager to your pass store. Existing pass entries are not overwritten."
+            )
+        );
+        if (this.migrationResult) {
+            nodes.push(
+                m(
+                    "div.migration-result",
+                    { class: this.migrationResult.status === "ok" ? "notice" : "error" },
+                    this.migrationResult.status === "ok"
+                        ? `Migration complete: ${this.migrationResult.migrated} migrated, ${this.migrationResult.skipped} skipped, ${this.migrationResult.failed} failed (${this.migrationResult.total} total)`
+                        : `Migration failed: ${this.migrationResult.message}`
+                )
+            );
+        }
+        nodes.push(
+            m(
+                "button.migrateCredentials",
+                {
+                    disabled: this.migrationInProgress,
+                    onclick: async () => {
+                        this.migrationInProgress = true;
+                        this.migrationResult = undefined;
+                        m.redraw();
+                        try {
+                            const response = await chrome.runtime.sendMessage({
+                                action: "migrateCredentials",
+                            });
+                            this.migrationResult = response;
+                        } catch (e) {
+                            this.migrationResult = { status: "error", message: e.message };
+                        }
+                        this.migrationInProgress = false;
+                        m.redraw();
+                    },
+                },
+                this.migrationInProgress ? "Migrating..." : "Migrate Thunderbird credentials"
+            )
+        );
+    }
+
     return nodes;
 }
 

@@ -4,6 +4,8 @@
 
 Browserpass is a browser extension for [zx2c4's pass](https://www.passwordstore.org/), a UNIX based password store manager. It allows you to auto-fill or copy to clipboard credentials for the current domain, protecting you from phishing attacks.
 
+Browserpass also supports Mozilla Thunderbird, providing password storage and autofill for email accounts (IMAP, SMTP, POP3) and OAuth2 tokens (Gmail, Microsoft, Fastmail).
+
 In order to use Browserpass you must also install a [companion native messaging host](https://github.com/browserpass/browserpass-native), which provides an interface to your password store.
 
 ![demo](https://user-images.githubusercontent.com/1177900/56079873-87057600-5dfa-11e9-8ff1-c51744c75585.gif)
@@ -12,6 +14,8 @@ In order to use Browserpass you must also install a [companion native messaging 
 
 -   [Requirements](#requirements)
 -   [Installation](#installation)
+    -   [Browser extension](#browser-extension)
+    -   [Thunderbird extension](#thunderbird-extension)
     -   [Verifying authenticity of the Github releases](#verifying-authenticity-of-the-github-releases)
 -   [Updates](#updates)
 -   [Usage](#usage)
@@ -43,7 +47,7 @@ In order to use Browserpass you must also install a [companion native messaging 
 
 ## Requirements
 
--   The latest stable version of Chromium or Firefox, or any of their derivatives.
+-   The latest stable version of Chromium, Firefox, or Thunderbird (128.0+), or any of their derivatives.
 -   The latest stable version of gpg (having `pass` or `gopass` is actually not required).
 -   A password store that follows certain [naming conventions](#organizing-password-store)
 
@@ -52,6 +56,10 @@ In order to use Browserpass you must also install a [companion native messaging 
 In order to install Browserpass correctly, you have to install two of its components:
 
 -   [Native messaging host](https://github.com/browserpass/browserpass-native#installation)
+-   Browser or Thunderbird extension (see below)
+
+### Browser extension
+
 -   Browser extension for Chromium-based browsers (choose one of the options):
     -   Install using a package manager for your OS (which will provide auto-update and keep extension in sync with native host app):
         -   Arch Linux: [browserpass-chromium](https://www.archlinux.org/packages/community/any/browserpass-chromium/), [browserpass-chrome](https://aur.archlinux.org/packages/browserpass-chrome/)
@@ -68,6 +76,19 @@ In order to install Browserpass correctly, you have to install two of its compon
         -   Debian: [webext-browserpass](https://packages.debian.org/stable/webext-browserpass) includes Firefox extension
     -   Install the extension from [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/browserpass-ce/) (which will provide auto-updates)
     -   Download `browserpass-firefox.zip` from the latest release, unarchive and use `Load Temporary Add-on` on `about:debugging#addons` (remember the extension will be removed after browser is closed!).
+
+### Thunderbird extension
+
+Thunderbird requires a separate build due to the experimental APIs needed for credential interception. When Thunderbird requests credentials, Browserpass intercepts the request and retrieves them from your pass store using GPG decryption. **Credentials are never stored in Thunderbird's password manager.**
+
+1. **Install Native Host**: Follow the [native messaging host](https://github.com/browserpass/browserpass-native) installation, then run `make hosts-thunderbird-user`
+2. **Build Extension**: Run `make thunderbird` in the browserpass-extension directory
+3. **Create XPI Package**:
+   ```bash
+   cd thunderbird
+   zip -r browserpass-thunderbird.xpi *
+   ```
+4. **Install in Thunderbird**: Open Add-ons and Themes (`Ctrl+Shift+A`), click the gear icon, select "Install Add-on From File", and select the XPI file
 
 ### Verifying authenticity of the Github releases
 
@@ -119,6 +140,23 @@ Browserpass was designed with an assumption that certain conventions are being f
         github.com/
             personal.gpg
             work.gpg
+    ```
+
+    For Thunderbird, all credentials are stored under `thunderbird/` with `{protocol}-{hostname}` naming:
+
+    ```
+    ~/.password-store/
+        thunderbird/
+            imap-mail.example.com.gpg       # IMAP server credentials
+            smtp-mail.example.com.gpg       # SMTP server credentials
+            oauth-accounts.google.com.gpg   # OAuth refresh token (one per provider)
+            https-sso.example.com.gpg       # OAuth browser window credentials
+    ```
+
+    If IMAP and SMTP use the same password, you can use a symlink:
+    ```bash
+    cd ~/.password-store/thunderbird/
+    ln -s imap-mail.example.com.gpg smtp-mail.example.com.gpg
     ```
 
 1. Password must be defined on a line starting with `password:`, `pass:` or `secret:` (case-insensitive), and if all of these are absent, the first line in the password entry file is considered to be a password.
@@ -405,6 +443,7 @@ See below the list of available `make` goals (check Makefile for more details). 
 | `make extension`     | Compile the extension source code                                                       |
 | `make chromium`      | Compile the extension source code, prepare unpacked extension for Chromium              |
 | `make firefox`       | Compile the extension source code, prepare unpacked extension for Firefox               |
+| `make thunderbird`   | Compile the extension source code, prepare unpacked extension for Thunderbird           |
 | `make crx`           | Compile the extension source code, prepare packed extension for Chromium                |
 
 ### Load an unpacked extension

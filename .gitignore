@@ -1,5 +1,6 @@
 /chromium
 /firefox
+/thunderbird
 /dist
 /dist-webstore
 
@@ -10,4 +11,5 @@
 
 *.pem
 *.crx
+*.xpi
 /.vscode
