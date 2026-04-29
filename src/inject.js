@@ -279,6 +279,9 @@
      * @return array List of shadow root elements
      */
     function queryShadowRoots(parent) {
+        if (window.browserpassIsTaggingShadowRoots) {
+            return parent.querySelectorAll("[is-shadow]");
+        }
         return [...parent.querySelectorAll("*")]
             .filter((e) => e.shadowRoot)
             .flatMap((e) => [e.shadowRoot, ...queryShadowRoots(e.shadowRoot)]);

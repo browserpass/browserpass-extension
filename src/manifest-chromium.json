@@ -54,5 +54,11 @@
             },
             "description": "Fill form with the best matching credentials"
         }
-    }
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["js/early-inject.dist.js"]
+        }
+    ]
 }
