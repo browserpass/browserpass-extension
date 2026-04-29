@@ -14,5 +14,5 @@ if (!_attachShadow) {
         this.setAttribute("is-shadow", "");
         return _attachShadow.call(this, options);
     };
-    window.browserpassIsTaggingShadowRoots = true;
+    document.documentElement.dataset.browserpassShadowrootsTagged = true;
 }

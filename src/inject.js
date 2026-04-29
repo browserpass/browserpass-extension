@@ -159,6 +159,10 @@
             loginForm = form(INPUT_FIELDS);
         }
 
+        if (!loginForm) {
+            return result;
+        }
+
         // don't attempt to fill non-secret forms unless non-secret filling is allowed
         if (!request.allowNoSecret && !find(PASSWORD_FIELDS, loginForm)) {
             return result;
@@ -276,13 +280,11 @@
      * @since 3.12.0
      *
      * @param DOMElement parent Parent element to query
+     * @param string selector Selector for potential shadow DOM roots
      * @return array List of shadow root elements
      */
-    function queryShadowRoots(parent) {
-        if (window.browserpassIsTaggingShadowRoots) {
-            return parent.querySelectorAll("[is-shadow]");
-        }
-        return [...parent.querySelectorAll("*")]
+    function queryShadowRoots(parent, selector) {
+        return [...parent.querySelectorAll(selector)]
             .filter((e) => e.shadowRoot)
             .flatMap((e) => [e.shadowRoot, ...queryShadowRoots(e.shadowRoot)]);
     }
@@ -299,7 +301,11 @@
      */
     function queryAllVisible(parent, field, form) {
         const result = [];
-        for (let root of [parent, ...queryShadowRoots(parent)]) {
+        let shadowRootSelector = document.documentElement.dataset.browserpassShadowrootsTagged
+            ? "[is-shadow]"
+            : "*";
+        const shadowRoots = queryShadowRoots(parent, shadowRootSelector);
+        for (let root of [parent, ...shadowRoots]) {
             for (let i = 0; i < field.selectors.length; i++) {
                 let elems = root.querySelectorAll(field.selectors[i]);
                 for (let j = 0; j < elems.length; j++) {
