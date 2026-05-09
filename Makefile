@@ -30,7 +30,8 @@ EXTENSION_FILES := \
 	src/js/popup.dist.js \
 	src/js/offscreen.dist.js \
 	src/js/options.dist.js \
-	src/js/inject.dist.js
+	src/js/inject.dist.js \
+	src/js/early-inject.dist.js
 CHROMIUM_FILES := $(patsubst src/%,chromium/%, $(EXTENSION_FILES))
 FIREFOX_FILES  := $(patsubst src/%,firefox/%,  $(EXTENSION_FILES))
 

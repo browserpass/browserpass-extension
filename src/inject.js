@@ -276,10 +276,11 @@
      * @since 3.12.0
      *
      * @param DOMElement parent Parent element to query
+     * @param string selector Selector for potential shadow DOM roots
      * @return array List of shadow root elements
      */
-    function queryShadowRoots(parent) {
-        return [...parent.querySelectorAll("*")]
+    function queryShadowRoots(parent, selector) {
+        return [...parent.querySelectorAll(selector)]
             .filter((e) => e.shadowRoot)
             .flatMap((e) => [e.shadowRoot, ...queryShadowRoots(e.shadowRoot)]);
     }
@@ -296,7 +297,12 @@
      */
     function queryAllVisible(parent, field, form) {
         const result = [];
-        for (let root of [parent, ...queryShadowRoots(parent)]) {
+        const shadowRootSelector =
+            document.documentElement.getAttribute("browserpass-detected-shadow-roots") !== null
+                ? "[browserpass-detected-shadow-root]"
+                : "*";
+        const shadowRoots = queryShadowRoots(parent, shadowRootSelector);
+        for (let root of [parent, ...shadowRoots]) {
             for (let i = 0; i < field.selectors.length; i++) {
                 let elems = root.querySelectorAll(field.selectors[i]);
                 for (let j = 0; j < elems.length; j++) {
