@@ -6,6 +6,10 @@
 // created and tag them with an identifier for later retrieval,
 // because JavaScript lacks a performant way to query all shadow DOMs
 // without doing up-front tracking of them.
+//
+// Note: This script is executed in the untrusted PAGE context, not
+// the extension context, which means that great care needs to be
+// taken with any functionality added here.
 
 var _attachShadow;
 if (!_attachShadow) {
