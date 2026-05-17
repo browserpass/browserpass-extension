@@ -1011,7 +1011,7 @@ async function handleMessage(settings, message, sendResponse) {
  * @param params object   Additional params to pass to the host app
  * @return Promise
  */
-function hostAction(settings, action, params = {}) {
+async function hostAction(settings, action, params = {}) {
     var request = {
         settings: settings,
         action: action,
@@ -1020,7 +1020,15 @@ function hostAction(settings, action, params = {}) {
         request[key] = params[key];
     }
 
-    return chrome.runtime.sendNativeMessage(appID, request);
+    var response = await chrome.runtime.sendNativeMessage(appID, request);
+    if (response) {
+        return response;
+    }
+
+    return {
+        status: "error",
+        params: { message: "Native host returned an empty response", error: "" },
+    };
 }
 
 /**
