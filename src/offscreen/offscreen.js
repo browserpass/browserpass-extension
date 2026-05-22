@@ -3,7 +3,12 @@
 const clipboard = require("../helpers/clipboard");
 
 //----------------------------------- Function definitions ----------------------------------//
-chrome.runtime.onMessage.addListener(handleMessage);
+chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
+    handleMessage(message, sender, sendResponse);
+
+    // allow async responses after this function returns
+    return true;
+});
 
 async function handleMessage(message, sender, sendResponse) {
     if (sender.id !== chrome.runtime.id) {
@@ -21,7 +26,7 @@ async function handleMessage(message, sender, sendResponse) {
     try {
         switch (message.type) {
             case "copy-data-to-clipboard":
-                clipboard.writeToClipboard(message.data);
+                await clipboard.writeToClipboard(message.data);
                 break;
             case "read-from-clipboard":
                 reply = clipboard.readFromClipboard();
