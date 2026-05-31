@@ -314,16 +314,28 @@ async function handleCredentialRequest(settings, credentialInfo) {
 
         // Fetch and parse password contents
         const credentials = [];
+        // True when a matching file exists but could not be decrypted (e.g. a
+        // hardware GPG key was not touched in time). Signals the caller that a
+        // retry may succeed, as opposed to the credential being genuinely absent.
+        let decryptionFailed = false;
         for (const matchingFile of filesToTry) {
             const fileObj = allFiles.find((f) => f.path === matchingFile);
             if (!fileObj) continue;
 
-            const fetchResponse = await sendNativeMessage(settings.appID, {
-                settings: settings,
-                action: "fetch",
-                storeId: fileObj.storeId,
-                file: matchingFile,
-            });
+            let fetchResponse;
+            try {
+                fetchResponse = await sendNativeMessage(settings.appID, {
+                    settings: settings,
+                    action: "fetch",
+                    storeId: fileObj.storeId,
+                    file: matchingFile,
+                });
+            } catch (e) {
+                // Native host disconnected mid-decrypt (e.g. GPG aborted/timed out)
+                console.warn("Browserpass: Native fetch failed for", matchingFile, e?.message);
+                decryptionFailed = true;
+                break;
+            }
 
             if (fetchResponse.status === "ok" && fetchResponse.data.contents) {
                 const parsed = parsePasswordContents(fetchResponse.data.contents, matchingFile);
@@ -353,6 +365,7 @@ async function handleCredentialRequest(settings, credentialInfo) {
                     fetchResponse.status,
                     "- stopping further attempts to avoid repeated GPG prompts"
                 );
+                decryptionFailed = true;
                 break;
             }
         }
@@ -373,6 +386,7 @@ async function handleCredentialRequest(settings, credentialInfo) {
         return {
             autoSubmit: settings.autoSubmit || false,
             credentials: credentials,
+            decryptionFailed: credentials.length === 0 && decryptionFailed,
         };
     } catch (error) {
         console.error("Browserpass: Error handling credential request:", error);

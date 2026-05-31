@@ -436,6 +436,9 @@
                 if (currentDetails.credentials && currentDetails.credentials.length) {
                     details.credentials = details.credentials.concat(currentDetails.credentials);
                 }
+                if (currentDetails.decryptionFailed) {
+                    details.decryptionFailed = true;
+                }
                 return details;
             },
             { autoSubmit: true, credentials: [] }
@@ -465,6 +468,66 @@
             () => requestListenerCount === 0,
             onThen
         );
+    }
+
+    /**
+     * Shows a modal Retry/Cancel dialog when a matching pass entry exists but
+     * could not be decrypted in time. This mirrors the behaviour of password
+     * wallets (e.g. KDE) that let the user retry an unlock: when the GPG key
+     * lives on a hardware token (e.g. a YubiKey) and was not touched before
+     * the agent timed out, the user can trigger another attempt instead of
+     * being forced to type the password manually.
+     *
+     * @param {string} host - The host whose credential failed to decrypt
+     * @returns {boolean} True if the user chose to retry
+     */
+    function promptDecryptionRetry(host) {
+        try {
+            const flags =
+                Services.prompt.BUTTON_POS_0 * Services.prompt.BUTTON_TITLE_IS_STRING +
+                Services.prompt.BUTTON_POS_1 * Services.prompt.BUTTON_TITLE_CANCEL;
+            const parent = Services.wm.getMostRecentWindow(null);
+            const button = Services.prompt.confirmEx(
+                parent,
+                "Browserpass",
+                `Could not decrypt the stored password for ${host}.\n\n` +
+                    "If your GPG key is on a hardware token (e.g. a YubiKey), it may not have " +
+                    "been touched before the request timed out. You can retry the decryption.",
+                flags,
+                "Retry",
+                null,
+                null,
+                null,
+                { value: false }
+            );
+            return button === 0;
+        } catch (e) {
+            console.error("Browserpass: Failed to show retry dialog:", e.message);
+            return false;
+        }
+    }
+
+    /**
+     * Looks up credentials and, when a matching pass entry exists but could not
+     * be decrypted, offers the user a Retry/Cancel dialog and tries again. On
+     * cancel (or when no matching entry exists) the original result is returned
+     * so the caller can fall through to manual entry.
+     *
+     * @param {object} data - Request data with host, login, etc.
+     * @returns {object|false} Credentials result or false on timeout
+     */
+    function waitForCredentialsWithRetry(data) {
+        let result = waitForCredentials(data);
+        while (
+            !getFirstCredential(result) &&
+            result &&
+            result.decryptionFailed &&
+            promptDecryptionRetry(data.host)
+        ) {
+            console.log("Browserpass: Retrying GPG decryption for:", data.host);
+            result = waitForCredentials(data);
+        }
+        return result;
     }
 
     /**
@@ -1029,7 +1092,7 @@
                         const hostname = port && port > 0 ? `${host}:${port}` : host;
                         const fullHost = `${scheme}://${hostname}`;
 
-                        const result = waitForCredentials({
+                        const result = waitForCredentialsWithRetry({
                             host: fullHost,
                             login: authInfo?.username || "",
                             loginChangeable: true,
@@ -1127,7 +1190,7 @@
                         return accepted;
                     }
 
-                    const result = waitForCredentials({
+                    const result = waitForCredentialsWithRetry({
                         host: host,
                         login: login,
                         loginChangeable: false,
@@ -1188,7 +1251,7 @@
                     });
 
                     const { host, login } = parseRealm(this, realm);
-                    const result = waitForCredentials({
+                    const result = waitForCredentialsWithRetry({
                         host: host,
                         login: login,
                         loginChangeable: true,
@@ -1679,7 +1742,7 @@
                         openChoiceDialog: true,
                     };
 
-                    const result = waitForCredentials(credRequest);
+                    const result = waitForCredentialsWithRetry(credRequest);
 
                     const cred = getFirstCredential(result);
                     if (cred) {
