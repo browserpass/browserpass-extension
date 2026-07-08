@@ -180,6 +180,11 @@ function renderMainView(ctl, params) {
                 onkeydown: (e) => {
                     e.preventDefault();
 
+                    if (e.ctrlKey && e.key.toLowerCase() === "a") {
+                        e.target.click();
+                        return;
+                    }
+
                     function goToElement(element) {
                         element.focus();
                         element.scrollIntoView();
@@ -206,10 +211,6 @@ function renderMainView(ctl, params) {
                             break;
                         case "Enter":
                             e.target.click();
-                        case "KeyA":
-                            if (e.ctrlKey) {
-                                e.target.click();
-                            }
                             break;
                         default:
                             break;
@@ -252,6 +253,36 @@ function search(searchQuery) {
 function keyHandler(e) {
     e.preventDefault();
     var login = e.target.classList.contains("login") ? e.target : e.target.closest(".login");
+
+    if (e.ctrlKey) {
+        switch (e.key.toLowerCase()) {
+            case "a":
+                document.querySelector(".part.add").click();
+                return;
+            case "c":
+                if (e.shiftKey || document.activeElement.classList.contains("copy-user")) {
+                    this.doAction("copyUsername");
+                } else {
+                    this.doAction("copyPassword");
+                }
+                return;
+            case "g": {
+                const event = e;
+                const target = this;
+                dialog.open(
+                    helpers.LAUNCH_URL_DEPRECATION_MESSAGE,
+                    function () {
+                        target.doAction(event.shiftKey ? "launchInNewTab" : "launch");
+                    },
+                    false
+                );
+                return;
+            }
+            case "o":
+                e.target.querySelector("div.action.details").click();
+                return;
+        }
+    }
 
     switch (e.code) {
         case "Tab":
@@ -302,38 +333,6 @@ function keyHandler(e) {
                 e.target.click();
             } else {
                 this.doAction("fill");
-            }
-            break;
-        case "KeyA":
-            if (e.ctrlKey) {
-                document.querySelector(".part.add").click();
-            }
-            break;
-        case "KeyC":
-            if (e.ctrlKey) {
-                if (e.shiftKey || document.activeElement.classList.contains("copy-user")) {
-                    this.doAction("copyUsername");
-                } else {
-                    this.doAction("copyPassword");
-                }
-            }
-            break;
-        case "KeyG":
-            if (e.ctrlKey) {
-                const event = e;
-                const target = this;
-                dialog.open(
-                    helpers.LAUNCH_URL_DEPRECATION_MESSAGE,
-                    function () {
-                        target.doAction(event.shiftKey ? "launchInNewTab" : "launch");
-                    },
-                    false
-                );
-            }
-            break;
-        case "KeyO":
-            if (e.ctrlKey) {
-                e.target.querySelector("div.action.details").click();
             }
             break;
         case "Home": {

@@ -101,6 +101,36 @@ function view(ctl, params) {
                     self.popup.search(e.target.value);
                 },
                 onkeydown: function (e) {
+                    if (e.ctrlKey && e.target.selectionStart == e.target.selectionEnd) {
+                        switch (e.key.toLowerCase()) {
+                            case "c":
+                                e.preventDefault();
+                                self.popup.results[0].doAction(
+                                    e.shiftKey ? "copyUsername" : "copyPassword"
+                                );
+                                return;
+                            case "g": {
+                                e.preventDefault();
+                                const event = e;
+                                const target = self.popup.results[0];
+                                dialog.open(
+                                    helpers.LAUNCH_URL_DEPRECATION_MESSAGE,
+                                    function () {
+                                        target.doAction(
+                                            event.shiftKey ? "launchInNewTab" : "launch"
+                                        );
+                                    },
+                                    false
+                                );
+                                return;
+                            }
+                            case "o":
+                                e.preventDefault();
+                                self.popup.results[0].doAction("getDetails");
+                                return;
+                        }
+                    }
+
                     switch (e.code) {
                         case "Backspace":
                             if (self.popup.currentDomainOnly) {
@@ -114,36 +144,6 @@ function view(ctl, params) {
                                     self.popup.currentDomainOnly = false;
                                     self.popup.search(e.target.value);
                                 }
-                            }
-                            break;
-                        case "KeyC":
-                            if (e.ctrlKey && e.target.selectionStart == e.target.selectionEnd) {
-                                e.preventDefault();
-                                self.popup.results[0].doAction(
-                                    e.shiftKey ? "copyUsername" : "copyPassword"
-                                );
-                            }
-                            break;
-                        case "KeyG":
-                            if (e.ctrlKey && e.target.selectionStart == e.target.selectionEnd) {
-                                e.preventDefault();
-                                const event = e;
-                                const target = self.popup.results[0];
-                                dialog.open(
-                                    helpers.LAUNCH_URL_DEPRECATION_MESSAGE,
-                                    function () {
-                                        target.doAction(
-                                            event.shiftKey ? "launchInNewTab" : "launch"
-                                        );
-                                    },
-                                    false
-                                );
-                            }
-                            break;
-                        case "KeyO":
-                            if (e.ctrlKey && e.target.selectionStart == e.target.selectionEnd) {
-                                e.preventDefault();
-                                self.popup.results[0].doAction("getDetails");
                             }
                             break;
                         case "End": {
