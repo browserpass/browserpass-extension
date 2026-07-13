@@ -1,0 +1,60 @@
+{
+    "manifest_version": 3,
+    "name": "Browserpass",
+    "description": "Thunderbird extension for zx2c4's pass (password manager)",
+    "version": "3.11.0",
+    "author": "Maxim Baz <browserpass@maximbaz.com>, Steve Gilberd <steve@erayd.net>",
+    "homepage_url": "https://github.com/browserpass/browserpass-extension",
+    "background": {
+        "scripts": ["js/background.dist.js"]
+    },
+    "icons": {
+        "16": "icon16.png",
+        "128": "icon.png"
+    },
+    "action": {
+        "default_icon": {
+            "16": "icon16.png",
+            "128": "icon.svg"
+        },
+        "default_popup": "popup/popup.html"
+    },
+    "options_ui": {
+        "page": "options/options.html",
+        "open_in_tab": false
+    },
+    "permissions": [
+        "activeTab",
+        "alarms",
+        "tabs",
+        "clipboardRead",
+        "clipboardWrite",
+        "nativeMessaging",
+        "notifications",
+        "scripting",
+        "storage",
+        "webRequest",
+        "webRequestAuthProvider"
+    ],
+    "host_permissions": ["http://*/*", "https://*/*"],
+    "content_security_policy": {
+        "extension_pages": "default-src 'none'; font-src 'self'; img-src 'self' data:; script-src 'self'"
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "browserpass@maximbaz.com",
+            "strict_min_version": "128.0"
+        }
+    },
+    "experiment_apis": {
+        "credentials": {
+            "schema": "thunderbird/experiment/schema.json",
+            "parent": {
+                "scopes": ["addon_parent"],
+                "paths": [["credentials"]],
+                "script": "thunderbird/experiment/implementation.js"
+            }
+        }
+    },
+    "commands": {}
+}

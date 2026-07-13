@@ -3,7 +3,7 @@ PRETTIER := node_modules/.bin/prettier
 LESSC := node_modules/.bin/lessc
 
 CLEAN_FILES := css js
-PRETTIER_FILES := $(wildcard *.json *.js popup/*.js offscreen/*.js options/*.js *.less popup/*.less options/*.less *.html popup/*.html offscreen/*.html options/*.html)
+PRETTIER_FILES := $(wildcard *.json *.js popup/*.js offscreen/*.js options/*.js  thunderbird/experiment/*.js thunderbird/experiment/*.json *.less popup/*.less options/*.less *.html popup/*.html offscreen/*.html options/*.html)
 
 .PHONY: all
 all: deps prettier css/popup.dist.css css/options.dist.css js/background.dist.js js/popup.dist.js js/offscreen.dist.js js/options.dist.js js/inject.dist.js js/early-inject.dist.js
@@ -24,7 +24,7 @@ css/options.dist.css: $(LESSC) options/*.less
 	[ -d css ] || mkdir -p css
 	$(LESSC) options/options.less css/options.dist.css
 
-js/background.dist.js: $(BROWSERIFY) background.js helpers/*.js
+js/background.dist.js: $(BROWSERIFY) background.js helpers/*.js thunderbird.js
 	[ -d js ] || mkdir -p js
 	$(BROWSERIFY) -o js/background.dist.js background.js
 

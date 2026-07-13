@@ -1,18 +1,19 @@
 VERSION ?= $(shell cat .version)
 
-CLEAN_FILES := chromium firefox dist dist-webstore
+CLEAN_FILES := chromium firefox thunderbird dist dist-webstore
 CHROME := $(shell which chromium 2>/dev/null || which chromium-browser 2>/dev/null || which chrome 2>/dev/null || which google-chrome 2>/dev/null || which google-chrome-stable 2>/dev/null)
 
 #######################
 # For local development
 
 .PHONY: all
-all: extension chromium firefox
+all: extension chromium firefox thunderbird
 
 .PHONY: extension
 extension:
 	$(MAKE) -C src
 
+# Base extension files (shared by all builds)
 EXTENSION_FILES := \
 	src/*.png \
 	src/*.svg \
@@ -32,8 +33,16 @@ EXTENSION_FILES := \
 	src/js/options.dist.js \
 	src/js/inject.dist.js \
 	src/js/early-inject.dist.js
+
+# Thunderbird-specific files
+THUNDERBIRD_EXTRA_FILES := \
+	src/thunderbird/experiment/*.js \
+	src/thunderbird/experiment/*.json
+THUNDERBIRD_EXTRA_FILES := $(wildcard $(THUNDERBIRD_EXTRA_FILES))
+
 CHROMIUM_FILES := $(patsubst src/%,chromium/%, $(EXTENSION_FILES))
 FIREFOX_FILES  := $(patsubst src/%,firefox/%,  $(EXTENSION_FILES))
+THUNDERBIRD_FILES := $(patsubst src/%,thunderbird/%, $(EXTENSION_FILES)) $(patsubst src/%,thunderbird/%, $(THUNDERBIRD_EXTRA_FILES))
 
 .PHONY: chromium
 chromium: extension $(CHROMIUM_FILES) chromium/manifest.json
@@ -57,6 +66,17 @@ firefox/manifest.json : src/manifest-firefox.json
 	[ -d $(dir $@) ] || mkdir -p $(dir $@)
 	cp $< $@
 
+.PHONY: thunderbird
+thunderbird: extension $(THUNDERBIRD_FILES) thunderbird/manifest.json
+
+$(THUNDERBIRD_FILES) : thunderbird/% : src/%
+	[ -d $(dir $@) ] || mkdir -p $(dir $@)
+	cp $< $@
+
+thunderbird/manifest.json : src/manifest-thunderbird.json
+	[ -d $(dir $@) ] || mkdir -p $(dir $@)
+	cp $< $@
+
 #######################
 # For official releases
 
@@ -76,13 +96,14 @@ crx-github:
 	mv chromium.crx browserpass-github.crx
 
 .PHONY: dist
-dist: clean extension chromium firefox crx-webstore crx-github
+dist: clean extension chromium firefox thunderbird crx-webstore crx-github
 	mkdir -p dist
 
 	git -c tar.tar.gz.command="gzip -cn" archive -o dist/browserpass-extension-$(VERSION).tar.gz --format tar.gz --prefix=browserpass-extension-$(VERSION)/ $(VERSION)
 
-	(cd chromium && zip -r ../dist/browserpass-chromium-$(VERSION).zip *)
-	(cd firefox  && zip -r ../dist/browserpass-firefox-$(VERSION).zip  *)
+	(cd chromium    && zip -r ../dist/browserpass-chromium-$(VERSION).zip *)
+	(cd firefox     && zip -r ../dist/browserpass-firefox-$(VERSION).zip  *)
+	(cd thunderbird && zip -r ../dist/browserpass-thunderbird-$(VERSION).zip *)
 
 	mv browserpass-webstore.crx dist/browserpass-webstore-$(VERSION).crx
 	mv browserpass-github.crx dist/browserpass-github-$(VERSION).crx

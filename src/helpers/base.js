@@ -33,6 +33,7 @@ module.exports = {
     getSetting,
     ignoreFiles,
     isChrome,
+    isThunderbird,
     makeTOTP,
     parseAuthUrl,
     prepareLogin,
@@ -94,6 +95,16 @@ function getSetting(key, login, settings) {
  */
 function isChrome() {
     return chrome.runtime.getURL("/").startsWith("chrom");
+}
+
+/**
+ * Returns true if running in Thunderbird.
+ * Checks for the browser.credentials API which is only available in Thunderbird.
+ *
+ * @return boolean
+ */
+function isThunderbird() {
+    return typeof browser !== "undefined" && browser.credentials !== undefined;
 }
 
 /**

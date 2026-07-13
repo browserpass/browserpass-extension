@@ -8,6 +8,7 @@ const Login = require("./models/Login");
 const Settings = require("./models/Settings");
 // utils, libs
 const helpers = require("../helpers/ui");
+const { isThunderbird } = require("../helpers/base");
 const m = require("mithril");
 // components
 const AddEditInterface = require("./addEditInterface");
@@ -40,6 +41,42 @@ async function run() {
         var logins = [],
             settings = await settingsModel.get(),
             root = document.getElementsByTagName("html")[0];
+
+        if (isThunderbird()) {
+            root.classList.add("colors-light");
+            document.body.innerHTML = `
+                <div class="thunderbird-popup">
+                    <h3>Browserpass for Thunderbird</h3>
+                    <p>In Thunderbird, Browserpass works automatically in the background:</p>
+                    <p><strong>Pass store layout</strong></p>
+                    <ul>
+                        <li><code>thunderbird/imap-{hostname}</code> — IMAP password</li>
+                        <li><code>thunderbird/smtp-{hostname}</code> — SMTP password</li>
+                        <li><code>thunderbird/pop3-{hostname}</code> — POP3 password</li>
+                        <li><code>thunderbird/oauth-{provider}</code> — OAuth refresh token (CalDAV/CardDAV)</li>
+                        <li><code>thunderbird/https-{hostname}</code> — OAuth browser-window login credentials
+                            <ul>
+                                <li>Username is auto-copied to clipboard when the window opens</li>
+                                <li><code>Ctrl+Shift+U</code> — re-copy username to clipboard</li>
+                                <li><code>Ctrl+Shift+P</code> — copy password to clipboard</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    <p><strong>Migrating existing Thunderbird credentials to pass:</strong></p>
+                    <ol>
+                        <li>Open <em>Add-ons Manager</em> → <em>Browserpass</em> → <em>Preferences</em></li>
+                        <li>Scroll to the <em>Thunderbird</em> section and click
+                            <strong>Migrate Thunderbird credentials to pass</strong></li>
+                        <li>After migration succeeds, you could remove the internal copies:
+                            <em>Settings → Privacy &amp; Security → Saved Passwords</em> → delete them</li>
+                    </ol>
+                    <hr>
+                    <p class="thunderbird-popup-hint"><strong>To hide this button:</strong> Right-click the toolbar → <em>Customize</em> → drag the Browserpass button off the toolbar → <em>Save</em>.</p>
+                </div>
+            `;
+            return;
+        }
+
         root.classList.remove("colors-dark");
         root.classList.add(`colors-${settings.theme}`);
 
