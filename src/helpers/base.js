@@ -366,6 +366,9 @@ function makeTOTP(params) {
         crypto: {
             createHmac: (a, k) => hash.hmac(hash[a], k),
         },
+        // HMAC handles key padding internally. Avoid otplib's non-standard
+        // repetition/truncation of secrets that do not match the hash length.
+        createHmacSecret: (secret, options) => Buffer.from(secret, options.encoding),
         algorithm: params.algorithm,
         digits: params.digits,
         step: params.period,
