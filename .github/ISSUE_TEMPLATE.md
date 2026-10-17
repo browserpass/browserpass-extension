@@ -3,7 +3,7 @@
 <!-- Please answer all the questions below before submitting the issue. -->
 
 -   Operating system + version:
--   Browser + version:
+-   Browser/Thunderbird + version:
 -   Information about the host app:
     -   How did you install it?
         <!-- Installed via a package manager, downloaded a pre-built binary, compiled yourself? -->
