@@ -17,7 +17,8 @@ This Privacy Policy applies to Browserpass and Browserpass OTP.
 ## Usage of Credential Files
 
 During the course of normal operation, Browserpass handles decrypted Credential Files.
-Only files selected by the User via the Browserpass interface are decrypted.
+Only files selected by the User via the Browserpass interface are decrypted. In Thunderbird,
+Credential Files are decrypted when Thunderbird requests authentication for email accounts.
 
 The contents of decrypted Credential Files are used *only* for the following purposes:
 
@@ -26,6 +27,20 @@ The contents of decrypted Credential Files are used *only* for the following pur
  - To provide the User with an interface to edit the contents of a selected Credential File,
  - To provide the OTP seed to Browserpass OTP
  - To fill other fields as requested by the User (e.g. credit card data)
+ - To authenticate email and news accounts in Thunderbird (IMAP, SMTP, POP3, NNTP);
+ - To provide OAuth2 tokens for mail providers (Gmail, Microsoft, etc.) and
+   calendar/contacts services (CalDAV/CardDAV) in Thunderbird.
+
+**In Thunderbird, credentials are never stored in Thunderbird's built-in password manager.**
+All credentials are retrieved directly from the Password Store using GPG decryption.
+
+When the User enters new credentials in Thunderbird (e.g., during account setup), Browserpass
+may save these credentials to the Password Store. OAuth tokens obtained during authentication
+are automatically stored in the Password Store for future use.
+
+Browserpass can migrate existing credentials from Thunderbird's password manager to the
+Password Store when the user triggers migration via the Add-on Preferences page. This
+migration does not overwrite existing entries in the Password Store.
 
 ## Use & Transmission of Data
 

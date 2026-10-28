@@ -667,3 +667,38 @@ dialog#browserpass-modal {
     .generate-heights(@start, @end, (@i + 1));
 }
 .generate-heights(300, 1000);
+
+// Thunderbird popup message
+.thunderbird-popup {
+    padding: 20px;
+    max-width: 400px;
+    font-family: "Open Sans", sans-serif;
+    white-space: normal;
+
+    h3 {
+        margin-top: 0;
+    }
+
+    ul {
+        padding-left: 20px;
+    }
+
+    code {
+        background-color: #f0f0f0;
+        padding: 1px 4px;
+        border-radius: 3px;
+        font-family: "Source Code Pro", monospace;
+        font-size: 0.9em;
+    }
+
+    hr {
+        margin: 15px 0;
+        border: none;
+        border-top: 1px solid #ccc;
+    }
+
+    .thunderbird-popup-hint {
+        font-size: 0.9em;
+        color: #666;
+    }
+}

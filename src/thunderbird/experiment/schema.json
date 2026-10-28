@@ -1,0 +1,77 @@
+[
+    {
+        "namespace": "credentials",
+        "functions": [
+            {
+                "name": "getThunderbirdSavedLogins",
+                "description": "Returns all credentials stored in Thunderbird's password manager for migration",
+                "type": "function",
+                "async": true,
+                "parameters": []
+            }
+        ],
+        "events": [
+            {
+                "name": "onCredentialRequested",
+                "description": "Fires when credentials are requested",
+                "type": "function",
+                "parameters": [
+                    {
+                        "name": "credentialInformation",
+                        "description": "Information about the requested credentials",
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "description": "The host including protocol for which credentials are requested",
+                                "type": "string"
+                            },
+                            "login": {
+                                "description": "The login for which credentials are requested",
+                                "optional": true,
+                                "type": "string"
+                            },
+                            "loginChangeable": {
+                                "description": "If the login is changeable in the password dialog",
+                                "optional": true,
+                                "type": "boolean"
+                            },
+                            "openChoiceDialog": {
+                                "description": "If the choice dialog should be displayed if more than one entry is found or auto submit is disabled",
+                                "optional": true,
+                                "type": "boolean"
+                            }
+                        }
+                    }
+                ]
+            },
+            {
+                "name": "onNewCredential",
+                "description": "Fires when new credentials are entered",
+                "type": "function",
+                "parameters": [
+                    {
+                        "name": "credentialInformation",
+                        "description": "Information about the entered credentials",
+                        "type": "object",
+                        "properties": {
+                            "host": {
+                                "description": "The host including protocol for which credentials were entered.",
+                                "type": "string"
+                            },
+                            "login": {
+                                "description": "The login for which credentials were entered.",
+                                "optional": true,
+                                "type": "string"
+                            },
+                            "password": {
+                                "description": "The password that was entered.",
+                                "optional": true,
+                                "type": "string"
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+]
