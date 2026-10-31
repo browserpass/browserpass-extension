@@ -312,6 +312,10 @@
                 let elems = root.querySelectorAll(field.selectors[i]);
                 for (let j = 0; j < elems.length; j++) {
                     let elem = elems[j];
+                    // Ignore elements already matched by an earlier selector
+                    if (result.includes(elem)) {
+                        continue;
+                    }
                     // Select only elements from specified form
                     if (form && form != elem.form) {
                         continue;
